@@ -988,7 +988,7 @@ async def ping(ctx):
     commandlogger.logHandler(ctx,None,None,'bot')
     await ctx.send(f'Pong! {round(client.latency * 1000)}ms')
 
-botflags = ['autowhitelist','autogreet','autorole','autoreply','autoconsole','autodonator','convertign','whitelistwait']
+botflags = ['autowhitelist','autogreet','autorole','autoreply','autoconsole','autodonator','convertign']
 botchans = ['whitelistchannel','faqchannel','supportchannel','ruleschannel','infochannel','botcomms']
 bottime = ['infractiontimeout','bantimeout','whitelistwaittime']
 

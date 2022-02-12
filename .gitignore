@@ -1,0 +1,8 @@
+
+/__pycache__
+/*.pyc
+/*.db
+/logs/*
+/tokens.py
+/db-howto.txt
+

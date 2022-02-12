@@ -1,0 +1,4 @@
+discord.py==1.7.3
+nbtlib==2.0.4
+pyotp==2.6.0
+requests==2.27.0

@@ -353,7 +353,7 @@ def servermaintenance(ctx,curserver,parameter):
 
 def serverchathandler(message):
     for server in AMPservers:
-        if server.Running == False:
+        if AMPservers[server].Running == False:
             continue 
         curserver = db.GetServer(InstanceID = server)
         if curserver.DiscordChatChannel == None:
@@ -366,7 +366,7 @@ def serverchathandler(message):
             
 def serverconsolehandler(message):
     for server in AMPservers:
-        if server.Running == False:
+        if AMPservers[server].Running == False:
             continue
         curserver = db.GetServer(InstanceID = server)
         if curserver.DiscordConsoleChannel == None:

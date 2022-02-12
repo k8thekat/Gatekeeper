@@ -116,18 +116,17 @@ def whitelistListCheck():
         return False
     global WhitelistWaitList
     curtime = datetime.now()
-    if dbconfig.Whitelistwait: 
-        if not dbconfig.Whitelistwaittime == None or not dbconfig.Whitelistwaittime == '0':
-            if len(WhitelistWaitList) == 0:
-                return False
-            for index in range(0,len(WhitelistWaitList)):
-                user = WhitelistWaitList[index]
-                waittime = timehandler.parse(dbconfig.Whitelistwaittime,True)
-                if user['timestamp'] + waittime >= curtime :
-                    AMPservers[user['server'].InstanceID].ConsoleMessage(f'whitelist add {user["IGN"]}')
-                    user['server'].AddUser(user)
-                    WhitelistWaitList.remove(user)
-                    return user
+    if not dbconfig.Whitelistwaittime == None or not dbconfig.Whitelistwaittime == '0':
+        if len(WhitelistWaitList) == 0:
+            return False
+        for index in range(0,len(WhitelistWaitList)):
+            user = WhitelistWaitList[index]
+            waittime = timehandler.parse(dbconfig.Whitelistwaittime,True)
+            if user['timestamp'] + waittime >= curtime :
+                AMPservers[user['server'].InstanceID].ConsoleMessage(f'whitelist add {user["IGN"]}')
+                user['server'].AddUser(user)
+                WhitelistWaitList.remove(user)
+                return user
     else:
         if len(WhitelistWaitList) == 0:
             return False

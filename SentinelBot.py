@@ -22,7 +22,7 @@ import tokens
 from AMP_API import AMPAPI
 import parse
 import config
-import endReset
+#import endReset # Coming soon
 import commandlogger
 import consolefilters
 import plugin_commands

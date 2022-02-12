@@ -1365,8 +1365,6 @@ def whitelistfilecheck(localdb):
 #Checks AMP for any new Instances...
 def AMPinstancecheck(startup = False):
     global AMPservers, AMPserverConsoles
-    AMPservers = AMP.getInstances()
-    AMPserverConsoles = AMP.getInstances()
     print('Checking for any new Instances..')
     if startup == True:
         for server in AMPservers:
@@ -1389,6 +1387,13 @@ def AMPinstancecheck(startup = False):
                 cur_server = db.AddServer(InstanceID = AMPservers[server].InstanceID, FriendlyName = AMPservers[server].FriendlyName)
                 blankwhitelistgenerator(cur_server)
                 botoutput(f'Found a new Instance, adding it to the Database...{AMPservers[server].FriendlyName}')
+    #Updating the Instance Names
+    for server in AMPservers:
+        cur_server = db.GetServer(server)
+        print('Checking if names have been changed...')
+        if AMPservers[server].FriendlyName != cur_server.FriendlyName:
+            botoutput(f'{cur_server.FriendlyName} has been updated too {AMPservers[server].FriendlyName}...')
+            cur_server.FriendlyName = AMPservers[server].FriendlyName
     print(response)
     return 
 

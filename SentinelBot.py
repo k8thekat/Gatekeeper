@@ -1188,6 +1188,7 @@ async def serverlist(ctx):
     if not rolecheck(ctx, 'General'):
         return 'User does not have permission.'
     print('Server List...')
+    
     commandlogger.logHandler(ctx,None,None,'bot')
     status = AMP.getInstanceStatus()
     serverlist = []
@@ -1364,6 +1365,8 @@ def whitelistfilecheck(localdb):
 #Checks AMP for any new Instances...
 def AMPinstancecheck(startup = False):
     global AMPservers, AMPserverConsoles
+    AMPservers = AMP.getInstances()
+    AMPserverConsoles = AMP.getInstances()
     print('Checking for any new Instances..')
     if startup == True:
         for server in AMPservers:
@@ -1405,12 +1408,14 @@ def threadloop():
     print('Thread Loop Initiated...\n')
     localdb = database.Database()
     updateinterval = datetime.now()
+    global AMPservers
     while(1):
         if (updateinterval+timedelta(seconds=60)) < datetime.now():
             print(f'Updating and Saving...{datetime.now().strftime("%c")}')
             #Database check on bans
             asyncio.run_coroutine_threadsafe(databasebancheck(localdb), async_loop)
             time.sleep(.5)
+            AMPservers = AMP.getInstances()
             AMPinstancecheck()
             time.sleep(.5)
             #whitelist file check to update db for non whitelisted users

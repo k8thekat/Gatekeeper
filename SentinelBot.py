@@ -954,7 +954,7 @@ async def wlbotreply(channel, context = None):
 
 @client.event
 async def on_ready():
-    botoutput('Bot is ready.')
+    botoutput('I am the Key Master...')
 
 @client.event
 #this is a nickname change; shouldn't need to update the database. Maybe other functionality?

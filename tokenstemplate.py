@@ -15,6 +15,6 @@ AMPAuth = '' #Leave blank if not in use.
 # The bot will need full perms over AMP Instances and File Manager; please set them AMP permissions correctly! #
 AMPUser = 'Replace this text with the login name' 
 AMPPassword = 'Replace this text with the login password'
-AMPurl = 'http://yoururl.com:8080/API' #The URL to Access the AMP console ## PLEASE ATTACH '/API' to the end 
+AMPurl = 'http://yoururl.com:8080' #The URL and Port to Access the AMP console
 
 ## MAKE SURE TO RENAME THIS FILE TO tokens.py ##

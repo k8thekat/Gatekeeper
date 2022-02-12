@@ -37,7 +37,7 @@ def Login(func):
 
 class AMPAPI:
     def __init__(self, instanceID = 0, serverdata = {},sessionIDlist = [],Index = 0):
-        self.url = config.AMPurl #base url for AMP console /API/
+        self.url = config.AMPurl + '/API/' #base url for AMP console /API/
         if instanceID != 0:
             self.url += f"ADSModule/Servers/{instanceID}/API/"
         self.InstanceID = instanceID

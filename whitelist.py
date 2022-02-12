@@ -5,23 +5,24 @@ import base64
 import json
 
 import parse
-import database
 import timehandler
 import UUIDhandler
 import config
 from AMP_API import AMPAPI
 
-#database setup
-db = database.Database()
-dbconfig = db.GetConfig()
 
 #whitelist wait list
 WhitelistWaitList = []
 
-#AMP Server Setup
-AMP = AMPAPI()
-AMPservers = AMP.getInstances() # creates objects for each server in AMP (returns serverlist)
-AMP.sessionCleanup() #cleans up any existing connections to prevent excessive AMP connections
+
+
+def init(origAMP,origAMPservers,origdb,origdbconfig):
+    global AMP,AMPservers,db,dbconfig
+    AMP = origAMP
+    AMPservers = origAMPservers
+    db = origdb
+    dbconfig = origdbconfig
+    return
 
 
 #Used to add users to the DB when they request whitelist in the WL channel if Autowhitelist is False.
@@ -110,12 +111,12 @@ def wlmessagehandler(message):
 def whitelistListCheck():
     #user = {'User': user , 'IGN': user.IngameName, 'timestamp' : curtime, 'server' : curserver, 'Context': message}
     print('Whitelist Wait List Check...')
-    wl_channel = dbconfig.Whitelistchannel
+    wl_channel = dbconfig.Whitelistchannel #ERROR DBConfig object has no attribute 
     if wl_channel == None:
         return False
     global WhitelistWaitList
     curtime = datetime.now()
-    if dbconfig.Whitelistwait:
+    if dbconfig.Whitelistwait: 
         if not dbconfig.Whitelistwaittime == None or not dbconfig.Whitelistwaittime == '0':
             if len(WhitelistWaitList) == 0:
                 return False

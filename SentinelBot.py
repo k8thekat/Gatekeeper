@@ -23,11 +23,11 @@ from AMP_API import AMPAPI
 import parse
 import config
 #import endReset # Coming soon
+import whitelist
 import commandlogger
 import consolefilters
 import plugin_commands
 import timehandler
-import whitelist
 import UUIDhandler
 import consolescan
 
@@ -1464,6 +1464,7 @@ def defaultinit():
 
 defaultinit()
 AMPinstancecheck(startup = True)
+whitelist.init(AMP,AMPservers,db,dbconfig)
 serverconsoleinit()
 whitelistfilecheck(db)
 client.run(tokens.token)

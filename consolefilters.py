@@ -17,10 +17,12 @@ def filters(entry):
             return True
         if entry['Source'] == 'Installer':
             return True
+        if entry['Source'] == 'Server thread/Warn':
+            return True
+    if config.Debugging:
         if entry['Source'] == 'Server thread/ERROR':
             return True
-            
-        filtertable = ['\tat net.minecraft','\tat java.util','java.lang.IllegalStateException']
+        filtertable = ['\tat net.minecraft','\tat java.util','java.lang']
         for filter in filtertable:
             if entry['Contents'].startswith(filter):
                 return True

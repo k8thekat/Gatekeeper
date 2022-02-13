@@ -1,19 +1,26 @@
 #Sentinel Bot - Chat filter
 
 def scan(content,client):
-    #Strips Unicode out of the message
     content = unicode(content)
-    #Replaces @User calls in Discord with just the Name
-    content = user(content,client)
-    #Attempts to find discord emoji's and remove them
-    content = emoji(content)
-    return content
-
+    while(1):
+        userstatus = user(content,client)
+        if userstatus != False:
+            userstatus = content   
+        emojistatus = emoji(content)
+        if emojistatus != False:
+            emojistatus = content
+        else:
+            if userstatus == False and emojistatus == False:
+                print(content)
+                return content
+    
+#Strips Unicode out of the message
 def unicode(content):
     content = content.encode("ascii","ignore")
     content = content.decode()
     return content
 
+#Replaces @User calls in Discord with just the Name
 def user(content,client):
     user_find_start = content.find('<@!')
     user_find_end = content.find('>',user_find_start)
@@ -21,9 +28,11 @@ def user(content,client):
         userid = content[user_find_start+3:user_find_end]
         username = client.get_user(id = int(userid))
         content = content[0:user_find_start] + username.name + content[user_find_end+1:]
-    else:
         return content
+    else:
+        return False
 
+#Attempts to find discord emoji's and remove them
 def emoji(content):
     start_bracket = content.find('<:')
     end_bracket = content.find('>',start_bracket)
@@ -31,5 +40,6 @@ def emoji(content):
         msgpart = content[0:start_bracket]
         msgpart += content[end_bracket+1:]
         content = msgpart
-    else:
         return content
+    else:
+        return False

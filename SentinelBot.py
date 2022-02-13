@@ -373,13 +373,14 @@ def serverconsolehandler(message):
             continue
         if int(curserver.DiscordConsoleChannel) == message.channel.id:
             if rolecheck(message, 'Maintenance'):
-                if message.content[0] == '/':
+                AMPservers[server].ConsoleMessage(message.content)
+                return True
+            '''
+            if message.content[0] == '/':
                     AMPservers[server].ConsoleMessage(f'{message.content[1:]}')
                     return True
-                else:
-                    AMPservers[server].ConsoleMessage(message.content)
-                    return True
-        continue
+            '''
+            continue
     
 serverfuncs = {
             'info' : serverinfo, 

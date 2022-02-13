@@ -28,9 +28,9 @@ def user(content):
     if user_find_start != -1 and user_find_end != -1:
         userid = content[user_find_start+3:user_find_end]
         print(userid)
-        username = discord.Client.get_user(int(userid))
+        username = discord.Client.get_user(id = int(userid))
         #username = 'k8_thekat'
-        content = content[0:user_find_start]+ username + content[user_find_end+1:]
+        content = content[0:user_find_start]+ username.name + content[user_find_end+1:]
         return content
     else:
         return content

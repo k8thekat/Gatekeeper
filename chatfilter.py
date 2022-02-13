@@ -5,15 +5,12 @@ def scan(content,client):
     while(1):
         userstatus = user(content,client)
         emojistatus = emoji(content)
-        print('User status',userstatus)
-        print('Emoji status',emojistatus)
         if userstatus != False:
             content = userstatus  
         elif emojistatus != False:
             content = emojistatus 
         else:
             if userstatus == False and emojistatus == False:
-                print(content)
                 return content
     
 #Strips Unicode out of the message

@@ -360,7 +360,7 @@ def serverchathandler(message):
             continue
         if int(curserver.DiscordChatChannel) == message.channel.id:
             message.content = message.content.replace('\n',' ')
-            AMPservers[server].ConsoleMessage(f'tellraw @a [{{"text":"(Discord)","color":"blue"}},{{"text":"<{message.author.name}>: {message.content}"}}]')
+            AMPservers[server].ConsoleMessage(f'tellraw @a [{{"text":"(Discord)","color":"blue"}},{{"text":"<{message.author.name}>: {message.content}","color":"white"}}]')
             #AMPservers[server].ConsoleMessage('tellraw @a {"text":"(Discord)","color":"blue"},{"text":"<%s>: %s"}'%(message.author.name,message.content))
             return True
         continue

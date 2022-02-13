@@ -16,7 +16,7 @@ def Login(func):
         self = args[0]
 
         if self.Running == False:
-            print(f'Instance offline: {self.FriendlyName}')
+            #print(f'Instance offline: {self.FriendlyName}')
             return False
 
         if self.SessionID == 0:

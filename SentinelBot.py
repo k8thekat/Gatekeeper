@@ -504,7 +504,7 @@ def colorstrip(entry):
 def serverchat(curserver,entry):
     consolemsg = []
     if entry['Source'].startswith('Async Chat Thread') or entry['Type'] == 'Chat' or entry['Type'] == 'Console':
-        if entry['Type'] == 'Console' and entry['Contents'].find('issued server command: /tellraw'):
+        if entry['Type'] == 'Console' and entry['Contents'].find('issued server command: /tellraw') != -1:
             #consolemsg.append(entry['Contents'][21:])
             print(entry['Contents'][21:])
         if entry['Type'] == 'Chat':

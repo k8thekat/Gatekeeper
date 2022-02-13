@@ -25,9 +25,12 @@ def unicode(content):
 def user(content):
     user_find_start = content.find('<@!')
     user_find_end = content.find('>',user_find_start)
-    userid = content[user_find_start+3:user_find_end]
-    print(userid)
-    username = discord.Client.get_user(int(userid))
-    #username = 'k8_thekat'
-    content = content[0:user_find_start]+ username + content[user_find_end+1:]
-    return content
+    if user_find_start != -1 and user_find_end != -1:
+        userid = content[user_find_start+3:user_find_end]
+        print(userid)
+        username = discord.Client.get_user(int(userid))
+        #username = 'k8_thekat'
+        content = content[0:user_find_start]+ username + content[user_find_end+1:]
+        return content
+    else:
+        return content

@@ -26,6 +26,7 @@ import config
 import whitelist
 import commandlogger
 import consolefilters
+import chatfilter
 import plugin_commands
 import timehandler
 import UUIDhandler
@@ -504,11 +505,11 @@ def colorstrip(entry):
 #Console messages are checked by 'Source' and by 'Type' to be sent to a designated discord channel.
 def serverchat(curserver,entry):
     consolemsg = []
+    entry = chatfilter.scan(entry)
     if entry['Source'].startswith('Async Chat Thread'):
         consolemsg.append(entry['Contents'])
     elif entry['Contents'].find('issued server command: /tellraw') != -1:
-        #consolemsg.append(entry['Contents'][21:])
-        print(entry['Contents'][21:])
+        consolemsg.append(entry['Contents'][21:])
     elif entry['Type'] == 'Chat':
         #Changes their IGN to their discord_name when it is send to the discord channel
         if dbconfig.GetSetting('ConvertIGN'):

@@ -360,7 +360,7 @@ def serverchathandler(message):
             continue
         if int(curserver.DiscordChatChannel) == message.channel.id:
             message.content = message.content.replace('\n',' ')
-            AMPservers[server].ConsoleMessage(f'tellraw @a {{"text":"(Discord)<{message.author.name}>: {message.content}"}}')
+            AMPservers[server].ConsoleMessage(f'tellraw @a {{"text":"(§9Discord)<{message.author.name}>: {message.content}"}}')
             return True
         continue
             
@@ -503,33 +503,35 @@ def colorstrip(entry):
 #Console messages are checked by 'Source' and by 'Type' to be sent to a designated discord channel.
 def serverchat(curserver,entry):
     consolemsg = []
-    if entry['Source'].startswith('Async Chat Thread') or entry['Type'] == 'Chat' or entry['Type'] == 'Console':
-        if entry['Type'] == 'Console' and entry['Contents'].find('issued server command: /tellraw') != -1:
-            #consolemsg.append(entry['Contents'][21:])
-            print(entry['Contents'][21:])
-        if entry['Type'] == 'Chat':
-            #Changes their IGN to their discord_name when it is send to the discord channel
-            if dbconfig.GetSetting('ConvertIGN'):
-                user = userIGNdiscord(entry['Source'])
-            else:
-                user = entry['Source']
-            consolemsg.append(f"{user}: {entry['Contents']}")
+    if entry['Source'].startswith('Async Chat Thread'):
+        consolemsg.append(entry['Contents'])
+    elif entry['Contents'].find('issued server command: /tellraw') != -1:
+        #consolemsg.append(entry['Contents'][21:])
+        print(entry['Contents'][21:])
+    elif entry['Type'] == 'Chat':
+        #Changes their IGN to their discord_name when it is send to the discord channel
+        if dbconfig.GetSetting('ConvertIGN'):
+            user = userIGNdiscord(entry['Source'])
         else:
-            consolemsg.append(entry['Contents'])
-        if curserver.DiscordChatChannel != None:
-            outputchan = client.get_channel(int(curserver.DiscordChatChannel))
-            if len(consolemsg) > 0:
-                bulkentry = ''
-                for entry in consolemsg:
-                    if len(bulkentry+entry) < 1500:
-                        bulkentry = bulkentry + entry + '\n' 
-                    else:
-                        ret = asyncio.run_coroutine_threadsafe(serverchatmessage(outputchan, bulkentry[:-1]), async_loop)
-                        ret.result()
-                        bulkentry = entry + '\n'
-                if len(bulkentry):
+            user = entry['Source']
+        consolemsg.append(f"{user}: {entry['Contents']}")
+    else:
+        return
+
+    if curserver.DiscordChatChannel != None:
+        outputchan = client.get_channel(int(curserver.DiscordChatChannel))
+        if len(consolemsg) > 0:
+            bulkentry = ''
+            for entry in consolemsg:
+                if len(bulkentry+entry) < 1500:
+                    bulkentry = bulkentry + entry + '\n' 
+                else:
                     ret = asyncio.run_coroutine_threadsafe(serverchatmessage(outputchan, bulkentry[:-1]), async_loop)
                     ret.result()
+                    bulkentry = entry + '\n'
+            if len(bulkentry):
+                ret = asyncio.run_coroutine_threadsafe(serverchatmessage(outputchan, bulkentry[:-1]), async_loop)
+                ret.result()
 
 #Starts up seperate threads to handle each console for interaction and usage.
 def serverconsoleinit():

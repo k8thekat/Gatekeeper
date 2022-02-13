@@ -2,18 +2,13 @@
 import discord
 
 def scan(content,client):
-    #Strips Unicode out of the message
-    content = unicode(content)
-    content = user(content,client)
-    #Attempts to find discord emoji's and remove them
     while(1):
-        start_bracket = content.find('<:')
-        end_bracket = content.find('>',start_bracket)
-        if start_bracket == -1 or end_bracket == -1:
-            return content
-        msgpart = content[0:start_bracket]
-        msgpart += content[end_bracket+1:]
-        content = msgpart
+        #Replaces @User calls in Discord with just the Name
+        content = user(content,client)
+        #Attempts to find discord emoji's and remove them
+        content = emoji(content)
+        #Strips Unicode out of the message
+        content = unicode(content)
     return content
 
 def unicode(content):
@@ -31,3 +26,13 @@ def user(content,client):
         return content
     else:
         return content
+
+def emoji(content):
+    start_bracket = content.find('<:')
+    end_bracket = content.find('>',start_bracket)
+    if start_bracket == -1 or end_bracket == -1:
+        return content
+    msgpart = content[0:start_bracket]
+    msgpart += content[end_bracket+1:]
+    content = msgpart
+    return content

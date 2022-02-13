@@ -43,6 +43,7 @@ CommandList = ['/tempban','/gmc','/whitelist','/deop','/pardon','/gmsp','/warp',
 #Console Suppresion flags (True = Filter/ False = Show)
 #These settings control what messages are displayed in the Discord console channel.
 Default = True #Basic console spamming messages (example: Current Memory Usage)
+Debugging = True #Filters out ANY ERRORs that would show in the console
 CommandBlocks = False #Anything related to command blocks will be suppressed.
 WorldEdit = False #Filters out any worldedit commands that start with //
 

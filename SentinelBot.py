@@ -360,7 +360,7 @@ def serverchathandler(message):
             continue
         if int(curserver.DiscordChatChannel) == message.channel.id:
             message.content = message.content.replace('\n',' ')
-            AMPservers[server].ConsoleMessage(f'tellraw @a {{"text":"(§9Discord)<{message.author.name}>: {message.content}"}}')
+            AMPservers[server].ConsoleMessage(f'tellraw @a {{"text":"(\x00\xa79Discord)\x00\xa7f<{message.author.name}>: {message.content}"}}')
             return True
         continue
             

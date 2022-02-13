@@ -351,7 +351,7 @@ def servermaintenance(ctx,curserver,parameter):
         return f'**Server**: {curserver.FriendlyName} has been taken out of Maintenance Mode'
     return
 
-def serverchathandler(message):
+def discordtoMCchathandler(message):
     for server in AMPservers:
         if AMPservers[server].Running == False:
             continue 
@@ -360,6 +360,8 @@ def serverchathandler(message):
             continue
         if int(curserver.DiscordChatChannel) == message.channel.id:
             message.content = message.content.replace('\n',' ')
+            message.content = chatfilter.scan(message.content)
+            #message.content = chatfilter.scan(message.content)
             AMPservers[server].ConsoleMessage(f'tellraw @a [{{"text":"(Discord)","color":"blue"}},{{"text":"<{message.author.name}>: {message.content}","color":"white"}}]')
             #AMPservers[server].ConsoleMessage('tellraw @a {"text":"(Discord)","color":"blue"},{"text":"<%s>: %s"}'%(message.author.name,message.content))
             return True
@@ -447,15 +449,13 @@ def serverconsole(curdb):
         #Walks through every entry of a Console Update
         for entry in console['ConsoleEntries']:
             #send off the server chat messages to a discord channel if enabled
-            serverchat(curserver,entry)
+            serverchattoDiscord(curserver,entry)
             #Checks for User last login and updates the database.
             userlastlogin(curserver,entry)
             #Handles each entry of the console to update DB or filter messages.
             entry = consolescan.scan(curserver,colorstrip(entry))
-            print(entry)
             #Supports different types of console suppression, see config.py and consolefilter.py
             entry = consolefilters.filters(entry)
-            print(entry)
             if entry == True:
                 continue
             elif len(entry['Contents']) > 1500:
@@ -502,13 +502,11 @@ def colorstrip(entry):
     return entry
 
 #Console messages are checked by 'Source' and by 'Type' to be sent to a designated discord channel.
-def serverchat(curserver,entry):
+def serverchattoDiscord(curserver,entry):
     consolemsg = []
-    print('Console entry', entry)
     if entry['Source'].startswith('Async Chat Thread'):
         consolemsg.append(entry['Contents'])
     elif entry['Contents'].find('issued server command: /tellraw') != -1:
-        entry = chatfilter.scan(entry)
         consolemsg.append(entry['Contents'][21:])
     elif entry['Type'] == 'Chat':
         #Changes their IGN to their discord_name when it is send to the discord channel
@@ -1299,7 +1297,7 @@ async def on_message(message):
         else:
             db.AddUser(DiscordID = str(message.author.id), DiscordName = message.author.name)
     else:
-        chatflag = serverchathandler(message)
+        chatflag = discordtoMCchathandler(message)
         consoleflag = serverconsolehandler(message)  
         if chatflag != True or consoleflag != True:
             if dbconfig.Autoreply:

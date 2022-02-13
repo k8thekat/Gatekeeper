@@ -232,7 +232,7 @@ def serverinfo(ctx,curserver,parameter):
     except:
         role = curserver.DiscordRole
     servernicknames = ', '.join(curserver.Nicknames)
-    response = f'**Name**: {curserver.FriendlyName}\n\t*Nicknames*: {servernicknames}\n**Whitelist**: {bool(curserver.Whitelist)}\n**Donator**: {bool(curserver.Donator)}\n**Discord Console Channel**: <#{discordconsolechan}>\n**Discord Chat Channel**: <#{discordchatchan}>\n**Discord Role**: {role}'
+    response = f'**Name**: {curserver.FriendlyName}\n\t*Nicknames*: {servernicknames}\n**Whitelist**: {bool(curserver.Whitelist)}\n**Donator**: {bool(curserver.Donator)}\n**Discord Console Channel**: {discordconsolechan}\n**Discord Chat Channel**: {discordchatchan}\n**Discord Role**: {role}'
     return response
 
 #bans a specific user from a specific server
@@ -360,7 +360,7 @@ def serverchathandler(message):
             continue
         if int(curserver.DiscordChatChannel) == message.channel.id:
             message.content = message.content.replace('\n',' ')
-            AMPservers[server].ConsoleMessage(f'say {message.author.name}: {message.content}')
+            AMPservers[server].ConsoleMessage(f'tellraw @a {{"text":"(Discord)<{message.author.name}>: {message.content}}}"')
             return True
         continue
             
@@ -503,7 +503,10 @@ def colorstrip(entry):
 #Console messages are checked by 'Source' and by 'Type' to be sent to a designated discord channel.
 def serverchat(curserver,entry):
     consolemsg = []
-    if entry['Source'].startswith('Async Chat Thread') or entry['Type'] == 'Chat':
+    if entry['Source'].startswith('Async Chat Thread') or entry['Type'] == 'Chat' or entry['Type'] == 'Console':
+        if entry['Type'] == 'Console' and entry['Contents'].find('issued server command: /tellraw'):
+            #consolemsg.append(entry['Contents'][21:])
+            print(entry['Contents'][21:])
         if entry['Type'] == 'Chat':
             #Changes their IGN to their discord_name when it is send to the discord channel
             if dbconfig.GetSetting('ConvertIGN'):
@@ -566,7 +569,7 @@ def userinfo(ctx,curuser,parameter):
         globalbanformat = curuser.GlobalBanExpiration['Date'].strftime('%Y/%m/%d Time: %X (UTC)')
     else:
         globalbanformat = curuser.GlobalBanExpiration
-    response = f'DiscordID: {curuser.DiscordID}\nDiscordName: {curuser.DiscordName}\nInGameName: {curuser.IngameName}\nDonator: {bool(curuser.Donator)}\nBanned: {globalbanformat}'
+    response = f'**DiscordID**: {curuser.DiscordID}\n**DiscordName**: {curuser.DiscordName}\n**InGameName**: {curuser.IngameName}\n**Donator**: {bool(curuser.Donator)}\n**Banned**: {globalbanformat}'
     if len(userservers) != 0:
         for entry in userservers:
             if entry.LastLogin != None:
@@ -577,16 +580,16 @@ def userinfo(ctx,curuser,parameter):
                 Suspensionformat = entry.SuspensionExpiration.strftime('Date: %Y/%m/%d | Time: %X (UTC)')
             else:
                 Suspensionformat = entry.SuspensionExpiration
-            data = f'\nServer: {entry.GetServer().FriendlyName}\n\tWhitelisted: {bool(entry.Whitelisted)}\n\tSuspended: {Suspensionformat}\n\tLast Login: {lastloginformat}'
+            data = f'\n**Server**: {entry.GetServer().FriendlyName}\n\tWhitelisted: {bool(entry.Whitelisted)}\n\tSuspended: {Suspensionformat}\n\t**Last Login**: {lastloginformat}'
             response += data
     if len(userinfractionslist) != 0:
         for entry in userinfractionslist:
             dateformat = entry['Date'].strftime('%Y/%m/%d Time: %X (UTC)')
             if entry['Server'] == None:
-                data = (f"\nInfraction ID: {entry['ID']}\n\tDate: {dateformat}\n\tWho Reported: {entry['DiscordName']}\n\tNotes: {entry['Note']}")
+                data = (f"\n**Infraction ID**: {entry['ID']}\n\tDate: {dateformat}\n\tWho Reported: {entry['DiscordName']}\n\tNotes: {entry['Note']}")
                 response += data
             else:
-                data = (f"\nInfraction ID: {entry['ID']}\n\tDate: {dateformat}\n\tWho Reported: {entry['DiscordName']}\n\tServer: {entry['Server']}\n\tNotes: {entry['Note']}")
+                data = (f"\n**Infraction ID**: {entry['ID']}\n\tDate: {dateformat}\n\tWho Reported: {entry['DiscordName']}\n\tServer: {entry['Server']}\n\tNotes: {entry['Note']}")
                 response += data
     return response
 
@@ -648,10 +651,10 @@ def userdonator(ctx,curuser,parameter):
     if len(parameter) == 3:
         if parameter[2].lower() == 'true':
             curuser.Donator = True
-            response = f'Set {curuser.DiscordName} donator to True'
+            response = f'Set {curuser.DiscordName} donator to `True`'
         else:
             curuser.Donator = False
-            response = f'Set {curuser.DiscordName} donator to False'
+            response = f'Set {curuser.DiscordName} donator to `False`'
     else:
         response = 'You must specify True or False.'
     return response
@@ -666,10 +669,10 @@ def usermoderator(ctx,curuser,parameter):
     if len(parameter) == 3:
         if parameter[2].lower() == 'true':
             curuser.ServerModerator = True
-            response = f'Set {curuser.DiscordName} Server Moderator to True'
+            response = f'Set {curuser.DiscordName} Server Moderator to `True`'
         else:
             curuser.ServerModerator = False
-            response = f'Set {curuser.DiscordName} Server Moderator to False'
+            response = f'Set {curuser.DiscordName} Server Moderator to `False`'
     else:
         response = 'You must specify True or False.'
     return response
@@ -689,7 +692,7 @@ def userign(ctx,curuser,parameter):
             curuser.InGameName = parameter[2]
             response = f'Set User: {curuser.DiscordName} Minecraft_IGN to {parameter[2]}'
         else:
-            response = f'{parameter[2]} is not a registered Minecraft IGN.'
+            response = f'{parameter[2]} is not a registered **Minecraft IGN**.'
     else:
         response = 'The In-game Name cannot be blank.'
     return response
@@ -731,15 +734,15 @@ async def userban(ctx,curuser,parameter):
     response = f'{curuser.DiscordName} has been banned until {bantime.strftime("%Y/%m/%d Time: %X (UTC)")}'
     if 'help' in parameter.lower():
         if parameter[1] == 'help':
-            response = f'Format: //user {curuser.DiscordName} ban time(Days:# or Hours:#)(Optional) reason:(optional)'
+            response = f'**Format**: //user {curuser.DiscordName} ban time(Days:# or Hours:#)(Optional) reason:(optional)'
         if parameter[2] == 'help':
-            response = f'Format: //user {curuser.DiscordName} {parameter[1]} time(Days:# or Hours:#)(Optional) reason:(optional)'
+            response = f'**Format**: //user {curuser.DiscordName} {parameter[1]} time(Days:# or Hours:#)(Optional) reason:(optional)'
         if parameter[3] == 'help':
-            response = f'Format: //user {curuser.DiscordName} {parameter[1]} {parameter[2]} reason:(optional)'
+            response = f'**Format**: //user {curuser.DiscordName} {parameter[1]} {parameter[2]} reason:(optional)'
     if parameter[2].isnumeric():
         bantime = timehandler.parse(parameter[2:])
     if bantime == False:
-        return f'Format: //user {curuser} ban time(Days:# or Hours:#)(Optional) reason:(optional)'
+        return f'**Format**: //user {curuser} ban time(Days:# or Hours:#)(Optional) reason:(optional)'
     curuser.GlobalBanExpiration = bantime
     #Attempts to find a reason and adds it to the reply.
     for entry in parameter:
@@ -1133,7 +1136,7 @@ def rolecheck(ctx,parameter):
             continue
         if dbrole in user_rolelist: #Contains Admins / index = 1
             #print('Role Check Passed.')
-            botoutput('Role Check Passed',ctx)
+            print('Role Check Passed',ctx)
             return True
         if parameter == role['Name']:
             break

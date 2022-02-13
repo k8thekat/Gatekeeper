@@ -363,7 +363,6 @@ def discordtoMCchathandler(message):
             message.content = message.content.replace('\n',' ')
             message.content = chatfilter.scan(message.content,client)
             AMPservers[server].ConsoleMessage(f'tellraw @a [{{"text":"(Discord)","color":"blue"}},{{"text":"<{message.author.name}>: {message.content}","color":"white"}}]')
-            #AMPservers[server].ConsoleMessage('tellraw @a {"text":"(Discord)","color":"blue"},{"text":"<%s>: %s"}'%(message.author.name,message.content))
             return True
         continue
             
@@ -378,11 +377,6 @@ def serverconsolehandler(message):
             if rolecheck(message, 'Maintenance'):
                 AMPservers[server].ConsoleMessage(message.content)
                 return True
-            '''
-            if message.content[0] == '/':
-                    AMPservers[server].ConsoleMessage(f'{message.content[1:]}')
-                    return True
-            '''
             continue
     
 serverfuncs = {

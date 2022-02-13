@@ -438,6 +438,9 @@ def serverconsole(curdb):
     for server in AMPserverConsoles:
         curserver = curdb.GetServer(server)
         console = AMPserverConsoles[server].ConsoleUpdate()
+        #All AMP functions return False if they are offline...
+        if console == False:
+            continue
         consolemsg = []
         #Walks through every entry of a Console Update
         for entry in console['ConsoleEntries']:
@@ -525,7 +528,9 @@ def serverchat(curserver,entry):
 def serverconsoleinit():
     if (dbconfig.Autoconsole):
         for entry in AMPserverConsoles:
-            AMPserverConsoles[entry].ConsoleUpdate()
+            status = AMPserverConsoles[entry].ConsoleUpdate()
+            if status == False:
+                continue
         print(f'Starting console threads...')
         reply = threading.Thread(target=serverconsolethreadloop)
         reply.start()
@@ -745,7 +750,7 @@ async def userban(ctx,curuser,parameter):
     #Ban on each server..
     if curuser.IngameName != None:
         for server in AMPservers:
-            if server.Running == False:
+            if AMPservers[server].Running == False:
                 continue 
             AMPservers[server].ConsoleMessage('/ban {curuser.IngameName}')
     else:
@@ -887,7 +892,7 @@ async def databasebancheck(localdb):
         await client.guild.unban(banneduser)
         botoutput(f'{banneduser.name} has been unbanned from Discord...')
     for server in AMPservers:
-        if server.Running == False:
+        if AMPservers[server].Running == False:
             continue 
         curserver = localdb.GetServer(AMPservers[server].InstanceID)
         server_userlist = curserver.GetAllUsers(SuspensionExpiration=datetime.now())
@@ -976,7 +981,7 @@ async def on_member_remove(member):
     curuser = db.GetUser(member.id)
     if curuser != None and curuser.IngameName != None:
         for server in AMPservers:
-            if server.Running == False:
+            if AMPservers[server].Running == False:
                 continue 
             AMPservers[server].ConsoleMessage(f'whitelist remove {curuser.IngameName}')
             curserver = db.GetServer(server.InstanceID)
@@ -1188,7 +1193,7 @@ async def serverlist(ctx):
     if not rolecheck(ctx, 'General'):
         return 'User does not have permission.'
     print('Server List...')
-    
+    AMPinstancecheck()
     commandlogger.logHandler(ctx,None,None,'bot')
     status = AMP.getInstanceStatus()
     serverlist = []
@@ -1247,7 +1252,7 @@ async def pardon(ctx,*parameter):
     banneduser = await client.fetch_user(parameter[0])
     if user != None:
         for server in AMPservers:
-            if server.Running == False:
+            if AMPservers[server].Running == False:
                 continue 
             AMPservers[server].ConsoleMessage('pardon {user.IngameName}')
         try:
@@ -1388,9 +1393,9 @@ def AMPinstancecheck(startup = False):
                 blankwhitelistgenerator(cur_server)
                 botoutput(f'Found a new Instance, adding it to the Database...{AMPservers[server].FriendlyName}')
     #Updating the Instance Names
+    print('Checking if names have been changed...')
     for server in AMPservers:
         cur_server = db.GetServer(server)
-        print('Checking if names have been changed...')
         if AMPservers[server].FriendlyName != cur_server.FriendlyName:
             botoutput(f'{cur_server.FriendlyName} has been updated too {AMPservers[server].FriendlyName}...')
             cur_server.FriendlyName = AMPservers[server].FriendlyName
@@ -1413,14 +1418,12 @@ def threadloop():
     print('Thread Loop Initiated...\n')
     localdb = database.Database()
     updateinterval = datetime.now()
-    global AMPservers
     while(1):
         if (updateinterval+timedelta(seconds=60)) < datetime.now():
             print(f'Updating and Saving...{datetime.now().strftime("%c")}')
             #Database check on bans
             asyncio.run_coroutine_threadsafe(databasebancheck(localdb), async_loop)
             time.sleep(.5)
-            AMPservers = AMP.getInstances()
             AMPinstancecheck()
             time.sleep(.5)
             #whitelist file check to update db for non whitelisted users

@@ -504,6 +504,7 @@ def colorstrip(entry):
 #Console messages are checked by 'Source' and by 'Type' to be sent to a designated discord channel.
 def serverchat(curserver,entry):
     consolemsg = []
+    print(entry)
     entry = chatfilter.scan(entry)
     if entry['Source'].startswith('Async Chat Thread'):
         consolemsg.append(entry['Contents'])

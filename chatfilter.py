@@ -4,11 +4,15 @@ def scan(content,client):
     content = unicode(content)
     while(1):
         userstatus = user(content,client)
-        print(userstatus)
+        emojistatus = emoji(content)
+        print('User status',userstatus)
+        print('Emoji status',emojistatus)
         if userstatus != False:
-            content = userstatus   
+            content = userstatus  
+        elif emojistatus != False:
+            content = emojistatus 
         else:
-            if userstatus == False:
+            if userstatus == False and emojistatus == False:
                 print(content)
                 return content
     

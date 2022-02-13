@@ -2,7 +2,6 @@
 ## k8thekat - 11/5/2021
 ## 
 import discord
-from discord import channel 
 from discord.ext import commands 
 import json
 import requests

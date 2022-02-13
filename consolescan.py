@@ -6,6 +6,8 @@ from datetime import datetime, timedelta
 
 #Handles each entry of the console to update DB or filter messages/etc.
 def scan(curserver,entry):
+    if entry == None:
+        return
     curtime = datetime.now()
     #Finding in game issued server commands
     if entry['Contents'].find('issued server command:') != -1:

@@ -452,8 +452,10 @@ def serverconsole(curdb):
             userlastlogin(curserver,entry)
             #Handles each entry of the console to update DB or filter messages.
             entry = consolescan.scan(curserver,colorstrip(entry))
+            print(entry)
             #Supports different types of console suppression, see config.py and consolefilter.py
             entry = consolefilters.filters(entry)
+            print(entry)
             if entry == True:
                 continue
             elif len(entry['Contents']) > 1500:

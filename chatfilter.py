@@ -5,8 +5,7 @@ def scan(content):
     print(content)
     #Strips Unicode out of the message
     content = unicode(content)
-    content = user(content)
-    
+    content = user(content
     #Attempts to find discord emoji's and remove them
     while(1):
         start_bracket = content.find('<:')

@@ -438,12 +438,14 @@ def serverconsole(curdb):
     for server in AMPserverConsoles:
         curserver = curdb.GetServer(server)
         console = AMPserverConsoles[server].ConsoleUpdate()
+        print(console)
         #All AMP functions return False if they are offline...
         if console == False:
             continue
         consolemsg = []
         #Walks through every entry of a Console Update
         for entry in console['ConsoleEntries']:
+            print(curserver.FriendlyName,entry)
             #send off the server chat messages to a discord channel if enabled
             serverchat(curserver,entry)
             #Checks for User last login and updates the database.

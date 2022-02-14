@@ -362,8 +362,11 @@ def discordtoMCchathandler(message):
         if int(curserver.DiscordChatChannel) == message.channel.id:
             message.content = message.content.replace('\n',' ')
             message.content = chatfilter.scan(message.content,client)
-            AMPservers[server].ConsoleMessage(f'tellraw @a [{{"text":"(Discord)","color":"blue"}},{{"text":"<{message.author.name}>: {message.content}","color":"white"}}]')
-            return True
+            if message.content == True:
+                return True
+            else:
+                AMPservers[server].ConsoleMessage(f'tellraw @a [{{"text":"(Discord)","color":"blue"}},{{"text":"<{message.author.name}>: {message.content}","color":"white"}}]')
+                return True
         continue
             
 def serverconsolehandler(message):

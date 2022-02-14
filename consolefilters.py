@@ -3,7 +3,6 @@ import config
 
 
 def filters(entry):
-    print('Console Filters',entry)
     if type(entry) == dict:
         if config.CommandBlocks:
             if entry['Contents'].startswith('CommandBlock at'):

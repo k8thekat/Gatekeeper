@@ -454,7 +454,6 @@ def serverconsole(curdb):
         consolemsg = []
         #Walks through every entry of a Console Update
         for entry in console['ConsoleEntries']:
-            print('Console Entry pre check, {entry}')
             #send off the server chat messages to a discord channel if enabled
             serverchattoDiscord(curserver,entry)
             #Checks for User last login and updates the database.
@@ -895,12 +894,13 @@ def serveruserWhitelistUpdate(curserver,whitelist):
                     mc_user_curname = UUIDhandler.uuidCurName(curuser.UUID)
                     curuser.IngameName = mc_user_curname['name']
                     botoutput(f'Updated User: {curuser.DiscordName} IGN: {mc_user_curname} in the database.')
-                    continue
+                    break
             if curuser.UUID != whitelist_user['uuid']:
                 serveruser.Whitelisted = False
                 #ERROR Here -- Multiple print statments are happening( I believe its because of EVERY entry in the list it is printing this...)
                 botoutput(f'Set User: {curuser.DiscordName} Server: {curserver.FriendlyName} whitelist flag to False.')
-                continue
+                break
+        continue
     return
     
 #Checks if a users ban is expired and pardons the user.

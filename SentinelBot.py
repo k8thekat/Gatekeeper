@@ -462,7 +462,7 @@ def serverconsole(curdb):
             #Handles each entry of the console to update DB if a console command was used.
             status = consolescan.scan(curserver,colorstrip(entry))
             if status[0] == True:
-                botoutput(entry[1])
+                botoutput(status[1])
                 continue
             if status[0] == False:
                 entry = status[1]

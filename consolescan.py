@@ -69,7 +69,7 @@ def scan(curserver,entry):
         commandlogger.logHandler(None,curserver,entry,'console')
         entry_split = entry['Contents'].split(' ')
         try:
-            curserver.GetUser(IngameName = entry_split[1]).Whitelisted = True
+            curserver.GetUser(entry_split[1]).Whitelisted = True
         except Exception as e:
             print(e)
             return True, f'Unable to update User: {entry_split[1]} whitelisted status in the database!'
@@ -80,7 +80,7 @@ def scan(curserver,entry):
         entry_split = entry['Contents'].split(' ')
         print(curserver)
         try:
-            curserver.GetUser(IngameName = entry_split[1]).Whitelisted = False
+            curserver.GetUser(entry_split[1]).Whitelisted = False
         except Exception as e:
             print(e)
             return True, f'Unable to update User: {entry_split[1]} whitelisted status in the database!'

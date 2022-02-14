@@ -444,7 +444,8 @@ async def serverchatmessage(chan, entry):
         botoutput(e)
 
 #Handles the AMP Console Channels
-def serverconsole(curdb):
+def serverconsole():
+    curdb = database.Database()
     for server in AMPserverConsoles:
         curserver = curdb.GetServer(server)
         console = AMPserverConsoles[server].ConsoleUpdate()
@@ -555,12 +556,10 @@ def serverconsoleinit():
         reply = threading.Thread(target=serverconsolethreadloop)
         reply.start()
 
-#Simple loop; helps keep the databases seperate for each check.
 def serverconsolethreadloop():
-    localdb = database.Database()
     while(1):
         time.sleep(1)
-        serverconsole(localdb)
+        serverconsole()
 
 #Converts IGN to discord_name
 def userIGNdiscord(user):

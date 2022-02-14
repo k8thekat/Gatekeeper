@@ -461,6 +461,9 @@ def serverconsole(curdb):
             userlastlogin(curserver,entry)
             #Handles each entry of the console to update DB or filter messages.
             entry = consolescan.scan(curserver,colorstrip(entry))
+            if entry[0] == True:
+                botoutput(entry[1])
+                continue
             #Supports different types of console suppression, see config.py and consolefilter.py
             entry = consolefilters.filters(entry)
             if entry == True:

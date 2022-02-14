@@ -50,7 +50,7 @@ def scan(curserver,entry):
             curserver.GetUser(entry_split[3]).Whitelisted = False
         except Exception as e:
             print(e)
-            return f'Unable to update User: {entry_split[3]} banned status in the database!'
+            return True, f'Unable to update User: {entry_split[3]} banned status in the database!'
     #�6Player�c Console �6unbanned�c k8_thekat
     if entry['Contents'].startswith('Player Console unbanned'):
         print('User has been unbanned via console...')
@@ -62,7 +62,7 @@ def scan(curserver,entry):
             #AMPservers[curserver.InstanceID].ConsoleMessage(f'whitelist add {entry_split[3]}')
         except Exception as e:
             print(e)
-            return f'Unable to update User: {entry_split[3]} banned status in the database!'
+            return True, f'Unable to update User: {entry_split[3]} banned status in the database!'
     #Added k8_thekat to the whitelist
     if entry['Contents'].startswith('Added') and entry['Contents'].endswith('to the whitelist'):
         print('User added to Whitelist via console..')
@@ -72,7 +72,7 @@ def scan(curserver,entry):
             curserver.GetUser(entry_split[1]).Whitelisted = True
         except Exception as e:
             print(e)
-            return f'Unable to update User: {entry_split[3]} whitelisted status in the database!'
+            return True, f'Unable to update User: {entry_split[3]} whitelisted status in the database!'
     #Removed k8_thekat from the whitelist
     if entry['Contents'].startswith('Removed') and entry['Contents'].endswith('from the whitelist'):
         print('User removed from Whitelist via console..')
@@ -82,6 +82,6 @@ def scan(curserver,entry):
             curserver.GetUser(entry_split[1]).Whitelisted = False
         except Exception as e:
             print(e)
-            return f'Unable to update User: {entry_split[3]} whitelisted status in the database!'
+            return True, f'Unable to update User: {entry_split[3]} whitelisted status in the database!'
     return entry
 

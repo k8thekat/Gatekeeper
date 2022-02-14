@@ -83,5 +83,5 @@ def scan(curserver,entry):
         except Exception as e:
             print(e)
             return True, f'Unable to update User: {entry_split[3]} whitelisted status in the database!'
-    return entry
+    return False, entry
 

@@ -459,13 +459,15 @@ def serverconsole(curdb):
             serverchattoDiscord(curserver,entry)
             #Checks for User last login and updates the database.
             userlastlogin(curserver,entry)
-            #Handles each entry of the console to update DB or filter messages.
-            entry = consolescan.scan(curserver,colorstrip(entry))
-            if entry[0] == True:
+            #Handles each entry of the console to update DB if a console command was used.
+            status = consolescan.scan(curserver,colorstrip(entry))
+            if status[0] == True:
                 botoutput(entry[1])
                 continue
-            #Supports different types of console suppression, see config.py and consolefilter.py
-            entry = consolefilters.filters(entry)
+            if status[0] == False:
+                entry = status[1]
+                #Supports different types of console suppression, see config.py and consolefilter.py
+                entry = consolefilters.filters(entry)
             if entry == True:
                 continue
             elif len(entry['Contents']) > 1500:

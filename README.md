@@ -18,12 +18,12 @@ Some additional functionality was added for replying to players with certain key
 
 ## Setup
 1. Follow the instructions inside the `tokenstemplate.py file` and `config.py`
-3. Run the script and wait for the Bot to connect.
-4. Once the Bot has connected in any channel type `//setup discord_role_id` were `discord_role_id` is the master Operator/Owner of the Bot. 
+2. Run the script via `Powershell` or `Command Prompt`.
+3. Once the Bot has connected in any channel type `//setup discord_role_id` or `discord_role_name`. The specified `Discord Role` is now the master Operator/Owner of the Bot. 
     - See [Developer Mode](https://www.howtogeek.com/714348/how-to-enable-or-disable-developer-mode-on-discord/)
-5. To see Bot errors, set up **Bot Settings: BotComms**
+4. To see Bot errors, set up **Bot Settings: BotComms**
     - Use the command `//botsettings botcomms discord_channel_id` or `discord_channel_name` to set a channel for bot errors to be sent.
-6. Setting up your AMP **Servers**
+5. Setting up your AMP **Servers**
     - You must enable `whitelist` on your AMP Instance via `Configuration -> Gameplay and Difficulty`
         - You must set the servers `//server server_name whitelist` to `true` to allow for users to request whitelist.
 ---

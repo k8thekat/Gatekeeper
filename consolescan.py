@@ -73,7 +73,7 @@ def scan(curserver,entry):
             curserver.GetUser(entry_split[1]).Whitelisted = True
         except Exception as e:
             print(e)
-            return True, f'Unable to update User: {entry_split[3]} whitelisted status in the database!'
+            return True, f'Unable to update User: {entry_split[1]} whitelisted status in the database!'
     #Removed k8_thekat from the whitelist
     if entry['Contents'].startswith('Removed') and entry['Contents'].endswith('from the whitelist'):
         print('User removed from Whitelist via console..')
@@ -84,6 +84,6 @@ def scan(curserver,entry):
             curserver.GetUser(entry_split[1]).Whitelisted = False
         except Exception as e:
             print(e)
-            return True, f'Unable to update User: {entry_split[3]} whitelisted status in the database!'
+            return True, f'Unable to update User: {entry_split[1]} whitelisted status in the database!'
     return False, entry
 

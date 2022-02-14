@@ -454,6 +454,7 @@ def serverconsole(curdb):
         consolemsg = []
         #Walks through every entry of a Console Update
         for entry in console['ConsoleEntries']:
+            print('Console Entry pre check, {entry}')
             #send off the server chat messages to a discord channel if enabled
             serverchattoDiscord(curserver,entry)
             #Checks for User last login and updates the database.

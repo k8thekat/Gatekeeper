@@ -1,27 +1,45 @@
-# The Level.dat End Reset Script
+# SentinelBot - The Level.dat End Reset Script
 import nbtlib
+import config
+import io
+import base64
+import gzip
 
-def dragonfightreset():
-    nbt_file = nbtlib.load('level.dat')
-    test_path = nbt_file['']['Data']['DragonFight']
+def init(AMPservers,curserver):
+    leveldat = AMPservers[curserver].getFileChunk('world\leveltest.dat',0,33554432)
+    newlevel = dragonReset(base64.b64decode(leveldat['result']['Base64Data']))
+    newdata = base64.b64encode(newlevel).decode('utf-8')
+    AMPservers[curserver].writeFileChunk('world\leveltest.dat',0,newdata)
+    worldremove(AMPservers,curserver)
+    return True
+
+def dragonReset(leveldat):
+    print('Attempting to reset the Dragon Fight in level.dat...')
+    fakefile = io.BytesIO()
+    fakefile.write(leveldat)
+    fakefile.seek(0)
+    if leveldat[0:2] == b"\x1f\x8b":
+       fakefile = gzip.GzipFile(fileobj=fakefile)
+    nbtdata = nbtlib.File.from_fileobj(fakefile, "big")
+    dragon_path = nbtdata['']['Data']['DragonFight']
     del_list = []
-    for entry in test_path:
+    for entry in dragon_path:
         del_list.append(entry)
     for entry in del_list:
-        del test_path[entry]
-    nbt_file.save()
-    return
-dragonfightreset()
+        print(entry)
+        del dragon_path[entry]
+    fakefile = io.BytesIO()
+    nbtdata.write(fakefile)
+    fakefile.seek(0)
+    newdata = fakefile.read()
+    return newdata
 
-import os
-import shutil
-def worldremove():
-    cwd = os.getcwd()
-    file_name = '\DIM1'
-    if os.path.isdir(cwd + file_name):
-        try:
-            shutil.rmtree(cwd + file_name)
-        except Exception as e:
-            print(e)
+def worldremove(AMPservers,curserver):
+    print('Removing the End World file...')
+    if config.Multiverse_Core:
+        worlddir = AMPservers[curserver].TrashDirectory('world_the_end')
+        print(worlddir)
+    else:
+        worlddir = AMPservers[curserver].TrashDirectory('world\DIM-1')
+        print(worlddir)
     return
-worldremove()

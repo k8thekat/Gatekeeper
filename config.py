@@ -47,6 +47,11 @@ Debugging = True #Filters out ANY ERRORs that would show in the console
 CommandBlocks = False #Anything related to command blocks will be suppressed.
 WorldEdit = False #Filters out any worldedit commands that start with //
 
+#World Reset/Dragon Fight handlers
+#These settings are needed to allow the bot to reset a dragon fight and reset the world.
+DragonReset = True
+Multiverse_Core = True
+
 #Auto-reply messages
 #These settings control what message the bot will reply with.
 # Format for channel links is #channel_name or <#channel_id>. 

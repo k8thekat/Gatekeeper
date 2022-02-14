@@ -21,7 +21,7 @@ import tokens
 from AMP_API import AMPAPI
 import parse
 import config
-#import endReset # Coming soon
+import endReset # Coming soon
 import whitelist
 import commandlogger
 import consolefilters
@@ -351,6 +351,14 @@ def servermaintenance(ctx,curserver,parameter):
         return f'**Server**: {curserver.FriendlyName} has been taken out of Maintenance Mode'
     return
 
+def serverEndReset(ctx,curserver,parameter):
+    global AMPservers
+    results = endReset.init(AMPservers,curserver)
+    if results == True:
+        return f'**Server**: {curserver.FriendlyName} has had The End fight reset and the World removed...'
+    else:
+        botoutput(f'**ERROR**: Resetting the End for {curserver.FriendlyName}')
+
 def discordtoMCchathandler(message):
     global client
     for server in AMPservers:
@@ -397,7 +405,8 @@ serverfuncs = {
             'start' : serverstart,
             'stop' : serverstop,
             'kill' : serverkill,
-            'maintenance' : servermaintenance
+            'maintenance' : servermaintenance,
+            'endreset' : serverEndReset
 }
 
 @client.command()

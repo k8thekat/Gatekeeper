@@ -2,6 +2,9 @@
 # by k8thekat // Lightning
 # 11/10/2021
 
+from inspect import Parameter
+from unittest import result
+from pkg_resources import register_loader_type
 import requests
 from requests.sessions import Session
 import tokens
@@ -208,6 +211,7 @@ class AMPAPI:
         }
         result = self.CallAPI('FileManagerPlugin/GetFileChunk',parameters)
         return result
+
     @Login
     def writeFileChunk(self,filename,position,data):
         parameters = {
@@ -238,6 +242,30 @@ class AMPAPI:
         parameters = {}
         result = self.CallAPI('ADSModule/GetInstanceStatuses', parameters)
 
+        return result
+
+    @Login
+    def trashDirectory(self,dirname):
+        parameters = {
+            'DirectoryName' : dirname
+        }
+        result = self.CallAPI('FileManagerPlugin/TrashDirectory',parameters)
+        return result
+
+    @Login
+    def trashFile(self,filename):
+        parameters = {
+            'Filename' : filename
+        }
+        result = self.CallAPI('FileManagerPlugin/TrashFile',parameters)
+        return result
+    
+    @Login
+    def emptyTrash(self,trashdir):
+        parameters = {
+            'TrashDirectoryName' : trashdir
+        }
+        result = self.CallAPI('FileManagerPlugin/EmptyTrash',parameters)
         return result
 
     def sessionCleanup(self):

@@ -1322,7 +1322,7 @@ async def on_message(message):
 @client.command()
 async def setup(ctx,*parameter):
     if len(parameter) < 1:
-        return await ctx.send('**Format**: //setup discord_role_id',reference = ctx.message.to_reference())
+        return await ctx.send('**Format**: //setup discord_role_id or discord_role_name',reference = ctx.message.to_reference())
     if dbconfig.Firststartup == True:
         print('Initializing...')
         role = roleparse(ctx,parameter[0]) #Verify the Discord_role_id exists

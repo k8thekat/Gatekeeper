@@ -892,6 +892,7 @@ def serveruserWhitelistUpdate(curserver,whitelist):
                     continue
             if curuser.UUID != whitelist_user['uuid']:
                 serveruser.Whitelisted = False
+                #ERROR Here -- Multiple print statments are happening( I believe its because of EVERY entry in the list it is printing this...)
                 botoutput(f'Set User: {curuser.DiscordName} Server: {curserver.FriendlyName} whitelist flag to False.')
                 continue
     return

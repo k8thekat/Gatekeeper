@@ -3,7 +3,7 @@ import config
 
 
 def filters(entry):
-    #print('Console Filters',entry)
+    print('Console Filters',entry)
     if config.CommandBlocks:
         if entry['Contents'].startswith('CommandBlock at'):
             #print(f'Console Filter triggered... Removed: {entry["Contents"]}')

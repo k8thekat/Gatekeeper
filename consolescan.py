@@ -68,6 +68,7 @@ def scan(curserver,entry):
         print('User added to Whitelist via console..')
         commandlogger.logHandler(None,curserver,entry,'console')
         entry_split = entry['Contents'].split(' ')
+        print(entry_split)
         try:
             curserver.GetUser(entry_split[1]).Whitelisted = True
         except Exception as e:
@@ -78,6 +79,7 @@ def scan(curserver,entry):
         print('User removed from Whitelist via console..')
         commandlogger.logHandler(None,curserver,entry,'console')
         entry_split = entry['Contents'].split(' ')
+        print(entry_split)
         try:
             curserver.GetUser(entry_split[1]).Whitelisted = False
         except Exception as e:

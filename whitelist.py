@@ -1,20 +1,15 @@
 #Sentinel Bot - whitelist.py
-from datetime import datetime, timedelta
-import random
+from datetime import datetime
 import base64
 import json
 
 import parse
 import timehandler
 import UUIDhandler
-import config
-from AMP_API import AMPAPI
 
 
 #whitelist wait list
 WhitelistWaitList = []
-
-
 
 def init(origAMP,origAMPservers,origdb,origdbconfig):
     global AMP,AMPservers,db,dbconfig
@@ -108,7 +103,7 @@ def wlmessagehandler(message):
 #f'Whitelisting is currently *disabled* for {curserver.FriendlyName}.'
 
 #Handles checking the whitelist list and adding users
-def whitelistListCheck():
+def whitelistListCheck(client):
     #user = {'User': user , 'IGN': user.IngameName, 'timestamp' : curtime, 'server' : curserver, 'Context': message}
     print('Whitelist Wait List Check...')
     wl_channel = dbconfig.Whitelistchannel #ERROR DBConfig object has no attribute 
@@ -125,6 +120,8 @@ def whitelistListCheck():
             if user['timestamp'] + waittime >= curtime :
                 AMPservers[user['server'].InstanceID].ConsoleMessage(f'whitelist add {user["IGN"]}')
                 user['server'].AddUser(user)
+                discord_user = client.get_user(user['user'].DiscordID)
+                print(discord_user)
                 WhitelistWaitList.remove(user)
                 return user
     else:
@@ -134,6 +131,8 @@ def whitelistListCheck():
             user = WhitelistWaitList[index]
             AMPservers[user['server'].InstanceID].ConsoleMessage(f'whitelist add {user["IGN"]}')
             user['server'].AddUser(user)
+            discord_user = client.get_user(user['user'].DiscordID)
+            print(discord_user)
             WhitelistWaitList.remove(user)
             return user
 

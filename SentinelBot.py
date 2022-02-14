@@ -1444,7 +1444,7 @@ def threadloop():
             #whitelist file check to update db for non whitelisted users
             whitelistfilecheck(localdb)
             #status = asyncio.run_coroutine_threadsafe(whitelist.whitelistListCheck(), async_loop)
-            status = whitelist.whitelistListCheck()
+            status = whitelist.whitelistListCheck(client)
             #whitelistListCheck returns False if it has no entries.
             if status != False:
                 asyncio.run_coroutine_threadsafe(wlbotreply(dbconfig.Whitelistchannel,status), async_loop)

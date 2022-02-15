@@ -888,17 +888,19 @@ def serveruserWhitelistUpdate(curserver,whitelist):
         for whitelist_user in whitelist:
             #Checks a users UUID agianst the whitelist file; if found verifies the users IGN.
             if curuser.UUID == whitelist_user['uuid']:
-                #Names do not match; so lets update the name
-                if curuser.IngameName != whitelist_user['name']:
+                if curuser.IngameName != whitelist_user['name']: #Names do not match; so lets update the name
                     mc_user_curname = UUIDhandler.uuidCurName(curuser.UUID)
                     curuser.IngameName = mc_user_curname['name']
                     botoutput(f'Updated User: {curuser.DiscordName} IGN: {mc_user_curname} in the database.')
                     break
-            if curuser.UUID != whitelist_user['uuid']:
-                serveruser.Whitelisted = False
-                #ERROR Here -- Setting peoples whitelist flag to false when it is unneeded...
-                botoutput(f'Set User: {curuser.DiscordName} Server: {curserver.FriendlyName} whitelist flag to False.')
-                break
+                else: #Names match; so lets keep searching for another match...
+                    continue
+            if curuser.UUID != whitelist_user['uuid']: #Keep searching
+                continue
+        #Couldn't find 
+        serveruser.Whitelisted = False
+        #ERROR Here -- Setting peoples whitelist flag to false when it is unneeded...
+        botoutput(f'Set User: {curuser.DiscordName} Server: {curserver.FriendlyName} whitelist flag to False.')
         continue
     return
     

@@ -97,6 +97,7 @@ def logfileloader():
         else:
             newfile = open(botdir + filename)
             LOGS = json.load(newfile)
+            #!! ERROR HERE --
     except json.decoder.JSONDecodeError as e:
         LOGS = []
         print(e)

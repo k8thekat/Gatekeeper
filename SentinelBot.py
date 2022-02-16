@@ -885,8 +885,9 @@ def serveruserWhitelistUpdate(curserver,whitelist):
             ign_check = UUIDhandler.uuidcheck(curuser.IngameName)
             curuser.UUID = ign_check[1][0]['id']
         found = False
+        ign_check = UUIDhandler.uuidcheck(curuser.IngameName)
         for whitelist_user in whitelist:
-            if curuser.UUID == whitelist_user['uuid']: #If I find a matching UUID lets continue...
+            if curuser.UUID == whitelist_user['uuid'].replace('-',''): #If I find a matching UUID lets continue...
                 found = True
                 if curuser.IngameName != whitelist_user['name']: #Names do not match; so lets update the name
                     mc_user_curname = UUIDhandler.uuidCurName(curuser.UUID)

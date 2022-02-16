@@ -22,7 +22,7 @@ from AMP_API import AMPAPI
 import parse
 import config
 import endReset # Coming soon
-import whitelist
+import whitelist 
 import commandlogger
 import consolefilters
 import chatfilter
@@ -877,10 +877,13 @@ def serveruserWhitelistFlag(curserver,whitelist,localdb):
 def serveruserWhitelistUpdate(curserver,whitelist):
     print('Server User whitelist name update...')
     serveruserlist = curserver.GetAllUsers()
+    print(len(serveruserlist))
     for serveruser in serveruserlist:
+        print(serveruser)
         curuser = serveruser.GetUser()
         found = False
         for whitelist_user in whitelist:
+
             print(curuser.UUID,type(curuser.UUID))
             print(whitelist_user['uuid'],type(whitelist_user['uuid']))
             if curuser.UUID == whitelist_user['uuid']: #If I find a matching UUID lets continue...

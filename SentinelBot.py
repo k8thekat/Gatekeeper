@@ -248,7 +248,7 @@ def serveruserban(ctx,curserver,parameter):
             return f'**Example**: //server {curserver.FriendlyName} userban Notch w:3d:6 reason:Stealing someones items'
     curuser = None
     if len(parameter) <= 2:
-        return f**'Format**: //server {curserver.FriendlyName} userban {curuser} time(Optional) reason:(optional)'
+        return f'**Format**: //server {curserver.FriendlyName} userban {curuser} time(Optional) reason:(optional)'
     if len(parameter) >= 3:
         curuser = db.GetUser(parameter[2])
     if curuser == None:

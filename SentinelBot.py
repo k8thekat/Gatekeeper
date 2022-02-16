@@ -224,7 +224,7 @@ def serverinfo(ctx,curserver,parameter):
         return 'User does not have permission.'
     print('Server Info...')
     try:
-        discordconsolechan,discordchatchan = client.get_channel(int(curserver.DiscordConsoleChannel)), client.get_channel(int(curserver.DiscordChatChannel))
+        discordconsolechan,discordchatchan = client.get_channel(curserver.DiscordConsoleChannel), client.get_channel(curserver.DiscordChatChannel)
     except:
         discordconsolechan,discordchatchan = curserver.DiscordConsoleChannel, curserver.DiscordChatChannel
     try:

@@ -1,9 +1,9 @@
 #command logger
-from tracemalloc import start
 import config
 import os
 import json
 from datetime import datetime
+import traceback
 
 curtime = datetime.now()
 botdir = os.getcwd()
@@ -19,8 +19,10 @@ def init():
         logfileloader()
     except Exception as e:
         print(e)
+        traceback.print_exc()
 
 def logHandler(ctx,curserver,parameter,loc):
+    print('Log file...')
     LOGS = logfileloader()
     server = curserver
     time = datetime.now().strftime('%c')
@@ -119,6 +121,7 @@ def logfilearchiver():
             os.rename(botdir + filename, botdir + logdate)
     except Exception as e:
         print(e)
+        traceback.print_exc()
     return
 
 def logfileparse(filename,count,start_index = 0):

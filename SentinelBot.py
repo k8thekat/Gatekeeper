@@ -14,6 +14,7 @@ import asyncio
 from datetime import datetime, timedelta
 import base64
 import random
+import traceback
 
 # Bot Scripts
 import database
@@ -953,6 +954,7 @@ async def botawaitsend(message,ctx = None):
             boterror = client.get_channel(dbconfig.Botcomms)
     except Exception as e:
         print(e)
+        traceback.print_exc()
     if ctx == None:
         await boterror.send(content = message)
     else:

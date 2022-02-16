@@ -224,18 +224,14 @@ def serverinfo(ctx,curserver,parameter):
         return 'User does not have permission.'
     print('Server Info...')
     try:
-        discordconsolechan,discordchatchan = client.get_channel(curserver.DiscordConsoleChannel), client.get_channel(curserver.DiscordChatChannel)
-    except:
-        discordconsolechan,discordchatchan = curserver.DiscordConsoleChannel, curserver.DiscordChatChannel
-    try:
         role = ctx.guild.get_role(int(curserver.DiscordRole))
     except:
         role = curserver.DiscordRole
     servernicknames = ', '.join(curserver.Nicknames)
     if len(curserver.Nicknames) == 0:
-        return f'**Name**: {curserver.FriendlyName}\n**Whitelist**: `{bool(curserver.Whitelist)}`\n**Donator**: `{bool(curserver.Donator)}`\n**Discord Console Channel**: <#{discordconsolechan}>\n**Discord Chat Channel**: <#{discordchatchan}>\n**Discord Role**: {role}'
+        return f'**Name**: {curserver.FriendlyName}\n**Whitelist**: `{bool(curserver.Whitelist)}`\n**Donator**: `{bool(curserver.Donator)}`\n**Discord Console Channel**: <#{curserver.DiscordConsoleChannel}>\n**Discord Chat Channel**: <#{curserver.DiscordChatChannel}>\n**Discord Role**: {role}'
     
-    response = f'**Name**: {curserver.FriendlyName}\n\t*Nicknames*: {servernicknames}\n**Whitelist**: `{bool(curserver.Whitelist)}`\n**Donator**: `{bool(curserver.Donator)}`\n**Discord Console Channel**: <#{discordconsolechan}>\n**Discord Chat Channel**: <#{discordchatchan}>\n**Discord Role**: {role}'
+    response = f'**Name**: {curserver.FriendlyName}\n\t*Nicknames*: {servernicknames}\n**Whitelist**: `{bool(curserver.Whitelist)}`\n**Donator**: `{bool(curserver.Donator)}`\n**Discord Console Channel**: <#{curserver.DiscordConsoleChannel}>\n**Discord Chat Channel**: <#{curserver.DiscordChatChannel}>\n**Discord Role**: {role}'
     return response
 
 #bans a specific user from a specific server

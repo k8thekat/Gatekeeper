@@ -7,10 +7,20 @@ from datetime import datetime
 curtime = datetime.now()
 botdir = os.getcwd()
 filename = f'\\logs\\log-{curtime.strftime("%d-%m-%Y")}.json'
+logfile_list = os.listdir(botdir + '\\logs')
+global LOGS
+
+
+def init():
+    try:
+        print('Making Log Directory')
+        os.makedirs(botdir + '\\logs')
+        logfileloader()
+    except Exception as e:
+        print(e)
 
 def logHandler(ctx,curserver,parameter,loc):
-    #print(curserver,parameter,loc)
-    log = []
+    LOGS = logfileloader()
     server = curserver
     time = datetime.now().strftime('%c')
     if curserver != None:
@@ -50,8 +60,8 @@ def logHandler(ctx,curserver,parameter,loc):
                 'Command' : command
                 }     
              
-        #log.append(logentry)
-        logfilesaver(logentry)
+        LOGS.append(logentry)
+        logfilesaver(LOGS)
         print('Logged a Bot Command')
 
     if loc == 'console':
@@ -70,29 +80,21 @@ def logHandler(ctx,curserver,parameter,loc):
                     'Command' : command,
                     'Usage' : " ".join(contents_split[5:])
                     }                   
-            #log.append(logentry)
-            logfilesaver(logentry)
+            LOGS.append(logentry)
+            logfilesaver(LOGS)
             print('Logged a Console Command')
     return
-
-def init():
-    try:
-        print('Making Log Directory')
-        os.makedirs(botdir + '\\logs')
-        logfileloader()
-    except Exception as e:
-        print(e)
 
 def logfileloader():
     try:    
         if os.path.isfile(botdir +  filename) != True:
             print('Created a new log file')
-            newfile = open(botdir + filename, 'x')
-            newfile.close()
-
+            LOGS = open(botdir + filename, 'x')
+        else:
+            LOGS = open(botdir + filename, 'w')
     except json.decoder.JSONDecodeError as e:
         print(e)
-    return
+    return LOGS
 
 def logfilesaver(log):
     newfile = open(botdir + filename, 'a') 
@@ -114,3 +116,7 @@ def logfilearchiver():
         print(e)
     return
 
+def logfileparse(filename,entries):
+    
+
+    return

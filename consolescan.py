@@ -3,6 +3,7 @@ import commandlogger
 import config
 import plugin_commands
 from datetime import datetime, timedelta
+import traceback
 
 #Handles each entry of the console to update DB or filter messages/etc.
 def scan(curserver,entry):
@@ -50,6 +51,7 @@ def scan(curserver,entry):
             curserver.GetUser(entry_split[3]).Whitelisted = False
         except Exception as e:
             print(e)
+            traceback.print_exc()
             return True, f'Unable to update User: {entry_split[3]} banned status in the database!'
     #�6Player�c Console �6unbanned�c k8_thekat
     if entry['Contents'].startswith('Player Console unbanned'):
@@ -62,6 +64,7 @@ def scan(curserver,entry):
             #AMPservers[curserver.InstanceID].ConsoleMessage(f'whitelist add {entry_split[3]}')
         except Exception as e:
             print(e)
+            traceback.print_exc()
             return True, f'Unable to update User: {entry_split[3]} banned status in the database!'
     #Added k8_thekat to the whitelist
     if entry['Contents'].startswith('Added') and entry['Contents'].endswith('to the whitelist'):
@@ -72,6 +75,7 @@ def scan(curserver,entry):
             curserver.GetUser(entry_split[1]).Whitelisted = True
         except Exception as e:
             print(e)
+            traceback.print_exc()
             return True, f'Unable to update User: {entry_split[1]} whitelisted status in the database!'
     #Removed k8_thekat from the whitelist
     if entry['Contents'].startswith('Removed') and entry['Contents'].endswith('from the whitelist'):
@@ -82,6 +86,7 @@ def scan(curserver,entry):
             curserver.GetUser(entry_split[1]).Whitelisted = False
         except Exception as e:
             print(e)
+            traceback.print_exc()
             return True, f'Unable to update User: {entry_split[1]} whitelisted status in the database!'
     return False, entry
 

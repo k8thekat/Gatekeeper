@@ -22,7 +22,6 @@ def init():
         traceback.print_exc()
 
 def logHandler(ctx,curserver,parameter,loc):
-    print('Log file...')
     LOGS = logfileloader()
     server = curserver
     time = datetime.now().strftime('%c')

@@ -883,7 +883,7 @@ def serveruserWhitelistUpdate(curserver,whitelist):
         curuser = serveruser.GetUser()
         if curuser.UUID == None and curuser.IngameName != None:
             ign_check = UUIDhandler.uuidcheck(curuser.IngameName)
-            curuser.UUID = ign_check[1]['id']
+            curuser.UUID = ign_check[1][0]['id']
         found = False
         for whitelist_user in whitelist:
             if curuser.UUID == whitelist_user['uuid']: #If I find a matching UUID lets continue...

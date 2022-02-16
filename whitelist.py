@@ -40,7 +40,7 @@ def wlmessagehandler(message):
             return False, f'Your IGN: {IGN} is not correct, please double check your IGN...'
         #Updates the DB users IGN
         curuser.IngameName = IGN
-        curuser.UUID = ign_check[1]['id']
+        curuser.UUID = ign_check[1][0]['id']
         #Converts and checks for the server in the DB
         curserver = db.GetServer(Name = sel_server.replace(' ', '_'))
         if curserver == None:
@@ -85,7 +85,7 @@ def wlmessagehandler(message):
                 return False, f'Your IGN: {IGN} is not correct, please double check your IGN...'
             #Updates the DB users IGN
             user.IngameName = IGN
-            user.UUID = ign_check[1]['id']
+            user.UUID = ign_check[1][0]['id']
             #Converts and checks for the server in the DB
             curserver = db.GetServer(Name = sel_server.replace(' ', '_'))
             if curserver == None: 

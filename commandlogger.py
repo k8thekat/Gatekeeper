@@ -1,4 +1,5 @@
 #command logger
+from tracemalloc import start
 import config
 import os
 import json
@@ -31,7 +32,7 @@ def logHandler(ctx,curserver,parameter,loc):
         command = str(ctx.command)
         if type(parameter) == tuple:
             logentry = {
-                    'Users': command_user,
+                    'User': command_user,
                     'User_ID': command_user_id,
                     'Timestamp' : time,
                     'Type' : 'Discord Bot',
@@ -42,7 +43,7 @@ def logHandler(ctx,curserver,parameter,loc):
         elif parameter != None:
             contents_split = parameter.split(' ')
             logentry = {
-                'Users': command_user,
+                'User': command_user,
                 'User_ID': command_user_id,
                 'Timestamp' : time,
                 'Type' : 'Discord Bot',
@@ -52,7 +53,7 @@ def logHandler(ctx,curserver,parameter,loc):
                 }     
         else:
             logentry = {
-                'Users': command_user,
+                'User': command_user,
                 'User_ID': command_user_id,
                 'Timestamp' : time,
                 'Type' : 'Discord Bot',
@@ -73,7 +74,7 @@ def logHandler(ctx,curserver,parameter,loc):
         if command in commandlist:
             time = datetime.fromtimestamp(float(parameter['Timestamp'][6:-2])/1000).strftime('%c')
             logentry = {
-                    'Users': command_user,
+                    'User': command_user,
                     'Timestamp' : time,
                     'Type' : 'Console',
                     'Server' : server,
@@ -89,15 +90,19 @@ def logfileloader():
     try:    
         if os.path.isfile(botdir +  filename) != True:
             print('Created a new log file')
-            LOGS = open(botdir + filename, 'x')
+            newfile = open(botdir + filename, 'x')
+            LOGS = []
+            newfile.close()
         else:
-            LOGS = open(botdir + filename, 'w')
+            newfile = open(botdir + filename)
+            LOGS = json.load(newfile)
     except json.decoder.JSONDecodeError as e:
+        LOGS = []
         print(e)
     return LOGS
 
 def logfilesaver(log):
-    newfile = open(botdir + filename, 'a') 
+    newfile = open(botdir + filename, 'w') 
     json.dump(log,newfile, indent=0)
     newfile.close()
     #print(f"log file saved")
@@ -116,7 +121,17 @@ def logfilearchiver():
         print(e)
     return
 
-def logfileparse(filename,entries):
-    
-
+def logfileparse(filename,count,start_index = 0):
+    print(filename)
+    newfile = open(botdir + '\\logs\\' + filename)
+    parse_log = json.load(newfile)
+    if count > 15:
+        return 'Please keep your values lower than 15...'
+    if count > len(parse_log) or start_index + count > len(parse_log):
+        return f'Youve exceeded the length of the log file {len(parse_log)}'
+    if start_index != 0:
+        log_return = []
+        for logentry in parse_log[-start_index:-start_index+count]:
+            log_return.append(str(logentry)[1:-1])
+            return log_return
     return

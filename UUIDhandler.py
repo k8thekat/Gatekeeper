@@ -9,9 +9,8 @@ def uuidcheck(name):
     jsonhandler = json.dumps(name)
     post_req = requests.post(url, headers=header, data=jsonhandler)
     minecraft_user = post_req.json()
-    #print(minecraft_user,len(minecraft_user))
     if len(minecraft_user) != 0: #True if it exists and False if it doesnt.
-        return True, minecraft_user
+        return True, minecraft_user #returns [{'id': 'uuid', 'name': 'name'}] 
     else:
         return False, None
 

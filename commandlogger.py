@@ -101,6 +101,7 @@ def logfileloader():
     except json.decoder.JSONDecodeError as e:
         LOGS = []
         print(e)
+        traceback.print_exc()
     return LOGS
 
 def logfilesaver(log):

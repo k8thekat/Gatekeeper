@@ -703,6 +703,7 @@ def userign(ctx,curuser,parameter):
         ign_check = UUIDhandler.uuidcheck(parameter[2])
         if ign_check != False:
             curuser.InGameName = parameter[2]
+            curuser.UUID = ign_check[1]['id']
             response = f'Set User: {curuser.DiscordName} Minecraft_IGN to {parameter[2]}'
         else:
             response = f'{parameter[2]} is not a registered **Minecraft IGN**.'
@@ -878,15 +879,13 @@ def serveruserWhitelistFlag(curserver,whitelist,localdb):
 def serveruserWhitelistUpdate(curserver,whitelist):
     print('Server User whitelist name update...')
     serveruserlist = curserver.GetAllUsers()
-    print(len(serveruserlist))
     for serveruser in serveruserlist:
-        print(serveruser)
         curuser = serveruser.GetUser()
+        if curuser.UUID == None and curuser.IngameName != None:
+            ign_check = UUIDhandler.uuidcheck(curuser.IngameName)
+            curuser.UUID = ign_check[1]['id']
         found = False
         for whitelist_user in whitelist:
-
-            print(curuser.UUID,type(curuser.UUID))
-            print(whitelist_user['uuid'],type(whitelist_user['uuid']))
             if curuser.UUID == whitelist_user['uuid']: #If I find a matching UUID lets continue...
                 found = True
                 if curuser.IngameName != whitelist_user['name']: #Names do not match; so lets update the name
@@ -897,7 +896,6 @@ def serveruserWhitelistUpdate(curserver,whitelist):
         if not found:
             serveruser.Whitelisted = False
             botoutput(f'**Set User**: {curuser.DiscordName} **Server**: {curserver.FriendlyName} whitelist flag to `False`.')
-
     return
     
 #Checks if a users ban is expired and pardons the user.

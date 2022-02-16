@@ -248,7 +248,7 @@ def serveruserban(ctx,curserver,parameter):
             return f'**Example**: //server {curserver.FriendlyName} userban Notch w:3d:6 reason:Stealing someones items'
     curuser = None
     if len(parameter) <= 2:
-        return f'Format: //server {curserver.FriendlyName} userban {curuser} time(Optional) reason:(optional)'
+        return f**'Format**: //server {curserver.FriendlyName} userban {curuser} time(Optional) reason:(optional)'
     if len(parameter) >= 3:
         curuser = db.GetUser(parameter[2])
     if curuser == None:
@@ -781,7 +781,7 @@ async def userban(ctx,curuser,parameter):
 userfuncs = {
             'info': userinfo,
             'add' : useradd,
-             4 : userinfractions,
+            'infraction' : userinfractions,
             'donator' : userdonator,
             'ign' : userign,
             'ban' : userban, 
@@ -825,12 +825,8 @@ def donatorcheck():
                 user = db.GetUser(str(member.id))
                 if user == None:
                     db.AddUser(DiscordID = str(member.id), DiscordName = member.name,Donator= True)
-                    continue
                 if not user.Donator:
                     user.Donator == True
-                    continue
-            else:
-                continue
     return
 
 @client.command()
@@ -1136,7 +1132,6 @@ def rolecheck(ctx,parameter):
     user_roles = ctx.author.roles
     user_rolelist = []
     for role in user_roles:
-        #print(role.id)
         user_rolelist.append(role.id) #List of users roles as discord_role_ids
 
     #parameter = Maintenance / index = 2
@@ -1145,8 +1140,7 @@ def rolecheck(ctx,parameter):
         if dbrole == None:
             continue
         if dbrole in user_rolelist: #Contains Admins / index = 1
-            #print('Role Check Passed.')
-            print('Role Check Passed',ctx)
+            print('Role Check Passed',ctx.author.name)
             return True
         if parameter == role['Name']:
             break
@@ -1171,8 +1165,6 @@ def roleparse(ctx,parameter): #returns None on failure
             parameter.replace('_',' ')
             if role.name.lower() == parameter.lower():
                 return role
-            else:
-                continue
 
 @client.command()
 #/role 'parameter[0] 'parameter[1]' 'parameter[2]'
@@ -1339,7 +1331,6 @@ async def setup(ctx,*parameter):
         if role == None:
             response = f'The role: {parameter[0]} does not exists.'
             return botoutput('**ERROR**: Setting Startup Role',ctx)
-        #!!Set the Role for the Discord_role_id to 'Operator'
         dbconfig.Operator = role.id
         dbconfig.Firststartup = False
         response = f'First time startup completed. Operator role set to {role.name}'
@@ -1389,8 +1380,6 @@ def whitelistfilecheck(localdb):
                         serveruserWhitelistUpdate(curserver,whitelist_json)
                         #Adds the user to the server_user_list and updates their Whitelisted Flag.
                         serveruserWhitelistFlag(curserver,whitelist_json,localdb)
-        else:
-            continue
 
 #Checks AMP for any new Instances...
 def AMPinstancecheck(startup = False):

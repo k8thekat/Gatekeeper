@@ -232,7 +232,10 @@ def serverinfo(ctx,curserver,parameter):
     except:
         role = curserver.DiscordRole
     servernicknames = ', '.join(curserver.Nicknames)
-    response = f'**Name**: {curserver.FriendlyName}\n\t*Nicknames*: {servernicknames}\n**Whitelist**: {bool(curserver.Whitelist)}\n**Donator**: {bool(curserver.Donator)}\n**Discord Console Channel**: {discordconsolechan}\n**Discord Chat Channel**: {discordchatchan}\n**Discord Role**: {role}'
+    if len(curserver.Nicknames) == 0:
+        return f'**Name**: {curserver.FriendlyName}\n**Whitelist**: `{bool(curserver.Whitelist)}`\n**Donator**: `{bool(curserver.Donator)}`\n**Discord Console Channel**: {discordconsolechan}\n**Discord Chat Channel**: {discordchatchan}\n**Discord Role**: {role}'
+    
+    response = f'**Name**: {curserver.FriendlyName}\n\t*Nicknames*: {servernicknames}\n**Whitelist**: `{bool(curserver.Whitelist)}`\n**Donator**: `{bool(curserver.Donator)}`\n**Discord Console Channel**: {discordconsolechan}\n**Discord Chat Channel**: {discordchatchan}\n**Discord Role**: {role}'
     return response
 
 #bans a specific user from a specific server
@@ -353,11 +356,12 @@ def servermaintenance(ctx,curserver,parameter):
 
 def serverEndReset(ctx,curserver,parameter):
     global AMPservers
-    results = endReset.init(AMPservers,curserver)
+    if config.DragonReset:
+        results = endReset.init(AMPservers,curserver)
     if results == True:
         return f'**Server**: {curserver.FriendlyName} has had The End fight reset and the World removed...'
     else:
-        botoutput(f'**ERROR**: Resetting the End for {curserver.FriendlyName}')
+        botoutput(f'**ERROR**: Resetting the End for {curserver.FriendlyName}, check your config file...')
 
 def discordtoMCchathandler(message):
     global client
@@ -581,7 +585,7 @@ def userinfo(ctx,curuser,parameter):
         globalbanformat = curuser.GlobalBanExpiration['Date'].strftime('%Y/%m/%d Time: %X (UTC)')
     else:
         globalbanformat = curuser.GlobalBanExpiration
-    response = f'**DiscordID**: {curuser.DiscordID}\n**DiscordName**: {curuser.DiscordName}\n**InGameName**: {curuser.IngameName}\n**Donator**: {bool(curuser.Donator)}\n**Banned**: {globalbanformat}'
+    response = f'**DiscordID**: {curuser.DiscordID}\n**DiscordName**: {curuser.DiscordName}\n**InGameName**: {curuser.IngameName}\n**Donator**: `{bool(curuser.Donator)}`\n**Banned**: {globalbanformat}'
     if len(userservers) != 0:
         for entry in userservers:
             if entry.LastLogin != None:
@@ -592,7 +596,7 @@ def userinfo(ctx,curuser,parameter):
                 Suspensionformat = entry.SuspensionExpiration.strftime('Date: %Y/%m/%d | Time: %X (UTC)')
             else:
                 Suspensionformat = entry.SuspensionExpiration
-            data = f'\n**Server**: {entry.GetServer().FriendlyName}\n\tWhitelisted: {bool(entry.Whitelisted)}\n\tSuspended: {Suspensionformat}\n\t**Last Login**: {lastloginformat}'
+            data = f'\n**Server**: {entry.GetServer().FriendlyName}\n\tWhitelisted: `{bool(entry.Whitelisted)}`\n\tSuspended: {Suspensionformat}\n\tLast Login: {lastloginformat}'
             response += data
     if len(userinfractionslist) != 0:
         for entry in userinfractionslist:
@@ -870,13 +874,11 @@ def serveruserWhitelistFlag(curserver,whitelist,localdb):
                 curserveruser.Whitelisted = True
             else:
                 curserveruser.Whitelisted = True
-                continue
         else:
             #Helps prevent bot error spam if users are whitelisted without a discord account
             if entry['name'] not in non_dbusers:
                 non_dbusers.append(entry['name'])
-                botoutput(f'Failed to handle: Server: {AMPservers[curserver.InstanceID].FriendlyName} IGN: {entry["name"]} in whitelist file, adding user to non DB user list...')
-            continue
+                botoutput(f'Failed to handle: **Server**: {AMPservers[curserver.InstanceID].FriendlyName} **IGN**: {entry["name"]} in whitelist file, adding user to non DB user list...')
     return
 
 #Updates users whitelisted flags for each server
@@ -885,23 +887,19 @@ def serveruserWhitelistUpdate(curserver,whitelist):
     serveruserlist = curserver.GetAllUsers()
     for serveruser in serveruserlist:
         curuser = serveruser.GetUser()
+        found = False
         for whitelist_user in whitelist:
-            #Checks a users UUID agianst the whitelist file; if found verifies the users IGN.
-            if curuser.UUID == whitelist_user['uuid']:
+            if curuser.UUID == whitelist_user['uuid']: #If I find a matching UUID lets continue...
+                found = True
                 if curuser.IngameName != whitelist_user['name']: #Names do not match; so lets update the name
                     mc_user_curname = UUIDhandler.uuidCurName(curuser.UUID)
                     curuser.IngameName = mc_user_curname['name']
-                    botoutput(f'Updated User: {curuser.DiscordName} IGN: {mc_user_curname} in the database.')
-                    break
-                else: #Names match; so lets keep searching for another match...
-                    continue
-            if curuser.UUID != whitelist_user['uuid']: #Keep searching
-                continue
-        #Couldn't find 
-        serveruser.Whitelisted = False
-        #ERROR Here -- Setting peoples whitelist flag to false when it is unneeded...
-        botoutput(f'Set User: {curuser.DiscordName} Server: {curserver.FriendlyName} whitelist flag to False.')
-        continue
+                    botoutput(f'**Updated User**: {curuser.DiscordName} **IGN**: {mc_user_curname} in the database.')
+                break
+        if not found:
+            serveruser.Whitelisted = False
+            botoutput(f'**Set User**: {curuser.DiscordName} **Server**: {curserver.FriendlyName} whitelist flag to `False`.')
+
     return
     
 #Checks if a users ban is expired and pardons the user.
@@ -1228,11 +1226,19 @@ async def serverlist(ctx):
                 serv_status = '`Online`'
             else:
                 serv_status = '`Offline`'
-            serverinfo = f'**Server**: {curserver.FriendlyName} - {serv_status}'
-            if len(curserver.Nicknames) == 0:
-                serverlist.append(serverinfo)
-            else:
-                serverlist.append(f'{serverinfo}\n\t**Nicknames**: {curservernick}')
+                
+            serverinfo = f'**Server**: {curserver.FriendlyName} - {serv_status}' 
+            if rolecheck(ctx,'Staff'): #If the user is Staff or Higher append to the list
+                if len(curserver.Nicknames) != 0: #If the server has nicknames
+                    serverlist.append(f'{serverinfo}\n\t**Nicknames**: {curservernick}')
+                else:
+                    serverlist.append(serverinfo)
+            elif serv_status != '`Offline`': #If the server is OFFLINE; do not display it to a general user..
+                if len(curserver.Nicknames) != 0:
+                    serverlist.append(f'{serverinfo}\n\t**Nicknames**: {curservernick}')
+                else:
+                    serverlist.append(serverinfo)
+
     serverlist = '\n'.join(serverlist)
     return await ctx.send(serverlist, reference=ctx.message.to_reference())
 

@@ -881,6 +881,8 @@ def serveruserWhitelistUpdate(curserver,whitelist):
         curuser = serveruser.GetUser()
         found = False
         for whitelist_user in whitelist:
+            print(curuser.UUID,type(curuser.UUID))
+            print(whitelist_user['uuid'],type(whitelist_user['uuid']))
             if curuser.UUID == whitelist_user['uuid']: #If I find a matching UUID lets continue...
                 found = True
                 if curuser.IngameName != whitelist_user['name']: #Names do not match; so lets update the name

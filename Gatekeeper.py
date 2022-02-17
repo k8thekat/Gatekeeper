@@ -862,6 +862,8 @@ async def user(ctx,*parameter):
         return await ctx.send('**Functions**: ' + '`' ", ".join(userfuncs.keys()) + '`')
     elif parameter[1].lower() in userfuncs:
         cur_db_user = db.GetUser(curuser.id)
+        if parameter[1].lower() == 'add':
+            return await ctx.send(userfuncs[parameter[1]](ctx,curuser,parameter),reference = ctx.message.to_reference())
         try:
             response = await asyncio.gather(userfuncs[parameter[1]](ctx,cur_db_user,parameter))
         except:

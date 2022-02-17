@@ -836,7 +836,7 @@ async def user(ctx,*parameter):
         return await ctx.send('**Format**: //user discord_id (function) (option) (parameter)',reference = ctx.message.to_reference())
     curuser = userparse(ctx,parameter)
     if curuser == None:
-        return await ctx.send(f'The User: {parameter[0]} does not exists in {ctx.guild.name}.', reference = ctx.message.to_reference())
+        return await ctx.send(f'**The User**: {parameter[0]} does not exists in **{ctx.guild.name}**.', reference = ctx.message.to_reference())
     if 'help' in parameter[0:1]:
         return await ctx.send('**Functions**: ' + '`' ", ".join(userfuncs.keys()) + '`')
     elif parameter[1].lower() in userfuncs:

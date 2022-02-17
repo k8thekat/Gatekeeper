@@ -724,7 +724,7 @@ def userign(ctx,curuser,parameter):
         ign_check = UUIDhandler.uuidcheck(parameter[2])
         if ign_check != False:
             curuser.InGameName = parameter[2]
-            curuser.UUID = ign_check[1]['id']
+            curuser.UUID = ign_check[1][0]['id']
             response = f'Set User: {curuser.DiscordName} Minecraft_IGN to {parameter[2]}'
         else:
             response = f'{parameter[2]} is not a registered **Minecraft IGN**.'

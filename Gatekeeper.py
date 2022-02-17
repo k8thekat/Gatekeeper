@@ -722,7 +722,7 @@ def userign(ctx,curuser,parameter):
         response = f'**Format**: //user {curuser} IGN (True or False)'
     if len(parameter) == 3:
         ign_check = UUIDhandler.uuidcheck(parameter[2])
-        if ign_check != False:
+        if ign_check[0] != False:
             curuser.InGameName = parameter[2]
             curuser.UUID = ign_check[1][0]['id']
             response = f'Set User: {curuser.DiscordName} Minecraft_IGN to {parameter[2]}'

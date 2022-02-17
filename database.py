@@ -1,3 +1,24 @@
+'''
+   Copyright (C) 2021-2022 Katelynn Cadwallader.
+
+   This file is part of Gatekeeper, the AMP Minecraft Discord Bot.
+
+   Gatekeeper is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
+
+   Gatekeeper is distributed in the hope that it will be useful, but WITHOUT
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+   License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Gatekeeper; see the file COPYING.  If not, write to the Free
+   Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
+   02110-1301, USA. 
+
+'''
 import sqlite3
 import os, sys
 import datetime
@@ -17,10 +38,10 @@ def dump_to_json(data):
 class Database:
 	def __init__(self):
 		DBExists = False
-		if os.path.exists("sentinel.db"):
+		if os.path.exists("Gatekeeper.db"):
 			DBExists = True
 
-		self._db = sqlite3.connect("sentinel.db", detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES, check_same_thread=False)
+		self._db = sqlite3.connect("Gatekeeper.db", detect_types=sqlite3.PARSE_DECLTYPES | sqlite3.PARSE_COLNAMES, check_same_thread=False)
 		self._db.row_factory = sqlite3.Row
 		if not DBExists:
 			self._InitializeDatabase()

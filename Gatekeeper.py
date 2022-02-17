@@ -1,6 +1,27 @@
-## Sentinel Bot
+'''
+   Copyright (C) 2021-2022 Katelynn Cadwallader.
+
+   This file is part of Gatekeeper, the AMP Minecraft Discord Bot.
+
+   Gatekeeper is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
+
+   Gatekeeper is distributed in the hope that it will be useful, but WITHOUT
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+   License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with Gatekeeper; see the file COPYING.  If not, write to the Free
+   Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
+   02110-1301, USA. 
+'''
+## Gatekeeper Bot
 ## k8thekat - 11/5/2021
 ## 
+from tracemalloc import start
 import discord
 from discord.ext import commands 
 import json
@@ -836,7 +857,7 @@ async def user(ctx,*parameter):
         return await ctx.send('**Format**: //user discord_id (function) (option) (parameter)',reference = ctx.message.to_reference())
     curuser = userparse(ctx,parameter)
     if curuser == None:
-        return await ctx.send(f'The User: {parameter[0]} does not exists in {ctx.guild.name}.', reference = ctx.message.to_reference())
+        return await ctx.send(f'**The User**: {parameter[0]} does not exists in **{ctx.guild.name}**.', reference = ctx.message.to_reference())
     if 'help' in parameter[0:1]:
         return await ctx.send('**Functions**: ' + '`' ", ".join(userfuncs.keys()) + '`')
     elif parameter[1].lower() in userfuncs:
@@ -1175,7 +1196,6 @@ async def role(ctx,*parameter):
     commandlogger.logHandler(ctx,None,parameter,'bot')
     if 'help' in parameter[0:2]:
         role_display = []
-        func_display = []
         for entry in roles:
             role_display.append(f'**{entry["Name"]}**: {entry["Description"]}')
         await ctx.send("**Roles**: \n" + '\n'.join(role_display))
@@ -1197,7 +1217,58 @@ async def role(ctx,*parameter):
     else:
         response = f'The Function: {parameter[1]} does not exists.'
     return await ctx.send(response,reference= ctx.message.to_reference())
-    
+
+
+def loglist(ctx,parameter):
+    list = commandlogger.logfile_list #list of all the log files in botdirectory + \\logs
+    return "**List of Log Files:**\n" + '\n'.join(list)
+
+#/logs read filename count start_index
+def logread(ctx,parameter):
+    #print(parameter, len(parameter))
+    filename = parameter[1]
+    if len(parameter) == 2:
+        logs = '\n'.join(commandlogger.logfileparse(filename))
+        return logs
+    elif len(parameter) == 3:
+        if parameter[2].isnumeric():
+            count = int(parameter[2])
+            logs = '\n'.join(commandlogger.logfileparse(filename, count))
+            return logs
+    elif len(parameter) == 4:
+        if parameter[2].isnumeric() and parameter[3].isnumeric():
+            count = int(parameter[2])
+            start_index = int(parameter[3])
+            logs = '\n'.join(commandlogger.logfileparse(filename, count, start_index))
+            return logs
+    else:
+        botoutput('We encountered an Error reading a log file {parameter}',ctx)
+        return 'Error'
+   
+
+logfuncs = {
+            'list' : loglist,
+            'read' : logread
+}
+
+@client.command()
+#/logs parameter[0] parameter[1]
+#/logs (functions) functions = list, read
+async def logs(ctx,*parameter):
+    if not rolecheck(ctx, 'Staff'):
+        return 'User does not have permission.'
+    commandlogger.logHandler(ctx,None,parameter,'bot')
+    if len(parameter) < 1:
+        return await ctx.send('**Format**: //logs (function) (parameter)', reference = ctx.message.to_reference())
+    if 'help' in parameter:
+        return await ctx.send('**Functions**: ' + '`' + ','.join(logfuncs.keys()) + '`', reference = ctx.message.to_reference())
+    if parameter[0].lower() in logfuncs:
+        response = logfuncs[parameter[0]](ctx,parameter)
+    else:
+        response = f'The Function: {parameter[1]} does not exists.'
+    return await ctx.send(response,reference = ctx.message.to_reference())
+
+
 #Gets a list of all AMP Instances, their Friendly Names and Database Nicknames
 @client.command()
 async def serverlist(ctx):

@@ -1,4 +1,4 @@
-# Sentinel Bot 
+# Gatekeeper Bot 
 ---
 ## About
 I wanted to create a bot to handle whitelisting of minecraft servers from inside Discord and without any outside user interaction. Simply follow the whitelist format and the bot handles the rest. Then the project turned into what other functionality could I help a community with by allowing user documentation on subjects such as infractions, donations, Minecraft Name, Discord roles and punishments such as a temporary ban without someone having to keep track of when it expires. 
@@ -11,7 +11,7 @@ Some additional functionality was added for replying to players with certain key
 - Currently it is required that the user creates their own bot. 
     - See [Creating a bot Account](https://discordpy.readthedocs.io/en/stable/discord.html), when creating the bot set the **Bot Permissions Integer to: 2415995910.**
 - Please Install [Python](https://www.python.org/); you will also need to install the required packages. 
-    - **Run `pip install -r requirements.txt`** in the same directory as Sentinel Bot.
+    - **Run `pip install -r requirements.txt`** in the same directory as Gatekeeper Bot.
 - You also need to be using [Cube Coders AMP](https://cubecoders.com/AMP) with a instance of Minecraft Java (any version later than 1.12) set up and running.
 
 ---

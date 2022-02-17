@@ -1,4 +1,4 @@
-# Sentinel Bot - Commands
+# Gatekeeper Bot - Commands
 ___
 
 ## Setup
@@ -107,5 +107,5 @@ These ranks do follow a heirachy starting from `General` to `Operator`; each ran
 
 ---
 ### Log Commands `//log`
-- Currently all log files are local and can be accessed in the same directory as the bot `Sentinel/logs`<br>
+- Currently all log files are local and can be accessed in the same directory as the bot `Gatekeeper/logs`<br>
 Coming soon...

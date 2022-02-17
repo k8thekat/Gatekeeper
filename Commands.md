@@ -108,4 +108,6 @@ These ranks do follow a heirachy starting from `General` to `Operator`; each ran
 ---
 ### Log Commands `//log`
 - Currently all log files are local and can be accessed in the same directory as the bot `Gatekeeper/logs`<br>
+- **List** | Usage: Lists all files in the `Gatekeeper/logs` folder
+- **Read** | Usage: Read entries from a specific log file.
 Coming soon...

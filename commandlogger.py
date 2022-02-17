@@ -88,18 +88,22 @@ def logHandler(ctx,curserver,parameter,loc):
     return
 
 def logfileloader():
+    filesize = os.path.getsize(botdir + filename)
+    LOGS = []
     try:    
         if os.path.isfile(botdir +  filename) != True:
             print('Created a new log file')
             newfile = open(botdir + filename, 'x')
-            LOGS = []
             newfile.close()
-        else:
+            return LOGS
+        elif filesize != 0:
             newfile = open(botdir + filename)
             LOGS = json.load(newfile)
-            #!! ERROR HERE --
+            newfile.close()
+            return LOGS
+        else:
+            return LOGS
     except json.decoder.JSONDecodeError as e:
-        LOGS = []
         print(e)
         traceback.print_exc()
     return LOGS

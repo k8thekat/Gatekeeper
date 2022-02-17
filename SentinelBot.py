@@ -811,10 +811,7 @@ def userparse(ctx,parameter = None):
         if cur_member != None:
             return cur_member
         else:
-            if parameter[1] == 'add':
-                return parameter[0]
-            else:
-                return None
+            return None
 
 #Checks all users in a guild for a certain role and sets Donator to True
 def donatorcheck():
@@ -838,19 +835,18 @@ async def user(ctx,*parameter):
     if len(parameter) < 2:
         return await ctx.send('**Format**: //user discord_id (function) (option) (parameter)',reference = ctx.message.to_reference())
     curuser = userparse(ctx,parameter)
+    if curuser == None:
+        return await ctx.send(f'The User: {parameter[0]} does not exists in {ctx.guild.name}.', reference = ctx.message.to_reference())
     if 'help' in parameter[0:1]:
         return await ctx.send('**Functions**: ' + '`' ", ".join(userfuncs.keys()) + '`')
     elif parameter[1].lower() in userfuncs:
-        if parameter[1].lower() == 'add':
-            return await ctx.send(useradd(ctx,curuser,parameter))
-        if curuser != None :
-            cur_db_user = db.GetUser(curuser.id)
-            try:
-                response = await asyncio.gather(userfuncs[parameter[1]](ctx,cur_db_user,parameter))
-            except:
-                response = userfuncs[parameter[1]](ctx,cur_db_user,parameter)
-        else:
-            response = f'The User: {parameter[0]} does not exists in {ctx.guild.name}.'
+        cur_db_user = db.GetUser(curuser.id)
+        try:
+            response = await asyncio.gather(userfuncs[parameter[1]](ctx,cur_db_user,parameter))
+        except:
+            response = userfuncs[parameter[1]](ctx,cur_db_user,parameter)
+    else:
+        return await ctx.send('**Format**: //user {curuser.DiscordName} {parameter[1]} (option) (parameter)',reference = ctx.message.to_reference())
     return await ctx.send(response,reference= ctx.message.to_reference()) 
 
 #Adds the User to the Server Lists and updates their whitelist flags        

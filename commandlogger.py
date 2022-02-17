@@ -92,7 +92,6 @@ def logfileloader():
     LOGS = []
     try:    
         if os.path.isfile(botdir +  filename) != True:
-            print('Created a new log file')
             newfile = open(botdir + filename, 'x')
             newfile.close()
             return LOGS
@@ -112,7 +111,6 @@ def logfilesaver(log):
     newfile = open(botdir + filename, 'w') 
     json.dump(log,newfile, indent=0)
     newfile.close()
-    #print(f"log file saved")
     return
 
 def logfilearchiver():

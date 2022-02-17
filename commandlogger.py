@@ -88,18 +88,20 @@ def logHandler(ctx,curserver,parameter,loc):
     return
 
 def logfileloader():
-    filesize = os.path.getsize(botdir + filename)
+    dircheck = os.path.isfile(botdir +  filename)
     LOGS = []
     try:    
-        if os.path.isfile(botdir +  filename) != True:
+        if dircheck != True:
             newfile = open(botdir + filename, 'x')
             newfile.close()
             return LOGS
-        elif filesize != 0:
-            newfile = open(botdir + filename)
-            LOGS = json.load(newfile)
-            newfile.close()
-            return LOGS
+        if dircheck:
+            filesize = os.path.getsize(botdir + filename)
+            if filesize != 0:
+                newfile = open(botdir + filename)
+                LOGS = json.load(newfile)
+                newfile.close()
+                return LOGS
         else:
             return LOGS
     except json.decoder.JSONDecodeError as e:
@@ -127,17 +129,27 @@ def logfilearchiver():
         traceback.print_exc()
     return
 
-def logfileparse(filename,count,start_index = 0):
-    print(filename)
-    newfile = open(botdir + '\\logs\\' + filename)
-    parse_log = json.load(newfile)
+def logfileparse(filename,count= 5,start_index= 0):
+    try:
+        newfile = open(botdir + '\\logs\\' + filename)
+        parse_log = json.load(newfile)
+    except:
+        return 'The File: {filename} was not correct...'
     if count > 15:
         return 'Please keep your values lower than 15...'
-    if count > len(parse_log) or start_index + count > len(parse_log):
-        return f'Youve exceeded the length of the log file {len(parse_log)}'
+    if count > len(parse_log): 
+        count = len(parse_log)
+    if start_index + count > len(parse_log):
+        start_index = len(parse_log) - count
+    
+        #return f'Youve exceeded the length of the log file, Entries: {len(parse_log)}'
     if start_index != 0:
         log_return = []
         for logentry in parse_log[-start_index:-start_index+count]:
             log_return.append(str(logentry)[1:-1])
-            return log_return
-    return
+        return log_return
+    else:
+        log_return = []
+        for logentry in parse_log[:count]:
+            log_return.append(str(logentry)[1:-1])
+        return log_return

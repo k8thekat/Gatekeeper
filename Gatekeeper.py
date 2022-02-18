@@ -532,8 +532,8 @@ def colorstrip(entry):
 async def MCchatsend(channel, user, message):
     if user != None:
         MChead = 'https://mc-heads.net/head/' + str(user[1][0]['id'])
-        webhook = await channel.create_webhook(name= user)
-        await webhook.send(message, username= user, avatar_url= MChead)
+        webhook = await channel.create_webhook(name= user[1][0]['name'])
+        await webhook.send(message, username= user[1][0]['name'], avatar_url= MChead)
     
     webhooks = await channel.webhooks()
     for webhook in webhooks:

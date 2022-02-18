@@ -34,7 +34,6 @@ def scan(content,client):
         else:
             if userstatus == False and emojistatus == False and channelstatus == False:
                 content = content.strip()
-                print(len(content))
                 if len(content) == 0:
                     return True
                 else:

@@ -69,7 +69,7 @@ These ranks do follow a heirachy starting from `General` to `Operator`; each ran
 - **Maintenance**  | Full access to Bot commands/settings, AMP commands/settings and Console.
 - **Moderator**  | Full access to Bot commands/settings.
 - **Staff**  | Full access to User commands and Ban/Pardon.
-- **General** | Basic User with access to Server Chat, Server List
+- **General** | Basic User with access to Discord Server Chat, Server List.
 ---
 ### User Commands `//user`
 *example: `//user discord_id donator (true` or `false`)* 

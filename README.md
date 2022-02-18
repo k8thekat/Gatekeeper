@@ -9,10 +9,11 @@ Some additional functionality was added for replying to players with certain key
 ## Requirements
 
 - Currently it is required that the user creates their own bot. 
-    - See [Creating a bot Account](https://discordpy.readthedocs.io/en/stable/discord.html), when creating the bot set the **Bot Permissions Integer to: 2415995910.**
+    - See [Creating a bot Account](https://discordpy.readthedocs.io/en/stable/discord.html), when creating the bot set the [**Bot Permissions**](bot_perms.png)
 - Please Install [Python](https://www.python.org/); you will also need to install the required packages. 
     - **Run `pip install -r requirements.txt`** in the same directory as Gatekeeper Bot.
 - You also need to be using [Cube Coders AMP](https://cubecoders.com/AMP) with a instance of Minecraft Java (any version later than 1.12) set up and running.
+    - Please set the AMP Role Permissions to [AMP Perms 1](AMP_perms1.png) and [AMP Perms2](AMP_perms2.png).
 
 ---
 

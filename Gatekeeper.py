@@ -458,13 +458,6 @@ async def serverconsolemessage(chan, entry):
     except Exception as e:
         botoutput(e)
 
-#Sends the chat messages to the predefined channel
-async def serverchatmessage(chan, entry):
-    try:
-        await chan.send(entry)
-    except Exception as e:
-        botoutput(e)
-
 #Handles the AMP Console Channels
 def serverconsole():
     curdb = database.Database()
@@ -535,20 +528,27 @@ def colorstrip(entry):
         return entry
     return entry
 
+
+async def MCchatsend(channel, user, message):
+    if user != None:
+        MChead = 'https://mc-heads.net/head/' + str(user[1][0]['id'])
+        webhook = await channel.create_webhook(name= user)
+        await webhook.send(message, username= user, avatar_url= MChead)
+    
+    webhooks = await channel.webhooks()
+    for webhook in webhooks:
+            await webhook.delete()
+
 #Console messages are checked by 'Source' and by 'Type' to be sent to a designated discord channel.
 def serverchattoDiscord(curserver,entry):
     consolemsg = []
     if entry['Source'].startswith('Async Chat Thread'):
         consolemsg.append(entry['Contents'])
-    elif entry['Contents'].find('issued server command: /tellraw') != -1:
-        consolemsg.append(entry['Contents'][21:])
+    #elif entry['Contents'].find('issued server command: /tellraw') != -1:
+       # consolemsg.append(entry['Contents'][21:])
     elif entry['Type'] == 'Chat':
-        #Changes their IGN to their discord_name when it is send to the discord channel
-        if dbconfig.GetSetting('ConvertIGN'):
-            user = userIGNdiscord(entry['Source'])
-        else:
-            user = entry['Source']
-        consolemsg.append(f"{user}: {entry['Contents']}")
+        user = UUIDhandler.uuidcheck(entry['Source'])
+        consolemsg.append(entry['Contents'])
     else:
         return
 
@@ -560,11 +560,11 @@ def serverchattoDiscord(curserver,entry):
                 if len(bulkentry+entry) < 1500:
                     bulkentry = bulkentry + entry + '\n' 
                 else:
-                    ret = asyncio.run_coroutine_threadsafe(serverchatmessage(outputchan, bulkentry[:-1]), async_loop)
+                    ret = asyncio.run_coroutine_threadsafe(MCchatsend(outputchan, user, bulkentry[:-1]), async_loop)
                     ret.result()
                     bulkentry = entry + '\n'
             if len(bulkentry):
-                ret = asyncio.run_coroutine_threadsafe(serverchatmessage(outputchan, bulkentry[:-1]), async_loop)
+                ret = asyncio.run_coroutine_threadsafe(MCchatsend(outputchan, user, bulkentry[:-1]), async_loop)
                 ret.result()
 
 #Starts up seperate threads to handle each console for interaction and usage.
@@ -738,6 +738,7 @@ def userign(ctx,curuser,parameter):
 def userlastlogin(curserver,entry):
     localdb = database.Database()
     if entry['Source'].startswith('User Authenticator'):
+        #if entry['Source'].startswith('Server thread/INFO') and entry[''].startswith()
         print('User Last Login Triggered...')
         curtime = datetime.now()
         psplit = entry['Contents'].split(' ')
@@ -1031,7 +1032,7 @@ async def ping(ctx):
     commandlogger.logHandler(ctx,None,None,'bot')
     await ctx.send(f'Pong! {round(client.latency * 1000)}ms')
 
-botflags = ['autowhitelist','autogreet','autorole','autoreply','autoconsole','autodonator','convertign']
+botflags = ['autowhitelist','autorole','autoreply','autoconsole','convertign']
 botchans = ['whitelistchannel','faqchannel','supportchannel','ruleschannel','infochannel','botcomms']
 bottime = ['infractiontimeout','bantimeout','whitelistwaittime']
 

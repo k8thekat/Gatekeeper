@@ -37,57 +37,56 @@ All commands can be used in any channel the bot can see. They are not case sensi
 - **Pardon** | Permission level: infraction | Usage: Un-bans a user from Discord and all AMP servers. <br>
 - **Banhammer** | Permission level: infraction | Usage: Permenatly bans a user from the Discord and all AMP servers. <br>
 - **Serverlist** | Permission level: info | Usage: Returns a list of all Servers that AMP has that are running along with Server nicknames. <br>
-- **Rolelistperms** | Permission level: botadmin | Usage: Get a list of role names that have a certain permission by name. See **Permissions**
+
 ---
 ### Server Commands `//server` 
 *example: `//server server_name discordchannel chat (discord_id` or `discord_channel_name)`* <br>
-- **Channel** | *default: None* | options: `chat` or `console` | parameters: `channel` Permission level: botadmin | <br>
-- **Donator** | *default: False* | parameters: `true` or `false` | Permission level: botadmin |  <br>
-- **Info** | *No Options or Parameters* | Permission level: info | <br>
-- **Kill** | *No Options or Parameters* | Permission level: Maintenance |<br>
-- **Maintenance** | *default: off* | parameters: `on` or `off` | Permission level: Maintenance |<br>
-- **Nickname** | *default: None* | options: `list` or `add` or `remove` | Permission level: botadmin | <br>
-- **Restart** | *No Options or Parameters* | Permissions level: Maintenance | <br>
-- **Role** | *default: None* | parameters: `role` | Permission level: botadmin |  <br>
-- **Start** | *No Options or Parameters* | Permission level: Maintenance | <br>
-- **Status** | *No Options or Parameters* | Permission level: None | <br>
-- **Stop** | *No Options or Parameters* | Permission level: Maintenance | <br>
-- **UserBan** | *No Options* | parameters: `user_name` / `time(optional)` / `reason:(optional)` | Permission level: infraction | <br>
-- **UserInfractions** | *No Options* | parameters: `user_name` / `note(optional)` | Permission level: infraction |  <br>
-- **UserList** | *No Options or Parameters* | Permission level: info | <br>
-- **Whitelist** | *default: False* | parameters: `true` or `false` | Permission level: botadmin |<br>
+- **Channel** | *default: None* | options: `chat` or `console` | parameters: `channel` Permission level: `Maintenance` | <br>
+- **Donator** | *default: False* | parameters: `true` or `false` | Permission level: `Maintenance` |  <br>
+- **Info** | *No Options or Parameters* | Permission level: `General` | <br>
+- **Kill** | *No Options or Parameters* | Permission level: `Maintenance` |<br>
+- **Maintenance** | *default: off* | parameters: `on` or `off` | Permission level: `Maintenance` |<br>
+- **Nickname** | *default: None* | options: `list` or `add` or `remove` | Permission level: `Maintenance` | <br>
+- **Restart** | *No Options or Parameters* | Permissions level: `Maintenance` | <br>
+- **Role** | *default: None* | parameters: `role` | Permission level: `Maintenance` |  <br>
+- **Start** | *No Options or Parameters* | Permission level: `Maintenance` | <br>
+- **Status** | *No Options or Parameters* | Permission level: `None` | <br>
+- **Stop** | *No Options or Parameters* | Permission level: `Maintenance` | <br>
+- **UserBan** | *No Options* | parameters: `user_name` / `time(optional)` / `reason:(optional)` | Permission level: `Staff` | <br>
+- **UserInfractions** | *No Options* | parameters: `user_name` / `note(optional)` | Permission level: `Staff` |  <br>
+- **UserList** | *No Options or Parameters* | Permission level: `Staff` | <br>
+- **Whitelist** | *default: False* | parameters: `true` or `false` | Permission level: `Maintenance` |<br>
 
 ---
 ### Role Commands `//role`
 *example: `//role discord_role_id set Staff (true` or `false)`*
-- **Set** | *No Options* | parameters: `role` / `role_name` /  Permission level: botadmin <br>
+- **Set** | *No Options* | parameters: `role` / `role_name` /  Permission level: `Admin` <br>
 
 ### Role Rank
 These ranks do follow a heirachy starting from `General` to `Operator`; each rank can only have one `discord role` per. Set them via the `//role discord_role_id set (rank)`<br>
-- **Operator** | `Description`: Full control over the bot, this is set during startup.
-- **Admin**  | `Description` : Similar to Operator, Full Control over the bot.
-- **Maintenance**  | `Description` : Full access to Bot commands/settings, AMP commands/settings and Console.
-- **Moderator**  | `Description` : Full access to Bot commands/settings.
-- **Staff**  | `Description` : Full access to User commands and Ban/Pardon.
-- **General** | `Description` : Basic User with access to Server Chat, Server List
+- **Operator** | Full control over the bot, this is set during startup.
+- **Admin**  | Similar to Operator, Full Control over the bot.
+- **Maintenance**  | Full access to Bot commands/settings, AMP commands/settings and Console.
+- **Moderator**  | Full access to Bot commands/settings.
+- **Staff**  | Full access to User commands and Ban/Pardon.
+- **General** | Basic User with access to Discord Server Chat, Server List.
 ---
 ### User Commands `//user`
 *example: `//user discord_id donator (true` or `false`)* 
-- **Add** | *No Options* | parameters: `user_name` | Permission level: botadmin <br>
-- **Ban** | *No Options* | parameters: `user_name` / `time(optional)` / `reason:(optional)` | Permisson level: infraction <br>
-- **Donator** | *No Options* | parameters: `user_name` `true` or `false` | Permission level: botadmin <br>
-- **IGN** | *No Options* | parameters: `user_name` | Permission level: botadmin <br>
-- **Info** | *No Options* | parameters: `user_name` | Permission level: discordadmin <br>
-- **Infractions** | options: `add` or `del` | parameters: `user_name` / `infractionID(del:optional)` / `time(add:optional)` / `reason:(add:optional)` | Permission level: infraction <br>
-- **Mod** | *No Options* | parameters: `user_name` / `true` or `false` | Permission level: botadmin <br>
+- **Add** | *No Options* | parameters: `user_name` | Permission level: `Staff` <br>
+- **Ban** | *No Options* | parameters: `user_name` / `time(optional)` / `reason:(optional)` | Permisson level: `Staff` <br>
+- **Donator** | *No Options* | parameters: `user_name` `true` or `false` | Permission level: `Moderator` <br>
+- **IGN** | *No Options* | parameters: `user_name` | Permission level: `Staff` <br>
+- **Info** | *No Options* | parameters: `user_name` | Permission level: `Staff` <br>
+- **Infractions** | options: `add` or `del` | parameters: `user_name` / `infractionID(del:optional)` / `time(add:optional)` / `reason:(add:optional)` | Permission level: `Staff` <br>
+- **Moderator** | *No Options* | parameters: `user_name` / `true` or `false` | Permission level: `Maintenance` <br>
 ---
 ### Bot Commands `//botsettings`
 *example: `//botsetting autowhitelist (true` or `false)`* |  *example 2: `//botsetting infractiontimeout time`*</br>
- **All Bot Settings require Permission level: `botadmin`**</br>
+ **All Bot Settings require Permission level: `Moderator` or higher**</br>
 
 #### ***Flags*** | *default: False*
 - **AutoConsole** | parameters: `true` or `false` | Usage: Allows Server console to be output to predefined channels per Server (See Server Functions -> DiscordChannel)
-- **Autogreet** |
 - **Autowhitelist** | parameters: `true` or `false` | Usage: Allows the bot to whitelist the User for the specified Server
 - **Autorole** | parameters: `true` or `false`| Usage: Allows the bot to set the Users role to the Server defined Role in Discord (See Server Functions -> Role)
 - **Autoreply** | parameters: `true` or `false`| Usage: Allows the bot to reply to predefined strings (help,server version,ip)
@@ -104,10 +103,10 @@ These ranks do follow a heirachy starting from `General` to `Operator`; each ran
 #### ***Time*** | See `time`
 - **Infractiontimeout** | *default: expire in 2 weeks*
 - **Bantimeout** | *default: expire in 3 days*
+- **WhitelistWaitTime** | *default: 0* | Usage: Delays the whitelist request for a specified number of minutes.
 
 ---
 ### Log Commands `//log`
 - Currently all log files are local and can be accessed in the same directory as the bot `Gatekeeper/logs`<br>
 - **List** | Usage: Lists all files in the `Gatekeeper/logs` folder
 - **Read** | Usage: Read entries from a specific log file.
-Coming soon...

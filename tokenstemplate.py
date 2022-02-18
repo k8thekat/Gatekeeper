@@ -32,7 +32,7 @@ token = 'Replace this text with the token' #See the 'Creating a Bot Account' lin
 AMPAuth = '' #Leave blank if not in use.
 
 #Login creds - ## DO NOT SHARE! ## - I strongly suggest making a seperate user account for AMP.
-# The bot will need full perms over AMP Instances and File Manager; please set them AMP permissions correctly! #
+# The bot will need full perms over AMP Instances and File Manager; please set the AMP permissions correctly! #
 AMPUser = 'Replace this text with the login name' 
 AMPPassword = 'Replace this text with the login password'
 AMPurl = 'http://yoururl.com:8080' #The URL and Port to Access the AMP console

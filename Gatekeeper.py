@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 '''
    Copyright (C) 2021-2022 Katelynn Cadwallader.
 
@@ -1573,5 +1571,3 @@ whitelist.init(AMP,AMPservers,db,dbconfig)
 serverconsoleinit()
 whitelistfilecheck(db)
 client.run(tokens.token)
-
->>>>>>> 9e40a0ac9347e0037bc5103e4c6d1b2adde06fd2

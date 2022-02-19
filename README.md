@@ -27,4 +27,5 @@ Some additional functionality was added for replying to players with certain key
 5. Setting up your AMP **Servers**
     - You must enable `whitelist` on your AMP Instance via `Configuration -> Gameplay and Difficulty`
         - You must set the servers `//server server_name whitelist` to `true` to allow for users to request whitelist.
+6. Once done; familarize yourself with the [**Commands**](COMMANDS.md)
 ---

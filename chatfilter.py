@@ -19,6 +19,8 @@
    02110-1301, USA. 
 '''
 #Gatekeeper Bot - Chat filter
+from datetime import datetime
+
 def scan(content,client):
     content = unicode(content)
     while(1):
@@ -79,3 +81,51 @@ def emoji(content):
         return content
     else:
         return False
+
+#Attempts to flag Scam Spam bots/Compromised accounts or anyone being annoying...
+MSGLOG = {}
+def spamFilter(message):
+    global MSGLOG
+    storeflag = False
+    #print(message.author.name,message.content,message.mention_everyone)
+    flags = ['https://','.gift','nitro','']
+    data =  {'Count' : 1, 'First Seen': datetime.now()}  
+
+    for flag in flags:
+        if flag in message.content:
+            print('Message contains a flagged word...')
+            storeflag = True
+
+    if message.mention_everyone: #If someone is repeatidly using @everyone; I want them to be caught and punished
+        storeflag = True
+
+    if storeflag:
+        if message.author.name in MSGLOG:
+            if message.content in MSGLOG[message.author.name]:
+                if MSGLOG[message.author.name][message.content]['Count'] >= 3: #Once a user has said the same 3 things; lets check the time between them.
+                    if ((datetime.now() - MSGLOG[message.author.name][message.content]['First Seen'])/60) <= 1: #If the time between the first message and the curtime is less than or equal to 1 minute.
+                        return True
+                    else: #lets reset the info and wait again..
+                        MSGLOG[message.author.name][message.content]['First Seen'] = datetime.now() #Lets reset the time between their messages to now
+                        MSGLOG[message.author.name][message.content]['Count'] = 1 #Lets reset the count too
+                else:
+                    MSGLOG[message.author.name][message.content]['Count'] += 1
+            else:  
+                MSGLOG[message.author.name][message.content] = data
+        else:
+            MSGLOG[message.author.name] = {message.content: data}
+    return False
+
+#Checks the log file for entries older than 5 mminutes and removed them.
+def logCleaner():
+    print('Cleaning up the Chat log...')
+    global MSGLOG
+    authorkeys = list(MSGLOG.keys())
+    for author in authorkeys:
+        contentkeys = list(MSGLOG[author].keys())
+        for content in contentkeys:
+            if datetime.now() - MSGLOG[author][content]['First Seen'] > 5:
+                MSGLOG[author].pop(content)
+        if len(MSGLOG[author].keys()) == 0:
+            MSGLOG.pop(author)
+    return

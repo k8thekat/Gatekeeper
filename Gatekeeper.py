@@ -55,7 +55,7 @@ import UUIDhandler
 import consolescan
 
 
-Version = 'alpha-1.0.0' #Major.Minor.Revisions
+Version = 'alpha-1.1.0' #Major.Minor.Revisions
 print('Version:', Version)
 
 async_loop = asyncio.new_event_loop()
@@ -475,6 +475,7 @@ def serverconsole():
         consolemsg = []
         #Walks through every entry of a Console Update
         for entry in console['ConsoleEntries']:
+            print('Testing',entry)
             #send off the server chat messages to a discord channel if enabled
             serverchattoDiscord(curserver,entry)
             #Checks for User last login and updates the database.
@@ -1402,6 +1403,9 @@ async def on_message(message):
         else:
             db.AddUser(DiscordID = str(message.author.id), DiscordName = message.author.name)
     else:
+        chat_filter = chatfilter.spamFilter(message)
+        if chat_filter == True:
+            print('Kicking the user from the server...')
         chatflag = discordtoMCchathandler(message)
         consoleflag = serverconsolehandler(message)  
         if chatflag != True or consoleflag != True:
@@ -1530,12 +1534,12 @@ def threadloop():
     localdb = database.Database()
     updateinterval = datetime.now()
     while(1):
-        if (updateinterval+timedelta(seconds=60)) < datetime.now():
+        if (updateinterval+timedelta(seconds=60)) < datetime.now(): #1 minute checkup interval
             print(f'Updating and Saving...{datetime.now().strftime("%c")}')
             #Database check on bans
             asyncio.run_coroutine_threadsafe(databasebancheck(localdb), async_loop)
             time.sleep(.5)
-            AMPinstancecheck()
+            AMPinstancecheck() #Check if any new AMP Instances have been created or started...
             time.sleep(.5)
             #whitelist file check to update db for non whitelisted users
             whitelistfilecheck(localdb)
@@ -1550,6 +1554,8 @@ def threadloop():
                 donatorcheck()
             updateinterval = datetime.now()
         time.sleep(.5)
+        if (updateinterval+ timedelta(seconds=3500)) < datetime.now(): #5 minute checkup interval
+            chatfilter.logCleaner() #Cleans up the MSGLOG for potential chat spam.
     return
 
 #Runs on startup...

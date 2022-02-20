@@ -55,7 +55,7 @@ import UUIDhandler
 import consolescan
 
 
-Version = 'alpha-1.2.0' #Major.Minor.Revisions
+Version = 'alpha-1.2.1' #Major.Minor.Revisions
 print('Version:', Version)
 
 async_loop = asyncio.new_event_loop()

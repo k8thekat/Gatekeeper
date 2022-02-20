@@ -28,7 +28,17 @@ import config
 import pyotp # 2Factor Authentication Python Module
 import json
 import time
-from pprint import pprint
+import pprint
+import sys
+
+#Checks for Errors in Config
+def init():
+    if config.AMPurl[-1] == '/' or "\\":
+        config.AMPurl = config.AMPurl[0:-1]
+    if len(tokens.AMP2Factor) < 7 or tokens.AMP2Factor != '':
+        print("**ERRORR** Please check your 2 Factor Set-up Code in tokens.py, should not contain spaces and enclosed in ' '")
+        input("Press any Key to Exit")
+        sys.exit(0)
 
 def Login(func):
     def wrapper(*args, **kargs):

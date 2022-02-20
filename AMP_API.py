@@ -21,11 +21,8 @@
 #AMP API 
 # by k8thekat // Lightning
 # 11/10/2021
-from inspect import Parameter
-from unittest import result
-from pkg_resources import register_loader_type
 import requests
-from requests.sessions import Session
+import requests.sessions
 import tokens
 import config
 import pyotp # 2Factor Authentication Python Module

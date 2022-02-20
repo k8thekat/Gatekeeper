@@ -28,8 +28,8 @@
 #Discord Server Connection OAuth Token ## DO NOT SHARE! ##
 token = 'Replace this text with the token' #See the 'Creating a Bot Account' link for help!
 
-#2Factor AUTH Code for AMP Console Login (Optional)
-AMPAuth = '' #Leave blank if not in use.
+#2Factor Set-up Key for AMP Console Login (Optional) **THIS IS THE REALLY LONG Code not the 6 digit number**
+AMPAuth = '' #Leave blank if not in use. MUST BE IN QUOTES "Code_here"
 
 #Login creds - ## DO NOT SHARE! ## - I strongly suggest making a seperate user account for AMP.
 # The bot will need full perms over AMP Instances and File Manager; please set the AMP permissions correctly! #

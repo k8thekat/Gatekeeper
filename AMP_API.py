@@ -30,13 +30,20 @@ import json
 import time
 import pprint
 import sys
+import os
 
 #Checks for Errors in Config
 def init():
+    reset = False
     if config.AMPurl[-1] == '/' or "\\":
         config.AMPurl = config.AMPurl[0:-1]
+    if os.path.isfile('tokenstemplate.py') or not os.path.isfile('tokens.py'):
+        print('**ERROR** Please rename your tokenstemplate.py file to tokens.py before trying again.')
+        reset = True
     if len(tokens.AMP2Factor) < 7 or tokens.AMP2Factor != '':
         print("**ERRORR** Please check your 2 Factor Set-up Code in tokens.py, should not contain spaces and enclosed in ' '")
+        reset = True
+    if reset:
         input("Press any Key to Exit")
         sys.exit(0)
 

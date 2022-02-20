@@ -820,7 +820,7 @@ class DBServer:
 		user.AddInfraction(self, mod, note)
 
 class DBServerUser:
-	def __init__(self, db:Database, Server:DBServer, User:DBUser, ID=None, Whitelisted:bool=False, LastLogin:datetime.datetime=None,TimePlayed:int=None, SuspensionExpiration:datetime.datetime=None):
+	def __init__(self, db:Database, Server:DBServer, User:DBUser, ID=None, Whitelisted:bool=False, LastLogin:datetime.datetime=None,TimePlayed:int= 0, SuspensionExpiration:datetime.datetime=None):
 		#set defaults
 		Params = locals()
 		Params.pop("self")

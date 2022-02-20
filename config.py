@@ -46,6 +46,13 @@ WhitelistFormat = 'IGN: username \nSERVER: servername'
 donations = False 
 donatorID = '926688290504065026' #discord_role_id' or 'discord_role_name' 
 
+#Timed Ranks -
+#Allows the bot to update players ranks in game via the ranks file. !!Rank Mod Here!!
+FTB_Rank = True #May add support for different mods/plugins
+FTB_Utlities = False
+Ranks_File = '\\filename.filetype' #
+
+
 #AMP Console - Login Info
 #!!DO NOT CHANGE THIS INFO!!
 AMPUser = tokens.AMPUser

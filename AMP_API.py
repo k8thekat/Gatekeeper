@@ -43,10 +43,14 @@ def Login(func):
 
         if self.SessionID == 0:
             print(f'Logging in {self.InstanceID}')
+            if self.AMP2Factor != None:
+                token = self.AMP2Factor.now()
+            else:
+                token = ''  
             parameters = {
                     'username': config.AMPUser,
                     'password': config.AMPPassword,
-                    'token': self.AMP2Factor.now(), #get current 2Factor Code
+                    'token': token, #get current 2Factor Code
                     'rememberMe': True}
 
             result = self.CallAPI('Core/Login',parameters)
@@ -66,9 +70,11 @@ class AMPAPI:
         self.AMPheader = {'Accept': 'text/javascript'} #custom header for AMP API POST requests. AMP is pure POST requests. ***EVERY REQUEST MUST HAVE THIS***
         try:
             self.AMP2Factor = pyotp.TOTP(tokens.AMPAuth) #Handles time based 2Factory Auth Key/Code
+            self.AMP2Factor.now()
             #print('Found 2 Factor')
         except AttributeError:
-            #print('No 2 Factor found')
+            self.AMP2Factor = None
+            #print('No 2 Factor found').
             return
         self.SessionID = 0
         self.Index = Index

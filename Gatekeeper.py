@@ -36,6 +36,7 @@ from datetime import datetime, timedelta
 import base64
 import random
 import traceback
+import math
 
 # Bot Scripts
 import database
@@ -52,6 +53,10 @@ import plugin_commands
 import timehandler
 import UUIDhandler
 import consolescan
+
+
+Version = 'alpha-1.0.0' #Major.Minor.Revisions
+print('Version:', Version)
 
 async_loop = asyncio.new_event_loop()
 asyncio.set_event_loop(async_loop)
@@ -474,6 +479,8 @@ def serverconsole():
             serverchattoDiscord(curserver,entry)
             #Checks for User last login and updates the database.
             userlastlogin(curserver,entry)
+            #Update users played time.
+            serverUserTimePlayed(curserver,entry)
             #Handles each entry of the console to update DB if a console command was used.
             status = consolescan.scan(curserver,colorstrip(entry))
             if status[0] == True:
@@ -873,8 +880,22 @@ async def user(ctx,*parameter):
         return await ctx.send('**Format**: //user {curuser.DiscordName} {parameter[1]} (option) (parameter)',reference = ctx.message.to_reference())
     return await ctx.send(response,reference= ctx.message.to_reference()) 
 
+#DB Server Users TimePlayed update..
+def serverUserTimePlayed(curserver,entry):
+    if entry['Source'] == 'Server thread/INFO' and entry['Contents'].endswith('has left the game!'):
+        time_online = datetime.fromtimestamp(float(entry['Timestamp'][6:-2])/1000)
+        entry = entry['Contents'].split(' ') #Prep to help me get the user out of the 'Contents'
+        user = entry[0]
+        if user == None:
+            botoutput('Failed to get User: {entry[0]}; please attempt to add them or update their IGN manually.')
+            return
+        lastlogin = curserver.GetUser(entry[0]).LastLogin #Gets the datetime object of the ServerUser last login
+        timeplayed = curserver.GetUser(entry[0]).TimePlayed #Gets the time played of the ServerUser
+        timeplayed += ((lastlogin - time_online)/60) #Add's the play time to their current accured amount of play time..
+    return 
+
 #Adds the User to the Server Lists and updates their whitelist flags        
-def serveruserWhitelistFlag(curserver,whitelist,localdb):
+def serverUserWhitelistFlag(curserver,whitelist,localdb):
     print('Server User whitelist update...')
     non_dbusers = []
     for entry in whitelist:
@@ -896,7 +917,7 @@ def serveruserWhitelistFlag(curserver,whitelist,localdb):
     return
 
 #Updates users whitelisted flags for each server
-def serveruserWhitelistUpdate(curserver,whitelist):
+def serverUserInfoUpdate(curserver,whitelist):
     print('Server User whitelist name update...')
     serveruserlist = curserver.GetAllUsers()
     for serveruser in serveruserlist:
@@ -1453,9 +1474,9 @@ def whitelistfilecheck(localdb):
                         whitelist_data = base64.b64decode(whitelist["result"]["Base64Data"])
                         whitelist_json = json.loads(whitelist_data.decode("utf-8"))
                         #Checks user UUIDs and updated the database if their IGN has changed. Updates Whitelisted Flag.
-                        serveruserWhitelistUpdate(curserver,whitelist_json)
+                        serverUserInfoUpdate(curserver,whitelist_json)
                         #Adds the user to the server_user_list and updates their Whitelisted Flag.
-                        serveruserWhitelistFlag(curserver,whitelist_json,localdb)
+                        serverUserWhitelistFlag(curserver,whitelist_json,localdb)
 
 #Checks AMP for any new Instances...
 def AMPinstancecheck(startup = False):

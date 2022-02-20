@@ -48,7 +48,7 @@ donatorID = '926688290504065026' #discord_role_id' or 'discord_role_name'
 
 #Timed Ranks -
 #Allows the bot to update players ranks in game via the ranks file. !!Rank Mod Here!!
-FTB_Rank = True #May add support for different mods/plugins
+FTB_Rank = False #May add support for different mods/plugins
 FTB_Utlities = False
 Ranks_File = '\\filename.filetype' #
 
@@ -76,8 +76,8 @@ WorldEdit = False #Filters out any worldedit commands that start with //
 
 #World Reset/Dragon Fight handlers
 #These settings are needed to allow the bot to reset a dragon fight and reset the world.
-DragonReset = True
-Multiverse_Core = True
+DragonReset = False
+Multiverse_Core = False
 
 #Auto-reply messages
 #These settings control what message the bot will reply with.

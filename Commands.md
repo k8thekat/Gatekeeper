@@ -10,7 +10,7 @@ ___
 2. Setting up **Bot Commands: Whitelist**
     - Set a Discord channel for the bot to read messages for whitelist requests via `//botsettings whitelist (discord_channel_id` or `discord_channel_name)`
     - This allows the bot to store the users `discord_name`, `discord_user_id` and their `minecraft_ign` to a database. 
-        - If **Bot Settings: AutoWhitelist** is `TRUE` then the bot will whitelist that user's `minecracft_ign` to the specified `server_name`
+        - If **Bot Setting: AutoWhitelist** is `TRUE` then the bot will whitelist that user's `minecracft_ign` to the specified `server_name`
     - Format for whitelist requests is: **`IGN: minecraft_ign SERVER: (server_name` or `server_nickname)`**
 3. Setting up **Role Commands: Permissions**
     - Set a Discord Roles permissions via `//role (discord_role_id` or `discord_role_name) set (role) (true` or `false)`

@@ -53,9 +53,11 @@ import plugin_commands
 import timehandler
 import UUIDhandler
 import consolescan
+import console
+import chat
 
 
-Version = 'alpha-1.2.2' #Major.Minor.Revisions
+Version = 'alpha-2.0.0' #Major.Minor.Revisions
 print('Version:', Version)
 
 async_loop = asyncio.new_event_loop()
@@ -69,7 +71,6 @@ client = commands.Bot(command_prefix = '//', intents=intents, loop=async_loop)
 #AMP API setup
 AMP = AMPAPI()
 AMPservers = AMP.getInstances() # creates objects for each server in AMP (returns serverlist)
-AMPserverConsoles = AMP.getInstances() # creates objects for server console/chat updates
 AMP.sessionCleanup() #cleans up any existing connections to prevent excessive AMP connections
 
 #database setup
@@ -160,7 +161,6 @@ def serverdiscordchannel(ctx,curserver,parameter):
                 curserver.DiscordChatChannel(None)
             else:
                 curserver.DiscordChatChannel = str(channel.id)
-                #
                 return f'Set Discord Chat Channel for {curserver.FriendlyName} to {channel.name}.'  
         elif parameter[2].lower() == 'console':
             if parameter[3] == 'None':
@@ -385,38 +385,7 @@ def serverEndReset(ctx,curserver,parameter):
         return f'**Server**: {curserver.FriendlyName} has had The End fight reset and the World removed...'
     else:
         botoutput(f'**ERROR**: Resetting the End for {curserver.FriendlyName}, check your config file...')
-
-def discordtoMCchathandler(message):
-    global client
-    for server in AMPservers:
-        if AMPservers[server].Running == False:
-            continue 
-        curserver = db.GetServer(InstanceID = server)
-        if curserver.DiscordChatChannel == None:
-            continue
-        if int(curserver.DiscordChatChannel) == message.channel.id:
-            message.content = message.content.replace('\n',' ')
-            message.content = chatfilter.scan(message.content,client)
-            if message.content == True:
-                return True
-            else:
-                AMPservers[server].ConsoleMessage(f'tellraw @a [{{"text":"(Discord)","color":"blue"}},{{"text":"<{message.author.name}>: {message.content}","color":"white"}}]')
-                return True
-        continue
-            
-def serverconsolehandler(message):
-    for server in AMPservers:
-        if AMPservers[server].Running == False:
-            continue
-        curserver = db.GetServer(InstanceID = server)
-        if curserver.DiscordConsoleChannel == None:
-            continue
-        if int(curserver.DiscordConsoleChannel) == message.channel.id:
-            if rolecheck(message, 'Maintenance'):
-                AMPservers[server].ConsoleMessage(message.content)
-                return True
-            continue
-    
+ 
 serverfuncs = {
             'info' : serverinfo, 
             'whitelist': serverwhitelistflag, 
@@ -455,141 +424,6 @@ async def server(ctx,*parameter):
             else:
                 response = f'The Command: {parameter[1]} is not apart of my list. Commands: {", ".join(serverfuncs.keys())}.' 
     return await ctx.send(response,reference= ctx.message.to_reference())
-
-#Sends the console to the predefined channel
-async def serverconsolemessage(chan, entry):
-    try:
-        await chan.send(entry)
-    except Exception as e:
-        botoutput(e)
-
-#Handles the AMP Console Channels
-def serverconsole():
-    curdb = database.Database()
-    for server in AMPserverConsoles:
-        curserver = curdb.GetServer(server)
-        console = AMPserverConsoles[server].ConsoleUpdate()
-        #All AMP functions return False if they are offline...
-        if console == False:
-            continue
-        consolemsg = []
-        #Walks through every entry of a Console Update
-        for entry in console['ConsoleEntries']:
-            print('Testing',entry)
-            #send off the server chat messages to a discord channel if enabled
-            serverchattoDiscord(curserver,entry)
-            #Checks for User last login and updates the database.
-            userlastlogin(curserver,entry)
-            #Update users played time.
-            serverUserTimePlayed(curserver,entry)
-            #Handles each entry of the console to update DB if a console command was used.
-            status = consolescan.scan(curserver,colorstrip(entry))
-            if status[0] == True:
-                botoutput(status[1])
-                continue
-            if status[0] == False:
-                entry = status[1]
-                #Supports different types of console suppression, see config.py and consolefilter.py
-                entry = consolefilters.filters(entry)
-            if entry == True:
-                continue
-            elif len(entry['Contents']) > 1500:
-                msg_len_index = entry['Contents'].rindex(';')
-                while msg_len_index > 1500:
-                    msg_len_indexend = msg_len_index
-                    msg_len_index = entry['Contents'].rindex(';',0,msg_len_indexend)
-                    if msg_len_index < 1500:
-                        newmsg = entry['Contents'][0:msg_len_index]
-                        consolemsg.append(f"{entry['Source']}: {newmsg.lstrip()}")
-                        entry['Contents'] = entry['Contents'][msg_len_index+1:len(entry['Contents'])]
-                        msg_len_index = len(entry['Contents'])
-                        continue
-            else:
-                consolemsg.append(f"{entry['Source']}: {entry['Contents']}")
-        if curserver.DiscordConsoleChannel != None:
-            outputchan = client.get_channel(int(curserver.DiscordConsoleChannel))
-            if len(consolemsg) > 0:
-                bulkentry = ''
-                for entry in consolemsg:
-                    if len(bulkentry + entry) < 1500:
-                        bulkentry = bulkentry + entry + '\n' 
-                    else:
-                        ret = asyncio.run_coroutine_threadsafe(serverconsolemessage(outputchan, bulkentry[:-1]), async_loop)
-                        ret.result()
-                        bulkentry = entry + '\n'
-                if len(bulkentry):
-                    ret = asyncio.run_coroutine_threadsafe(serverconsolemessage(outputchan, bulkentry[:-1]), async_loop)
-                    ret.result()
-
-#Removed the odd character for color idicators on text
-def colorstrip(entry):
-    char =  '�'
-    if entry['Contents'].find(char) != -1:
-        print('Color strip triggered...')
-        index = 0
-        while 1:
-            index = entry['Contents'].find(char,index)
-            if index == -1:
-                break
-            newchar = entry['Contents'][index:index+2]
-            entry['Contents'] = entry['Contents'].replace(newchar,'')
-        return entry
-    return entry
-
-
-async def MCchatsend(channel, user, message):
-    if user != None:
-        MChead = 'https://mc-heads.net/head/' + str(user[1][0]['id'])
-        webhook = await channel.create_webhook(name= user[1][0]['name'])
-        await webhook.send(message, username= user[1][0]['name'], avatar_url= MChead)
-    
-    webhooks = await channel.webhooks()
-    for webhook in webhooks:
-            await webhook.delete()
-
-#Console messages are checked by 'Source' and by 'Type' to be sent to a designated discord channel.
-def serverchattoDiscord(curserver,entry):
-    consolemsg = []
-    if entry['Source'].startswith('Async Chat Thread'):
-        consolemsg.append(entry['Contents'])
-    #elif entry['Contents'].find('issued server command: /tellraw') != -1:
-       # consolemsg.append(entry['Contents'][21:])
-    elif entry['Type'] == 'Chat':
-        user = UUIDhandler.uuidcheck(entry['Source'])
-        consolemsg.append(entry['Contents'])
-    else:
-        return
-
-    if curserver.DiscordChatChannel != None:
-        outputchan = client.get_channel(int(curserver.DiscordChatChannel))
-        if len(consolemsg) > 0:
-            bulkentry = ''
-            for entry in consolemsg:
-                if len(bulkentry+entry) < 1500:
-                    bulkentry = bulkentry + entry + '\n' 
-                else:
-                    ret = asyncio.run_coroutine_threadsafe(MCchatsend(outputchan, user, bulkentry[:-1]), async_loop)
-                    ret.result()
-                    bulkentry = entry + '\n'
-            if len(bulkentry):
-                ret = asyncio.run_coroutine_threadsafe(MCchatsend(outputchan, user, bulkentry[:-1]), async_loop)
-                ret.result()
-
-#Starts up seperate threads to handle each console for interaction and usage.
-def serverconsoleinit():
-    if (dbconfig.Autoconsole):
-        for entry in AMPserverConsoles:
-            status = AMPserverConsoles[entry].ConsoleUpdate()
-            if status == False:
-                continue
-        print(f'Starting console threads...')
-        reply = threading.Thread(target=serverconsolethreadloop)
-        reply.start()
-
-def serverconsolethreadloop():
-    while(1):
-        time.sleep(1)
-        serverconsole()
 
 #Converts IGN to discord_name
 def userIGNdiscord(user):
@@ -740,31 +574,6 @@ def userign(ctx,curuser,parameter):
         response = 'The In-game Name cannot be blank.'
     return response
 
-#User Authenticator #22/INFO
-#parameter[0] 
-#Updates the DB of the last login of users
-def userlastlogin(curserver,entry):
-    localdb = database.Database()
-    if entry['Source'].startswith('User Authenticator'):
-        #if entry['Source'].startswith('Server thread/INFO') and entry[''].startswith()
-        print('User Last Login Triggered...')
-        curtime = datetime.now()
-        psplit = entry['Contents'].split(' ')
-        user = localdb.GetUser(psplit[3])
-        if user != None:
-            serveruser = curserver.GetUser(user)
-            if serveruser == None:
-                botoutput(f'Adding user to Server: {curserver.FriendlyName} User: {user.DiscordName} IGN: {user.IngameName}')
-                curserver.AddUser(user)
-            try:
-                serveruser = curserver.GetUser(user)
-                serveruser.LastLogin = curtime
-            except Exception as e:
-                botoutput(e)
-                botoutput('Issue finding serveruser in db...')
-        else:
-            botoutput(f'Failed to set Last Login for Server: {curserver.FriendlyName} User: {psplit[3]}. Please add the user to the database and set the users IGN via //user DiscordID ign {psplit[3]}')
-
 #/user parameter[0] parameter[1] parameter[2] parameter[3]
 #/user 'username' 'ban' 'time' 'reason'
 async def userban(ctx,curuser,parameter):
@@ -881,20 +690,6 @@ async def user(ctx,*parameter):
         return await ctx.send('**Format**: //user {curuser.DiscordName} {parameter[1]} (option) (parameter)',reference = ctx.message.to_reference())
     return await ctx.send(response,reference= ctx.message.to_reference()) 
 
-#DB Server Users TimePlayed update..
-def serverUserTimePlayed(curserver,entry):
-    if entry['Source'] == 'Server thread/INFO' and entry['Contents'].endswith('has left the game!'):
-        time_online = datetime.fromtimestamp(float(entry['Timestamp'][6:-2])/1000)
-        entry = entry['Contents'].split(' ') #Prep to help me get the user out of the 'Contents'
-        user = entry[0]
-        if user == None:
-            botoutput('Failed to get User: {entry[0]}; please attempt to add them or update their IGN manually.')
-            return
-        lastlogin = curserver.GetUser(entry[0]).LastLogin #Gets the datetime object of the ServerUser last login
-        timeplayed = curserver.GetUser(entry[0]).TimePlayed #Gets the time played of the ServerUser
-        timeplayed += ((lastlogin - time_online)/60) #Add's the play time to their current accured amount of play time..
-    return 
-
 #Adds the User to the Server Lists and updates their whitelist flags        
 def serverUserWhitelistFlag(curserver,whitelist,localdb):
     print('Server User whitelist update...')
@@ -975,7 +770,6 @@ def channelparse(ctx,parameter):
                 return channel
         else:
             return None
-
 
 #Bot communcation channel, outputs any errors with any functions for staff to handle.
 def botoutput(message,ctx = None):
@@ -1128,7 +922,7 @@ async def botsetting(ctx,*parameter):
                     if value == True:
                         botoutput('Currently initiating Consoles...')
                         #Starts up the console functions
-                        serverconsoleinit() 
+                        console.init() 
             except:
                 response = f'**Format:** //botsetting {parameter[0]} (True or False)'
         else:
@@ -1167,7 +961,8 @@ roles = [{'Name': 'Operator', 'Description': 'Full control over the bot, this is
         {'Name': 'Admin', 'Description': 'Similar to Operator, Full Control over the bot.'},
         {'Name': 'Maintenance', 'Description': 'Full access to Bot commands/settings, AMP commands/settings and Console.'},
         {'Name': 'Moderator', 'Description': 'Full access to Bot commands/settings.'},
-        {'Name': 'Staff', 'Description' : 'Full access to User commands and Ban/Pardon.'}
+        {'Name': 'Staff', 'Description' : 'Full access to User commands and Ban/Pardon.'},
+        {'Name': 'General', 'Description' : 'General User in the server.'}
         ]
 
 #role check
@@ -1406,20 +1201,17 @@ async def on_message(message):
         chat_filter = chatfilter.spamFilter(message)
         if chat_filter == True:
             print('Kicking the user from the server...')
-        chatflag = discordtoMCchathandler(message)
-        consoleflag = serverconsolehandler(message)  
-        if chatflag != True or consoleflag != True:
-            if dbconfig.Autoreply:
-                if (message.content.lower() == 'help'):
-                    response = config.helpmsg
-                    botoutput(f'Auto-reply triggered. Message: {message.content}')
-                    return await message.channel.send(response, reference=message.to_reference())
-                if message.content.lower() == 'version' or message.content.lower() =='ip':
-                    response = config.infomsg
-                    botoutput(f'Auto-reply triggered. Message: {message.content}')
-                    return await message.channel.send(response, reference=message.to_reference())
-            else:
-                pass
+            return 
+        if dbconfig.Autoreply:
+            if (message.content.lower() == 'help'):
+                response = config.helpmsg
+                botoutput(f'Auto-reply triggered. Message: {message.content}')
+                return await message.channel.send(response, reference=message.to_reference())
+            if message.content.lower() == 'version' or message.content.lower() =='ip':
+                response = config.infomsg
+                botoutput(f'Auto-reply triggered. Message: {message.content}')
+                return await message.channel.send(response, reference=message.to_reference())
+       
 
 #Initial Setup to set Operator Role...
 @client.command()
@@ -1595,6 +1387,7 @@ def defaultinit():
 defaultinit()
 AMPinstancecheck(startup = True)
 whitelist.init(AMP,AMPservers,db,dbconfig)
-serverconsoleinit()
+console.init(client,rolecheck,botoutput)
+chat.init()
 whitelistfilecheck(db)
 client.run(tokens.token)

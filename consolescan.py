@@ -24,6 +24,10 @@ import config
 import plugin_commands
 from datetime import datetime, timedelta
 import traceback
+import database
+
+#Database
+db = database.Database()
 
 #Handles each entry of the console to update DB or filter messages/etc.
 def scan(curserver,entry):
@@ -108,5 +112,37 @@ def scan(curserver,entry):
             print(e)
             traceback.print_exc()
             return True, f'Unable to update User: {entry_split[1]} whitelisted status in the database!'
-    return False, entry
+    #User Lastlogin Stuff
+    if entry['Source'].startswith('User Authenticator'):
+            #if entry['Source'].startswith('Server thread/INFO') and entry[''].startswith()
+        print('User Last Login Triggered...')
+        curtime = datetime.now()
+        psplit = entry['Contents'].split(' ')
+        user = db.GetUser(psplit[3])
+        if user != None:
+            serveruser = curserver.GetUser(user)
+            if serveruser == None:
+                curserver.AddUser(user)
+            try:
+                serveruser = curserver.GetUser(user)
+                serveruser.LastLogin = curtime
+                return True, f'Adding user to Server: {curserver.FriendlyName} User: {user.DiscordName} IGN: {user.IngameName}'
+            except Exception as e:
+                print(e)
+                traceback.print_exc()
+                return True, f'Failed to set Last Login for Server: {curserver.FriendlyName} User: {psplit[3]}. Please add the user to the database and set the users IGN via //user DiscordID ign {psplit[3]}'
+    #User Played Time
+    if entry['Source'] == 'Server thread/INFO' and entry['Contents'].endswith('has left the game!'):
+        time_online = datetime.fromtimestamp(float(entry['Timestamp'][6:-2])/1000)
+        entry = entry['Contents'].split(' ') #Prep to help me get the user out of the 'Contents'
+        user = entry[0]
+        if user == None:
+            return True, f'Failed to get User: {entry[0]}; please attempt to add them or update their IGN manually.'
+            
+        lastlogin = curserver.GetUser(entry[0]).LastLogin #Gets the datetime object of the ServerUser last login
+        timeplayed = curserver.GetUser(entry[0]).TimePlayed #Gets the time played of the ServerUser
+        time_online = (time_online/60) #Turn our value into minutes.
+        timeplayed += (lastlogin - time_online) #Add's the play time to their current accured amount of play time..
+        return True, f'Updated User: {entry[0]} played time increased by {time_online} Minutes. Total: {timeplayed} Minutes.'
 
+    return False, entry

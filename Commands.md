@@ -64,7 +64,7 @@ All commands can be used in any channel the bot can see. They are not case sensi
 
 ### Role Rank
 These ranks do follow a heirachy starting from `General` to `Operator`; each rank can only have one `discord role` per. Set them via the `//role discord_role_id set (rank)`<br>
-- **Operator** | Full control over the bot, this is set during startup.
+- **Operator** | Full control over the bot, this is set during the `//setup` command.
 - **Admin**  | Similar to Operator, Full Control over the bot.
 - **Maintenance**  | Full access to Bot commands/settings, AMP commands/settings and Console.
 - **Moderator**  | Full access to Bot commands/settings.
@@ -83,6 +83,7 @@ These ranks do follow a heirachy starting from `General` to `Operator`; each ran
 ---
 ### Bot Commands `//botsettings`
 *example: `//botsetting autowhitelist (true` or `false)`* |  *example 2: `//botsetting infractiontimeout time`*</br>
+- Show all Settings via `//botsetting info`
  **All Bot Settings require Permission level: `Moderator` or higher**</br>
 
 #### ***Flags*** | *default: False*

@@ -22,7 +22,6 @@
 #Gatekeeper Bot - consolefilters
 import config
 
-
 def filters(entry):
     if type(entry) == dict:
         if config.CommandBlocks:
@@ -38,18 +37,36 @@ def filters(entry):
             if entry['Contents'].startswith('Current Memory Usage:') and entry['Contents'].endswith('mb)'):
                 #print(f'Console Filter triggered... Removed: {entry["Contents"]}')
                 return True
-            if entry['Source'] == 'Installer':
+            if entry['Source'].lower() == 'installer':
                 return True
-            if entry['Source'] == 'Server thread/Warn':
+            if entry['Source'].lower() == 'server thread/warn':
                 return True
 
         if config.Debugging:
-            if entry['Source'] == 'Server thread/ERROR':
+            if entry['Source'].lower() == 'server thread/info':
                 return True
-            filtertable = ['\tat net.minecraft','\tat java.util','java.lang']
+            if entry['Source'].lower() == 'server thread/error':
+                return True
+            #!! Needs to be Adressed; find out console filter solutions for mod loading.
+            filtertable = ['\\tat net.minecraft','\\tat java.util','java.lang','java.io','com.google']
             for filter in filtertable:
-                if entry['Contents'].startswith(filter):
+                if entry['Contents'].lower().startswith(filter):
                     return True
         return entry
     else:
         return entry
+
+#Removed the odd character for color idicators on text
+def colorstrip(entry):
+    char =  '�'
+    if entry['Contents'].find(char) != -1:
+        print('Color strip triggered...')
+        index = 0
+        while 1:
+            index = entry['Contents'].find(char,index)
+            if index == -1:
+                break
+            newchar = entry['Contents'][index:index+2]
+            entry['Contents'] = entry['Contents'].replace(newchar,'')
+        return entry
+    return entry

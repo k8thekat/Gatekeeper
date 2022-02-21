@@ -42,22 +42,16 @@ import math
 import database
 import tokens
 from AMP_API import AMPAPI
-import parse
 import config
 import endReset # Coming soon
 import whitelist 
 import commandlogger
-import consolefilters
 import chatfilter
-import plugin_commands
 import timehandler
 import UUIDhandler
-import consolescan
-import console
-import chat
 
 
-Version = 'alpha-2.0.0' #Major.Minor.Revisions
+Version = 'alpha-2.0.1' #Major.Minor.Revisions
 print('Version:', Version)
 
 async_loop = asyncio.new_event_loop()
@@ -66,6 +60,8 @@ asyncio.set_event_loop(async_loop)
 intents = discord.Intents.default() # Default
 intents.members = True
 client = commands.Bot(command_prefix = '//', intents=intents, loop=async_loop)
+import console
+import chat
 #client.remove_command('help')
 
 #AMP API setup
@@ -1185,10 +1181,10 @@ async def pardon(ctx,*parameter):
 async def on_message(message):
     if message.author.bot:
         return
-    if (message.content.startswith('//')):
+    elif (message.content.startswith('//')):
         print('Found /command.')
         return await client.process_commands(message)
-    if message.channel.id == dbconfig.Whitelistchannel:
+    elif message.channel.id == dbconfig.Whitelistchannel:
         if dbconfig.Autowhitelist:
             reply = whitelist.wlmessagehandler(message)
             if reply[0] == False:
@@ -1197,6 +1193,10 @@ async def on_message(message):
                 botoutput(reply[1])
         else:
             db.AddUser(DiscordID = str(message.author.id), DiscordName = message.author.name)
+    elif console.on_message(message):
+        return
+    elif chat.on_message(message):
+        return
     else:
         chat_filter = chatfilter.spamFilter(message)
         if chat_filter == True:
@@ -1388,6 +1388,6 @@ defaultinit()
 AMPinstancecheck(startup = True)
 whitelist.init(AMP,AMPservers,db,dbconfig)
 console.init(client,rolecheck,botoutput)
-chat.init()
+chat.init(client)
 whitelistfilecheck(db)
 client.run(tokens.token)

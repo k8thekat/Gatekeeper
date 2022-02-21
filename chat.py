@@ -59,8 +59,8 @@ def init(client):
     print(SERVERCHAT)
 
 #This handles scanning discord chat messages to send it to the correct minecraft server
-@CLIENT.event()
-async def on_message(message):
+
+def on_message(message):
     global CLIENT
     if message.channel.id in SERVERCHAT:
         if SERVERCHAT[message.channel.id]['status']:
@@ -71,6 +71,7 @@ async def on_message(message):
             else:
                 SERVERCHAT[message.channel.id].ConsoleMessage(f'tellraw @a [{{"text":"(Discord)","color":"blue"}},{{"text":"<{message.author.name}>: {message.content}","color":"white"}}]')
                 return True
+    return False
 
 #This fetches MC avatars heads and uses them for Discord Profile Pics and changes the message name to the IGN from minecraft
 async def MCchatsend(channel, user, message):

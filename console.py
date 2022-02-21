@@ -69,14 +69,15 @@ async def serverConsoletoDiscord(channel, entry):
     except Exception as e:
         BOTOUTPUT(e)
 
-@CLIENT.event()
 #This handles passing DISCORD Chat commands to the MC server
-async def on_message(message):
+def on_message(message):
     global CLIENT
     if message.channel.id in SERVERCONSOLE:
         if SERVERCONSOLE[message.channel.id]['status']:
             if ROLECHECK(message, 'Maintenance'):
                 SERVERCONSOLE[message.channel.id].ConsoleMessage(message.content)
+                return True
+    return False
         
 
 #Parses each AMP Server Console

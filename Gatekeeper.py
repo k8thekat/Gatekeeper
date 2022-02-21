@@ -51,7 +51,7 @@ import timehandler
 import UUIDhandler
 
 
-Version = 'alpha-2.0.1' #Major.Minor.Revisions
+Version = 'alpha-2.0.2' #Major.Minor.Revisions
 print('Version:', Version)
 
 async_loop = asyncio.new_event_loop()

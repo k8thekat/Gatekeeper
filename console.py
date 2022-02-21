@@ -54,11 +54,12 @@ def init(client,rolecheck,botoutput):
     if dbconfig.Autoconsole:
         for server in AMPservers:
             db_server = db.GetServer(server)
-            channel = int(db_server.DiscordChatChannel) #Needs to be an int() because of discord message.channel.id type is int()
-            if channel != None: 
+            channel = db_server.DiscordChatChannel #Needs to be an int() because of discord message.channel.id type is int()
+            if channel != None:
+                #channel = int(channel) 
                 print('Starting Console Threads...')
                 server_thread = threading.Thread(target = serverconsole(AMPservers[server],db_server))
-                SERVERCONSOLE = {channel: AMPservers[server], 'DBserver': db_server, 'thread' : server_thread, 'status' : AMPservers[server].Running}
+                SERVERCONSOLE = {int(channel): AMPservers[server], 'DBserver': db_server, 'thread' : server_thread, 'status' : AMPservers[server].Running}
                 server_thread.start()
         print(SERVERCONSOLE)
 

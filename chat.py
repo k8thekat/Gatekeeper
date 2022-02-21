@@ -50,11 +50,11 @@ def init(client):
     CLIENT = client #Store my discord client for Discord related API functions.
     for server in AMPservers:
         db_server = db.GetServer(server)
-        channel = int(db_server.DiscordChatChannel) #Needs to be an int() because of discord message.channel.id type is int()
+        channel = db_server.DiscordChatChannel #Needs to be an int() because of discord message.channel.id type is int()
         if channel != None:
             print('Starting Chat Threads...')
             server_thread = threading.Thread(target = MCchattoDiscord(AMPservers[server],db_server))
-            SERVERCHAT = {channel: AMPservers[server], 'DBserver': db_server, 'thread' : server_thread, 'status' : AMPservers[server].Running}
+            SERVERCHAT = {int(channel): AMPservers[server], 'DBserver': db_server, 'thread' : server_thread, 'status' : AMPservers[server].Running}
             server_thread.start()
     print(SERVERCHAT)
 

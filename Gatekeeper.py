@@ -51,7 +51,7 @@ import timehandler
 import UUIDhandler
 
 
-Version = 'alpha-2.0.2' #Major.Minor.Revisions
+Version = 'alpha-2.1.2' #Major.Minor.Revisions
 print('Version:', Version)
 
 async_loop = asyncio.new_event_loop()
@@ -80,9 +80,7 @@ dbconfig = db.GetConfig()
 def serverwhitelistflag(ctx,curserver,parameter):
     if not rolecheck(ctx, 'Maintenance'):
         return 'User does not have permission.'
-    print('Server Whitelist Flag...')
-    if 'help' in parameter:
-        return f'**Example**: //server {curserver.FriendlyName} whitelist true'
+    print('Server Whitelist Flag...')       
     if len(parameter) == 3:
         try:
             curserver.Whitelist = strtobool(parameter[2])
@@ -101,8 +99,6 @@ def serverdonatorflag(ctx,curserver,parameter):
     if not rolecheck(ctx, 'Maintenance'):
         return 'User does not have permission.'
     print('Server Donator Flag...')
-    if 'help' in parameter:
-        return f'**Example**: //server {curserver.FriendlyName} donator false'
     if len(parameter) == 3:
         try:
             curserver.Donator = strtobool(parameter[2])
@@ -126,8 +122,6 @@ def serverrole(ctx,curserver,parameter):
     if not rolecheck(ctx, 'Maintenance'):
         return 'User does not have permission.'
     print('Server Role...')
-    if 'help' in parameter:
-        return f'**Example**: //server {curserver.FriendlyName} role 617967701381611520'
     if len(parameter) >= 3:
         role = roleparse(ctx,parameter[2]) #returns a role object or None
         if role != None:
@@ -146,8 +140,6 @@ def serverdiscordchannel(ctx,curserver,parameter):
     if not rolecheck(ctx, 'Maintenance'):
         return 'User does not have permission.'
     print('Server Discord Channel...')
-    if 'help' in parameter:
-        return f'**Example**: //server {curserver.FriendlyName} discordchannel chat SkyFactory-Chat'
     if len(parameter) == 4:
         channel = channelparse(ctx,parameter[3]) #returns a channel object or None
         if channel == None:
@@ -175,8 +167,6 @@ def servernickname(ctx,curserver,parameter):
     if not rolecheck(ctx, 'Maintenance'):
         return 'User does not have permission.'
     print('Server Nickname...')
-    if 'help' in parameter:
-        return f'**Format**: //server {curserver.FriendlyName} nickname option(add or remove or list) newnickname'
     if parameter[2].lower() == 'list':
         nicknames = ', '.join(curserver.Nicknames)
         return f'{curserver.FriendlyName} has the Nicknames: {nicknames}'
@@ -234,8 +224,6 @@ def serveruserinfraction(ctx,curserver,parameter):
     modauthor = db.GetUser(ctx.author.id)
     details = ' '.join(parameter[3:])
     curuser = db.GetUser(parameter[2])
-    if 'help' in parameter:
-        return f'**Format**: //server {curserver.FriendlyName} infraction user_name notes(optional)'
     if curuser != None:
         curserver.AddUserInfraction(user= curuser ,mod= modauthor ,note= details)
         return f'User Infraction for {curuser.DiscordName} added to {curserver.FriendlyName} by {modauthor.DiscordName}\n**Note**: {details}'
@@ -266,9 +254,6 @@ def serveruserban(ctx,curserver,parameter):
     print('Server Ban Initiated...')
     if not rolecheck(ctx, 'Staff'):
         return 'User does not have permission.'
-    if 'help' in parameter:
-        if parameter[1] == 'help':
-            return f'**Example**: //server {curserver.FriendlyName} userban Notch w:3d:6 reason:Stealing someones items'
     curuser = None
     if len(parameter) <= 2:
         return f'**Format**: //server {curserver.FriendlyName} userban {curuser} time(Optional) reason:(optional)'
@@ -348,7 +333,7 @@ def servermaintenance(ctx,curserver,parameter):
     if len(parameter) <= 2:
         return f'**Format**: //server {curserver.FriendlyName} maintenance (on or off)'
     serverfile_list = AMPservers[curserver.InstanceID].getDirectoryListing('')
-    if parameter[2].lower() == 'on':
+    if parameter[2].lower() == 'true':
         #prevents players from requesting whitelist
         curserver.Whitelist = False
         #op's every member of staff for said server to allow them to bypass the whitelist setting.(just in case)
@@ -362,7 +347,7 @@ def servermaintenance(ctx,curserver,parameter):
                 time.sleep(.5)
                 AMPservers[curserver.InstanceID].renameFile('whitelist_blank.json', 'whitelist.json')
         return f'**Server**: {curserver.FriendlyName} has been put into Maintenance Mode'
-    if parameter[2].lower() == 'off':
+    if parameter[2].lower() == 'false':
         #allows players to request whitelist
         curserver.Whitelist = True
         for filename in serverfile_list['result']:
@@ -412,13 +397,35 @@ async def server(ctx,*parameter):
     if curserver == None:
         response = f'**Server**: {parameter[0]} does not exists.'
     #checks if curserver is a server in the database.
-    if 'help' in parameter[0:1]:
-        return await ctx.send(', '.join(serverfuncs.keys()),reference = ctx.message.to_reference())
+    if 'example' in parameter:
+        await ctx.send('**Examples**:' +
+            '\n //server Vanilla userban Notch w:3d:6 reason: Stealing someones items.'+ 
+            '\n //server Valhelsia3 role 617967701381611520' +
+            '\n //server ProjectOzone3 nickname add po3' +
+            '\n //server SkyFactory channel chat SkyFactory-Chat')
+    if 'help' in parameter:
+        option_help = '**Options**: None'
+        parameter_help = '**Parameters**: server_name '
+        if 'channel' in parameter:
+            option_help = '**Options**: chat or console'
+            parameter_help += '/ channel'
+        if 'nickname' in parameter:
+            option_help = '**Options**: list or add or remove'
+        if 'whitelist' or 'donator' or 'maintenance' in parameter:
+            parameter_help += '/ true or false'
+        if 'infraction' in parameter:
+            parameter_help += '/ user_name / note(Optional) '
+        if 'role' in parameter:
+            parameter_help += '/ role'
+        if 'ban' in parameter:
+            parameter_help += '/ user_name / time(Optional) / reason:(Optional)'
+        await ctx.send(f'**Format**: //server server_name (function) (option) (parameter)',reference = ctx.message.to_reference())
+        return await ctx.send(f"**Functions**: " + ', '.join(serverfuncs.keys()) + '\n' + option_help + '\n' + parameter_help)
     if curserver != None:
             if parameter[1].lower() in serverfuncs:
                 response = serverfuncs[parameter[1]](ctx,curserver,parameter) 
             else:
-                response = f'The Command: {parameter[1]} is not apart of my list. Commands: {", ".join(serverfuncs.keys())}.' 
+                response = f'The Command: {parameter[1]} is not apart of my list. Commands: ' + ", ".join(serverfuncs.keys())
     return await ctx.send(response,reference= ctx.message.to_reference())
 
 #Converts IGN to discord_name
@@ -485,30 +492,27 @@ def userinfractions(ctx,curuser,parameter):
     if not rolecheck(ctx, 'Staff'):
         return 'User does not have permission.'
     mod = db.GetUser(ctx.author.id)
-    if 'help' in parameter[2:3].lower():
-        return f"**Format**: //user {curuser.DiscordName} infraction (parameter) (ID:optional or server:optional) (notes:optional)"
     if len(parameter) >= 4:
         if parameter[2].lower() == 'add':
+            for entry in parameter:
+                entry = entry.replace('Reason:','reason:')
+                reason_id = entry.find('reason:')
+            if reason_id != -1:
+                reason_id = parameter.index('reason:')
+                reason = []
+                reason = ' '.join(parameter[reason_id+1:])
             server = db.GetServer(name = parameter[3])
             if server != None:
-                notes = ' '.join(parameter[4:])
-                curuser.AddInfraction(server = server, mod = mod, note = notes)
-                response = f'Added Infraction on {curuser.DiscordName} for {server.FriendlyName} with the comment of "{notes}"'
+                curuser.AddInfraction(server = server, mod = mod, note = reason)
+                response = f'Added Infraction on {curuser.DiscordName} for {server.FriendlyName} with the reason of "{reason}"'
             else:
-                notes = ' '.join(parameter[3:])
-                curuser.AddInfraction(server = None, mod = mod, note = notes)
-                response = f'Added Infracton on {curuser.DiscordName} with comment of "{notes}"'
+                curuser.AddInfraction(server = None, mod = mod, note = reason)
+                response = f'Added Infracton on {curuser.DiscordName} with the reason of "{reason}"'
         elif parameter[2].lower() == 'del':
                 curuser.DelInfraction(ID=parameter[3])
                 response = f'Removed Infraction {parameter[3]} on {curuser.DiscordName}' 
     else:
-        if len(parameter) >= 4:
-            if parameter[2].lower() == 'del':
-                response =f"**Format**: //user {curuser.DiscordName} infraction del InfractionID"
-            if parameter[2].lower() == 'add':
-                response =f"**Format**: //user {curuser.DiscordName} infraction add (server:optional) (notes:optional)"
-        else:
-            response = f"**Format**: //user {curuser.DiscordName} infraction (option:add or del) (ID:optional) (notes)"
+        response = f"**Format**: //user user_name infraction option(Add or Del) infractionID('Del' only) reason:(Optional)"
     return response
 
 # updates user parameters in database (donator)
@@ -518,8 +522,6 @@ def userdonator(ctx,curuser,parameter):
     if not rolecheck(ctx, 'Moderator'):
         return 'User does not have permission.'
     print('User Donator...')
-    if 'help' in parameter.lower():
-        response = f'**Format**: //user {curuser} donator (True or False)'
     if len(parameter) == 3:
         if parameter[2].lower() == 'true':
             curuser.Donator = True
@@ -536,8 +538,6 @@ def usermoderator(ctx,curuser,parameter):
     if not rolecheck(ctx, 'Maintenance'):
         return 'User does not have permission.'
     print('User Moderator...')
-    if 'help' in parameter:
-        response = f'**Format**: //user {curuser} mod (True or False)'
     if len(parameter) == 3:
         if parameter[2].lower() == 'true':
             curuser.ServerModerator = True
@@ -556,8 +556,6 @@ def userign(ctx,curuser,parameter):
     if not rolecheck(ctx, 'Staff'):
         return 'User does not have permission.'
     print('User IGN...')
-    if 'help' in parameter:
-        response = f'**Format**: //user {curuser} IGN (True or False)'
     if len(parameter) == 3:
         ign_check = UUIDhandler.uuidcheck(parameter[2])
         if ign_check[0] != False:
@@ -581,13 +579,6 @@ async def userban(ctx,curuser,parameter):
         return f'The User: {parameter[0]} is not apart of this guild.'
     bantime = timehandler.parse(dbconfig.GetSetting('bantimeout'))
     response = f'{curuser.DiscordName} has been banned until {bantime.strftime("%Y/%m/%d Time: %X (UTC)")}'
-    if 'help' in parameter.lower():
-        if parameter[1] == 'help':
-            response = f'**Format**: //user {curuser.DiscordName} ban time(Days:# or Hours:#)(Optional) reason:(optional)'
-        if parameter[2] == 'help':
-            response = f'**Format**: //user {curuser.DiscordName} {parameter[1]} time(Days:# or Hours:#)(Optional) reason:(optional)'
-        if parameter[3] == 'help':
-            response = f'**Format**: //user {curuser.DiscordName} {parameter[1]} {parameter[2]} reason:(optional)'
     if parameter[2].isnumeric():
         bantime = timehandler.parse(parameter[2:])
     if bantime == False:
@@ -672,8 +663,23 @@ async def user(ctx,*parameter):
     curuser = userparse(ctx,parameter)
     if curuser == None:
         return await ctx.send(f'**The User**: {parameter[0]} does not exists in **{ctx.guild.name}**.', reference = ctx.message.to_reference())
-    if 'help' in parameter[0:1]:
-        return await ctx.send('**Functions**: ' + '`' ", ".join(userfuncs.keys()) + '`')
+    if 'example' in parameter:
+        await ctx.send('**Examples**:' +
+        '\n //user Notch infraction add Vanilla_server note: Griefing Spawn with creepers.' + 
+        '\n //user k8_thekat ban d:3h:12 reason: Attempting to catch staff members in Pok-e balls.' + 
+        '\n //user Notch254 IGN The_Notch')
+    if 'help' in parameter:
+        option_help = '**Options**: None'
+        parameter_help = '**Parameters**: user_name '
+        if 'infractions' in parameter:
+            option_help = '**Options**: Add or Del'
+            parameter_help = '**Parameters**: user_name / infractionID("Del" only) / time("Add" only: Optional) / reason:("Add" only: Optional)'
+        if 'moderator' or 'donator' in parameter:
+            parameter_help = '**Parameters**: user_name / True or False'
+        if 'ban' in parameter:
+            parameter_help = '**Parameters**: user_name / time(Optional) / reason:(Optional)'
+        await ctx.send('**Format**: //user discord_id `function` `option` `parameter`',reference = ctx.message.to_reference())
+        return await ctx.send('**Functions**: ' + ", ".join(userfuncs.keys()) + '\n' + option_help + '\n' + parameter_help)
     elif parameter[1].lower() in userfuncs:
         cur_db_user = db.GetUser(curuser.id)
         if parameter[1].lower() == 'add':
@@ -1014,8 +1020,9 @@ async def role(ctx,*parameter):
         role_display = []
         for entry in roles:
             role_display.append(f'**{entry["Name"]}**: {entry["Description"]}')
-        await ctx.send("**Roles**: \n" + '\n'.join(role_display))
-        return await ctx.send("**Functions**: "+ '`' +",".join(rolefuncs.keys())+ '`',reference= ctx.message.to_reference())
+        await ctx.send('**Format**: //role discrd_role set (role)',reference= ctx.message.to_reference())
+        await ctx.send("**Functions**: " + ",".join(rolefuncs.keys()))
+        return await ctx.send("**Roles**: \n" + '\n'.join(role_display))
     if len(parameter) < 3:
         response = f'**Format**: //role discrd_role set (role)'
         return await ctx.send(response,reference = ctx.message.to_reference()) 
@@ -1088,8 +1095,11 @@ async def logs(ctx,*parameter):
 #Gets a list of all AMP Instances, their Friendly Names and Database Nicknames
 @client.command()
 async def serverlist(ctx):
+    staff = False
     if not rolecheck(ctx, 'General'):
         return 'User does not have permission.'
+    if rolecheck(ctx,'Staff'): #If the user is Staff or Higher append to the list
+        staff = True
     print('Server List...')
     AMPinstancecheck()
     commandlogger.logHandler(ctx,None,None,'bot')
@@ -1105,7 +1115,7 @@ async def serverlist(ctx):
                 serv_status = '`Offline`'
                 
             serverinfo = f'**Server**: {curserver.FriendlyName} - {serv_status}' 
-            if rolecheck(ctx,'Staff'): #If the user is Staff or Higher append to the list
+            if staff == True:
                 if len(curserver.Nicknames) != 0: #If the server has nicknames
                     serverlist.append(f'{serverinfo}\n\t**Nicknames**: {curservernick}')
                 else:
@@ -1181,10 +1191,10 @@ async def pardon(ctx,*parameter):
 async def on_message(message):
     if message.author.bot:
         return
-    elif (message.content.startswith('//')):
+    if (message.content.startswith('//')):
         print('Found /command.')
         return await client.process_commands(message)
-    elif message.channel.id == dbconfig.Whitelistchannel:
+    if message.channel.id == dbconfig.Whitelistchannel:
         if dbconfig.Autowhitelist:
             reply = whitelist.wlmessagehandler(message)
             if reply[0] == False:
@@ -1193,9 +1203,9 @@ async def on_message(message):
                 botoutput(reply[1])
         else:
             db.AddUser(DiscordID = str(message.author.id), DiscordName = message.author.name)
-    elif console.on_message(message):
+    if console.on_message(message):
         return
-    elif chat.on_message(message):
+    if chat.on_message(message):
         return
     else:
         chat_filter = chatfilter.spamFilter(message)
@@ -1322,7 +1332,7 @@ async def discordRoleSet(user):
 #General thread loop for all recurring checks/events...
 def threadloop():
     time.sleep(1)
-    print('Thread Loop Initiated...\n')
+    print('Recurring Thread Loop Initiated...\n')
     localdb = database.Database()
     updateinterval = datetime.now()
     while(1):

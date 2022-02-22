@@ -24,15 +24,25 @@ import os
 import json
 from datetime import datetime
 import traceback
+import platform
+
 
 curtime = datetime.now()
 botdir = os.getcwd()
-filename = f'\\logs\\log-{curtime.strftime("%d-%m-%Y")}.json'
 logfile_list = os.listdir(botdir + '\\logs')
-global LOGS
-
+LOGS = []
+FILENAME = ''
+DIR = ''
 
 def init():
+    global FILENAME, DIR
+    osplat = platform.system()
+    if osplat.lower() == 'windows':
+        FILENAME = f'\\logs\\commandlog-{curtime.strftime("%d-%m-%Y")}.json'
+        DIR = '\\logs\\'
+    if osplat.lower() == 'linux': #Flip the slash to accomadate Linux users <3
+        FILENAME = f'/logs/commandlog-{curtime.strftime("%d-%m-%Y")}.json'
+        DIR = '/logs/'
     try:
         print('Making Log Directory')
         os.makedirs(botdir + '\\logs')
@@ -42,6 +52,7 @@ def init():
         traceback.print_exc()
 
 def logHandler(ctx,curserver,parameter,loc):
+    global LOGS
     LOGS = logfileloader()
     server = curserver
     time = datetime.now().strftime('%c')
@@ -108,17 +119,18 @@ def logHandler(ctx,curserver,parameter,loc):
     return
 
 def logfileloader():
-    dircheck = os.path.isfile(botdir +  filename)
+    global FILENAME,LOGS
+    dircheck = os.path.isfile(botdir +  FILENAME)
     LOGS = []
     try:    
         if dircheck != True:
-            newfile = open(botdir + filename, 'x')
+            newfile = open(botdir + FILENAME, 'x')
             newfile.close()
             return LOGS
         if dircheck:
-            filesize = os.path.getsize(botdir + filename)
+            filesize = os.path.getsize(botdir + FILENAME)
             if filesize != 0:
-                newfile = open(botdir + filename)
+                newfile = open(botdir + FILENAME)
                 LOGS = json.load(newfile)
                 newfile.close()
                 return LOGS
@@ -130,28 +142,32 @@ def logfileloader():
     return LOGS
 
 def logfilesaver(log):
-    newfile = open(botdir + filename, 'w') 
+    global FILENAME
+    newfile = open(botdir + FILENAME, 'w') 
     json.dump(log,newfile, indent=0)
     newfile.close()
     return
 
 def logfilearchiver():
-    logdate = filename.replace('log.json',f'log-{curtime.strftime("%d-%m-%Y")}.json')
+    global FILENAME
+    logdate = FILENAME.replace('log.json',f'log-{curtime.strftime("%d-%m-%Y")}.json')
     print(logdate)
     try:
-        if os.path.isfile(botdir + filename) != True:
+        if os.path.isfile(botdir + FILENAME) != True:
             return
         else:
             print('Attempting to rename file')
-            os.rename(botdir + filename, botdir + logdate)
+            os.rename(botdir + FILENAME, botdir + logdate)
     except Exception as e:
         print(e)
         traceback.print_exc()
     return
 
 def logfileparse(filename,count= 5,start_index= 0):
+    global DIR
     try:
-        newfile = open(botdir + '\\logs\\' + filename)
+        #TODO Fix the directory
+        newfile = open(botdir + DIR + filename)
         parse_log = json.load(newfile)
     except:
         return 'The File: {filename} was not correct...'

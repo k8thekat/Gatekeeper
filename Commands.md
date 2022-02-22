@@ -40,26 +40,26 @@ All commands can be used in any channel the bot can see. They are not case sensi
 
 ---
 ### Server Commands `//server` 
-*example: `//server server_name discordchannel chat (discord_id` or `discord_channel_name)`* <br>
-- **Channel** | *default: None* | options: `chat` or `console` | parameters: `channel` Permission level: `Maintenance` | <br>
-- **Donator** | *default: False* | parameters: `true` or `false` | Permission level: `Maintenance` |  <br>
-- **Info** | *No Options or Parameters* | Permission level: `General` | <br>
-- **Kill** | *No Options or Parameters* | Permission level: `Maintenance` |<br>
-- **Maintenance** | *default: off* | parameters: `on` or `off` | Permission level: `Maintenance` |<br>
-- **Nickname** | *default: None* | options: `list` or `add` or `remove` | Permission level: `Maintenance` | <br>
-- **Restart** | *No Options or Parameters* | Permissions level: `Maintenance` | <br>
-- **Role** | *default: None* | parameters: `role` | Permission level: `Maintenance` |  <br>
-- **Start** | *No Options or Parameters* | Permission level: `Maintenance` | <br>
-- **Status** | *No Options or Parameters* | Permission level: `None` | <br>
-- **Stop** | *No Options or Parameters* | Permission level: `Maintenance` | <br>
-- **UserBan** | *No Options* | parameters: `user_name` / `time(optional)` / `reason:(optional)` | Permission level: `Staff` | <br>
-- **UserInfractions** | *No Options* | parameters: `user_name` / `note(optional)` | Permission level: `Staff` |  <br>
-- **UserList** | *No Options or Parameters* | Permission level: `Staff` | <br>
-- **Whitelist** | *default: False* | parameters: `true` or `false` | Permission level: `Maintenance` |<br>
+*example: `//server server_name channel chat (discord_id` or `discord_channel_name)`* <br>
+- **Channel** | *default: None* | options: `chat` or `console` | parameters: `server_name` / `channel` Permission level: `Maintenance` | <br>
+- **Donator** | *default: False* | parameters: `server_name`/ `true` or `false` | Permission level: `Maintenance` |  <br>
+- **Info** | *No Options* | parameters: `server_name` | Permission level: `General` | <br>
+- **Kill** | *No Options* | parameters: `server_name`| Permission level: `Maintenance` |<br>
+- **Maintenance** | *default: off* | parameters: `server_name` / `true` or `false` | Permission level: `Maintenance` |<br>
+- **Nickname** | *default: None* | options: `list` or `add` or `remove` | parameters: `server_name` | Permission level: `Maintenance` | <br>
+- **Restart** | *No Options* | parameters: `server_name` | Permissions level: `Maintenance` | <br>
+- **Role** | *default: None* | parameters: `server_name` / `role` | Permission level: `Maintenance` |  <br>
+- **Start** | *No Options* | parameters: `server_name` | Permission level: `Maintenance` | <br>
+- **Status** | *No Options* | parameters: `server_name` | Permission level: `None` | <br>
+- **Stop** | *No Options* | parameters: `server_name` | Permission level: `Maintenance` | <br>
+- **Ban** | *No Options* | parameters: `server_name` / `user_name` / `time(optional)` / `reason:(optional)` | Permission level: `Staff` | <br>
+- **Infraction** | *No Options* | parameters: `server_name` |`user_name` / `reason:(optional)` | Permission level: `Staff` |  <br>
+- **List** | *No Options* | parameters: `server_name` | Permission level: `Staff` | <br>
+- **Whitelist** | *default: False* | parameters: `server_name` |`true` or `false` | Permission level: `Maintenance` |<br>
 
 ---
 ### Role Commands `//role`
-*example: `//role discord_role_id set Staff (true` or `false)`*
+*example: `//role role set Staff (true` or `false)`*
 - **Set** | *No Options* | parameters: `role` / `role_name` /  Permission level: `Admin` <br>
 
 ### Role Rank
@@ -72,10 +72,10 @@ These ranks do follow a heirachy starting from `General` to `Operator`; each ran
 - **General** | Basic User with access to Discord Server Chat, Server List.
 ---
 ### User Commands `//user`
-*example: `//user discord_id donator (true` or `false`)* 
+*example: `//user user_name donator (true` or `false`)* 
 - **Add** | *No Options* | parameters: `user_name` | Permission level: `Staff` <br>
 - **Ban** | *No Options* | parameters: `user_name` / `time(optional)` / `reason:(optional)` | Permisson level: `Staff` <br>
-- **Donator** | *No Options* | parameters: `user_name` `true` or `false` | Permission level: `Moderator` <br>
+- **Donator** | *No Options* | parameters: `user_name` / `true` or `false` | Permission level: `Moderator` <br>
 - **IGN** | *No Options* | parameters: `user_name` | Permission level: `Staff` <br>
 - **Info** | *No Options* | parameters: `user_name` | Permission level: `Staff` <br>
 - **Infractions** | options: `add` or `del` | parameters: `user_name` / `infractionID(del:optional)` / `time(add:optional)` / `reason:(add:optional)` | Permission level: `Staff` <br>

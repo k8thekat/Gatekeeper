@@ -59,14 +59,14 @@ def init(client,rolecheck,botoutput):
                 #channel = int(channel) 
                 print('Starting Console Threads...')
                 server_thread = threading.Thread(target = serverconsole(AMPservers[server],db_server))
-                SERVERCONSOLE = {int(channel): AMPservers[server], 'DBserver': db_server, 'thread' : server_thread, 'status' : AMPservers[server].Running}
+                SERVERCONSOLE = {int(channel): {'AMPserver' :AMPservers[server], 'DBserver': db_server, 'thread' : server_thread, 'status' : AMPservers[server].Running}}
                 server_thread.start()
         print(SERVERCONSOLE)
 
 #Sends the console to the predefined channel
 async def serverConsoletoDiscord(channel, entry):
     try:
-        await channel.send(entry) #!!This will be accessed via the console.py
+        await channel.send(entry) 
     except Exception as e:
         BOTOUTPUT(e)
 
@@ -74,6 +74,7 @@ async def serverConsoletoDiscord(channel, entry):
 def on_message(message):
     global CLIENT
     if message.channel.id in SERVERCONSOLE:
+        #TODO Possible Error Here TypeError: 'AMPAPI' object is not subscriptable
         if SERVERCONSOLE[message.channel.id]['status']:
             if ROLECHECK(message, 'Maintenance'):
                 SERVERCONSOLE[message.channel.id].ConsoleMessage(message.content)

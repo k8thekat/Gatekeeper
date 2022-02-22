@@ -88,7 +88,7 @@ def spamFilter(message):
     global MSGLOG
     storeflag = False
     #print(message.author.name,message.content,message.mention_everyone)
-    flags = ['https://','.gift','nitro','']
+    flags = ['https://','.gift','nitro']
     data =  {'Count' : 1, 'First Seen': datetime.now()}  
 
     for flag in flags:

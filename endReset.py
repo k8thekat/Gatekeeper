@@ -24,12 +24,21 @@ import config
 import io
 import base64
 import gzip
+import platform
+FILENAME = ''
+OSPLAT = ''
 
 def init(AMPservers,curserver):
-    leveldat = AMPservers[curserver].getFileChunk('world\leveltest.dat',0,33554432)
+    global FILENAME, OSPLAT
+    OSPLAT = platform.system()
+    if OSPLAT.lower() == 'windows':
+        FILENAME = f'world\level.dat'
+    if OSPLAT.lower() == 'linux': #Flip the slash to accomadate Linux users <3
+        FILENAME = f'world/level.dat'
+    leveldat = AMPservers[curserver].getFileChunk(FILENAME,0,33554432)
     newlevel = dragonReset(base64.b64decode(leveldat['result']['Base64Data']))
     newdata = base64.b64encode(newlevel).decode('utf-8')
-    AMPservers[curserver].writeFileChunk('world\leveltest.dat',0,newdata)
+    AMPservers[curserver].writeFileChunk(FILENAME,0,newdata)
     worldremove(AMPservers,curserver)
     return True
 
@@ -56,10 +65,15 @@ def dragonReset(leveldat):
 
 def worldremove(AMPservers,curserver):
     print('Removing the End World file...')
+    global OSPLAT
     if config.Multiverse_Core:
         worlddir = AMPservers[curserver].TrashDirectory('world_the_end')
         print(worlddir)
     else:
-        worlddir = AMPservers[curserver].TrashDirectory('world\DIM-1')
+        if OSPLAT.lower() == 'windows':
+            trashdir = f'world\DIM-1'
+        if OSPLAT.lower() == 'linux': #Flip the slash to accomadate Linux users <3
+            trashdir = f'world/DIM-1'
+        worlddir = AMPservers[curserver].TrashDirectory(trashdir)
         print(worlddir)
     return

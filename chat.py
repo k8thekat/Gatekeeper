@@ -54,7 +54,7 @@ def init(client):
         if channel != None:
             print('Starting Chat Threads...')
             server_thread = threading.Thread(target = MCchattoDiscord(AMPservers[server],db_server))
-            SERVERCHAT = {int(channel): AMPservers[server], 'DBserver': db_server, 'thread' : server_thread, 'status' : AMPservers[server].Running}
+            SERVERCHAT = {int(channel): {'AMPserver' : AMPservers[server], 'DBserver': db_server, 'thread' : server_thread, 'status' : AMPservers[server].Running}}
             server_thread.start()
     print(SERVERCHAT)
 

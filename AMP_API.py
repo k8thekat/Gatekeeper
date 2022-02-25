@@ -32,6 +32,8 @@ import pprint
 import sys
 import os
 
+SessionIDlist = {}
+
 #Checks for Errors in Config
 def init():
     reset = False
@@ -49,6 +51,7 @@ def init():
 
 def Login(func):
     def wrapper(*args, **kargs):
+        global SessionIDlist
         self = args[0]
 
         if self.Running == False:
@@ -56,6 +59,10 @@ def Login(func):
             return False
 
         if self.SessionID == 0:
+            if self.InstanceID in SessionIDlist:
+                self.SessionID = SessionIDlist[self.InstanceID]
+                return func(*args, **kargs)
+
             print(f'Logging in {self.InstanceID}')
             if self.AMP2Factor != None:
                 token = self.AMP2Factor.now()
@@ -70,13 +77,13 @@ def Login(func):
             result = self.CallAPI('Core/Login',parameters)
             self.SessionID = result['sessionID']
             if ("checkup" not in kargs) or (kargs["checkup"] == False):
-                self.sessionIDlist.append(self.SessionID)
+                SessionIDlist[self.InstanceID] = self.SessionID
 
         return func(*args, **kargs)
     return wrapper
 
 class AMPAPI:
-    def __init__(self, instanceID = 0, serverdata = {},sessionIDlist = [],Index = 0):
+    def __init__(self, instanceID = 0, serverdata = {},Index = 0):
         self.url = config.AMPurl + '/API/' #base url for AMP console /API/
         if instanceID != 0:
             self.url += f"ADSModule/Servers/{instanceID}/API/"
@@ -92,7 +99,7 @@ class AMPAPI:
             return
         self.SessionID = 0
         self.Index = Index
-        self.sessionIDlist = sessionIDlist
+    
         self.serverdata = serverdata
         if instanceID != 0:
             for entry in serverdata:
@@ -307,10 +314,12 @@ class AMPAPI:
         result = self.CallAPI('FileManagerPlugin/EmptyTrash',parameters)
         return result
 
+    #TODO Need to fix list
     def sessionCleanup(self):
+        global SessionIDlist
         sessions = self.getActiveAMPSessions()
         for entry in sessions['result']:
             if entry['Username'] == config.AMPUser:
-                if entry['SessionID'] not in self.sessionIDlist:
+                if entry['SessionID'] not in SessionIDlist:
                     self.endUserSession(entry['SessionID'])
         return

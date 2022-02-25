@@ -51,7 +51,7 @@ import timehandler
 import UUIDhandler
 
 
-Version = 'alpha-2.1.2' #Major.Minor.Revisions
+Version = 'alpha-2.2.0' #Major.Minor.Revisions
 print('Version:', Version)
 
 async_loop = asyncio.new_event_loop()
@@ -67,7 +67,7 @@ import chat
 #AMP API setup
 AMP = AMPAPI()
 AMPservers = AMP.getInstances() # creates objects for each server in AMP (returns serverlist)
-AMP.sessionCleanup() #cleans up any existing connections to prevent excessive AMP connections
+#AMP.sessionCleanup() #cleans up any existing connections to prevent excessive AMP connections
 
 #database setup
 db = database.Database()
@@ -1298,7 +1298,7 @@ def AMPinstancecheck(startup = False):
         return
     AMPserverscheck = AMP.getInstances(checkup=True)
     time.sleep(1)
-    AMP.sessionCleanup()
+    #AMP.sessionCleanup()
     response = f'Found no new Instances..'
     if AMPserverscheck.keys() != AMPservers.keys():
         AMPserverConsoles = AMP.getInstances()
@@ -1362,8 +1362,13 @@ def threadloop():
 
 #Runs on startup...
 def defaultinit():
+    global AMPservers
     loop = threading.Thread(target=threadloop)
     loop.start()
+    chatloop = threading.Thread(target = chat.init, args = (client,))
+    chatloop.start()
+    consoleloop = threading.Thread(target = console.init, args=(client,rolecheck,botoutput))
+    consoleloop.start()
     try:
         isconfigured = dbconfig.Isconfigured
         return 
@@ -1397,7 +1402,5 @@ def defaultinit():
 defaultinit()
 AMPinstancecheck(startup = True)
 whitelist.init(AMP,AMPservers,db,dbconfig)
-console.init(client,rolecheck,botoutput)
-chat.init(client)
 whitelistfilecheck(db)
 client.run(tokens.token)

@@ -26,6 +26,7 @@ import database
 import threading
 import consolescan
 import consolefilters
+import time
 
 
 #database setup
@@ -47,7 +48,7 @@ ROLECHECK = None
 BOTOUTPUT = None
 
 def init(client,rolecheck,botoutput):
-    global CLIENT,SERVERCONSOLE,ROLECHECK
+    global CLIENT,SERVERCONSOLE,ROLECHECK,AMPservers
     CLIENT = client
     ROLECHECK = rolecheck
     BOTOUTPUT = botoutput
@@ -58,7 +59,8 @@ def init(client,rolecheck,botoutput):
             if channel != None:
                 #channel = int(channel) 
                 print('Starting Console Threads...')
-                server_thread = threading.Thread(target = serverconsole(AMPservers[server],db_server))
+                server_thread = threading.Thread(target = serverconsole, args = (AMPservers[server],db_server))
+                time.sleep(0.1)
                 SERVERCONSOLE = {int(channel): {'AMPserver' :AMPservers[server], 'DBserver': db_server, 'thread' : server_thread, 'status' : AMPservers[server].Running}}
                 server_thread.start()
         print(SERVERCONSOLE)
@@ -85,6 +87,7 @@ def on_message(message):
 #Parses each AMP Server Console
 def serverconsole(amp_server,db_server):
     if amp_server.Running:
+        time.sleep(0.5)
         console = amp_server.ConsoleUpdate()
         consolemsg = []
         #Walks through every entry of a Console Update

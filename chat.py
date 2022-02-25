@@ -26,6 +26,7 @@ import database
 import threading
 import UUIDhandler
 import chatfilter
+import time
 
 #database setup
 db = database.Database()
@@ -46,14 +47,15 @@ SERVERCHAT = {}
 
 def init(client):
     #Lets generate our list of servers via Chat channels for easier lookup.
-    global SERVERCHAT,CLIENT
+    global SERVERCHAT,CLIENT, AMPservers
     CLIENT = client #Store my discord client for Discord related API functions.
     for server in AMPservers:
         db_server = db.GetServer(server)
         channel = db_server.DiscordChatChannel #Needs to be an int() because of discord message.channel.id type is int()
         if channel != None:
             print('Starting Chat Threads...')
-            server_thread = threading.Thread(target = MCchattoDiscord(AMPservers[server],db_server))
+            server_thread = threading.Thread(target = MCchattoDiscord, args= (AMPservers[server],db_server))
+            time.sleep(0.1)
             SERVERCHAT = {int(channel): {'AMPserver' : AMPservers[server], 'DBserver': db_server, 'thread' : server_thread, 'status' : AMPservers[server].Running}}
             server_thread.start()
     print(SERVERCHAT)
@@ -87,6 +89,7 @@ async def MCchatsend(channel, user, message):
 #Console messages are checked by 'Source' and by 'Type' to be sent to a designated discord channel.
 def MCchattoDiscord(amp_server,db_server):
     if amp_server.Running:
+        time.sleep(0.5)
         chat = amp_server.ConsoleUpdate()
         outputchan = CLIENT.get_channel(int(db_server.DiscordChatChannel))
         #Walks through every entry of a Console Update

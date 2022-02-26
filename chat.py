@@ -23,11 +23,9 @@
 from AMP_API import AMPAPI
 import asyncio
 import database
-import threading
 import UUIDhandler
 import chatfilter
 import time
-import traceback
 
 #database setup
 db = database.Database()
@@ -49,11 +47,8 @@ def init(client):
         db_server = db.GetServer(server)
         channel = db_server.DiscordChatChannel #Needs to be an int() because of discord message.channel.id type is int()
         if channel != None:
-            #server_thread = threading.Thread(target = MCchattoDiscord, args= (AMPservers[server],async_loop,disc_channel))
             time.sleep(0.1)
             SERVERCHAT = {int(channel): {'AMPserver' : AMPservers[server], 'DBserver': db_server, 'status' : AMPservers[server].Running}}
-            #server_thread.start()
-    #print(SERVERCHAT)
 
 #@client.event()
 #This handles scanning discord chat messages to send it to the correct minecraft server

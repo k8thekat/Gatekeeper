@@ -25,6 +25,7 @@ import plugin_commands
 from datetime import datetime, timedelta
 import traceback
 import database
+import datetime
 
 #Database
 db = database.Database()
@@ -136,16 +137,16 @@ def scan(amp_server,entry):
     
     #User Played Time
     if entry['Source'] == 'Server thread/INFO' and entry['Contents'].endswith('has left the game!'):
-        time_online = datetime.fromtimestamp(float(entry['Timestamp'][6:-2])/1000)
+        logout_time = datetime.fromtimestamp(float(entry['Timestamp'][6:-2])/1000)
         entry = entry['Contents'].split(' ') #Prep to help me get the user out of the 'Contents'
         user = entry[0]
         if user == None:
             return True, f'Failed to get User: {entry[0]}; please attempt to add them or update their IGN manually.'
-            
+    
         lastlogin = curserver.GetUser(entry[0]).LastLogin #Gets the datetime object of the ServerUser last login
-        timeplayed = curserver.GetUser(entry[0]).TimePlayed #Gets the time played of the ServerUser
-        time_online = (time_online.second/60) #Turn our value into minutes.
-        timeplayed += (lastlogin - time_online) #Add's the play time to their current accured amount of play time..
-        return True, f'Updated User: {entry[0]} played time increased by {time_online} Minutes. Total: {timeplayed} Minutes.'
+        total_timeplayed = curserver.GetUser(entry[0]).TimePlayed #Gets the time played of the ServerUser - Should be in minutes
+        time_played = (lastlogin - logout_time) #The datetime of how long they played.
+        total_timeplayed += (time_played.seconds/60) #Add's the play time to their current accured amount of play time..
+        return True, f'Updated User: {entry[0]} played time increased by {time_played} Minutes. Total: {total_timeplayed} Minutes.'
 
     return False, entry

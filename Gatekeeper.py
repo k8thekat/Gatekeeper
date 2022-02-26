@@ -21,12 +21,10 @@
 ## Gatekeeper Bot
 ## k8thekat - 11/5/2021
 ## 
-from tracemalloc import start
+from tracemalloc
 import discord
 from discord.ext import commands 
 import json
-import requests
-import requests.sessions
 from distutils.util import strtobool
 import time
 from pprint import pprint
@@ -36,14 +34,13 @@ from datetime import datetime, timedelta
 import base64
 import random
 import traceback
-import math
 
 # Bot Scripts
 import database
 import tokens
 from AMP_API import AMPAPI
 import config
-import endReset # Coming soon
+import endReset
 import whitelist 
 import commandlogger
 import chatfilter
@@ -53,7 +50,7 @@ import console
 import chat
 
 
-Version = 'alpha-2.2.1' #Major.Minor.Revisions
+Version = 'alpha-2.2.3' #Major.Minor.Revisions
 print('Version:', Version)
 
 async_loop = asyncio.new_event_loop()
@@ -155,7 +152,7 @@ def serverdiscordchannel(ctx,curserver,parameter):
                 curserver.DiscordConsoleChannel(None)
             else:
                 curserver.DiscordConsoleChannel = str(channel.id)
-                #
+                console.threadinit(curserver,channel,'console',client,async_loop)
                 return f'Set Discord Console Channel for {curserver.FriendlyName} to {channel.name}.'
     else:
         return f'**Format**: //server {curserver.FriendlyName} discordchannel (chat or console) discord_channel_name or discord_channel_id'

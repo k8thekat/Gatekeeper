@@ -41,8 +41,8 @@ def init():
         FILENAME = f'\\logs\\commandlog-{curtime.strftime("%d-%m-%Y")}.json'
         DIR = '\\logs\\'
     if osplat.lower() == 'linux': #Flip the slash to accomadate Linux users <3
-        FILENAME = f'/logs/commandlog-{curtime.strftime("%d-%m-%Y")}.json'
-        DIR = '/logs/'
+        FILENAME = f'//logs//commandlog-{curtime.strftime("%d-%m-%Y")}.json'
+        DIR = '//logs//'
     try:
         dircheck = os.path.isdir(botdir + DIR)
         if dircheck != True:

@@ -43,8 +43,8 @@ def filters(entry):
                 return True
 
         if config.Debugging:
-            if entry['Source'].lower() == 'server thread/info':
-                return True
+            #if entry['Source'].lower() == 'server thread/info':
+               # return True
             if entry['Source'].lower() == 'server thread/error':
                 return True
             #!! Needs to be Adressed; find out console filter solutions for mod loading.

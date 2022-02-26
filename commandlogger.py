@@ -44,9 +44,11 @@ def init():
         FILENAME = f'/logs/commandlog-{curtime.strftime("%d-%m-%Y")}.json'
         DIR = '/logs/'
     try:
-        print('Making Log Directory')
-        os.makedirs(botdir + '\\logs')
-        logfileloader()
+        dircheck = os.path.isdir(botdir + DIR)
+        if dircheck != True:
+            print('Making Log Directory')
+            os.makedirs(botdir + DIR)
+            logfileloader()
     except Exception as e:
         print(e)
         traceback.print_exc()

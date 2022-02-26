@@ -20,6 +20,7 @@
 
 '''
 #Gatekeeper - Minecraft Console
+from http import client
 from AMP_API import AMPAPI
 import asyncio
 import database
@@ -27,56 +28,59 @@ import threading
 import consolescan
 import consolefilters
 import time
-
+import traceback
+import chat
 
 #database setup
 db = database.Database()
 dbconfig = db.GetConfig()
 
-#Async function setup
-async_loop = asyncio.new_event_loop()
-asyncio.set_event_loop(async_loop)
-
 #AMP API setup
 AMP = AMPAPI()
 AMPservers = AMP.getInstances() # creates objects for server console/chat updates
 
-
-CLIENT = None
+#client = None
 SERVERCONSOLE = {}
 ROLECHECK = None
 BOTOUTPUT = None
 
-def init(client,rolecheck,botoutput):
-    global CLIENT,SERVERCONSOLE,ROLECHECK,AMPservers
-    CLIENT = client
+def init(client,rolecheck,botoutput,async_loop):
+    while(client.is_ready() == False): #Lets wait to start this until the bot has fully setup.
+        time.sleep(1)
+    global SERVERCONSOLE,BOTOUTPUT,ROLECHECK,AMPservers
     ROLECHECK = rolecheck
     BOTOUTPUT = botoutput
     if dbconfig.Autoconsole:
         for server in AMPservers:
             db_server = db.GetServer(server)
-            channel = db_server.DiscordChatChannel #Needs to be an int() because of discord message.channel.id type is int()
+            channel = db_server.DiscordConsoleChannel #Needs to be an int() because of discord message.channel.id type is int()
+            #print(db_server.FriendlyName,channel)
             if channel != None:
+                disc_channel = client.get_channel(int(channel))
+                #print('Disc Channel',disc_channel,channel)
                 #channel = int(channel) 
                 print('Starting Console Threads...')
-                server_thread = threading.Thread(target = serverconsole, args = (AMPservers[server],db_server))
+                server_thread = threading.Thread(target = serverconsole, args = (AMPservers[server],db_server,disc_channel,client,async_loop))
                 time.sleep(0.1)
                 SERVERCONSOLE = {int(channel): {'AMPserver' :AMPservers[server], 'DBserver': db_server, 'thread' : server_thread, 'status' : AMPservers[server].Running}}
                 server_thread.start()
-        print(SERVERCONSOLE)
+        #print(SERVERCONSOLE)
 
 #Sends the console to the predefined channel
 async def serverConsoletoDiscord(channel, entry):
+    global BOTOUTPUT
     try:
         await channel.send(entry) 
     except Exception as e:
+        print(e)
+        traceback.print_exc()
         BOTOUTPUT(e)
 
+#@client.event()
 #This handles passing DISCORD Chat commands to the MC server
 def on_message(message):
-    global CLIENT
     if message.channel.id in SERVERCONSOLE:
-        #TODO Possible Error Here TypeError: 'AMPAPI' object is not subscriptable
+        #TODO  Possible Error Here TypeError: 'AMPAPI' object is not subscriptable
         if SERVERCONSOLE[message.channel.id]['status']:
             if ROLECHECK(message, 'Maintenance'):
                 SERVERCONSOLE[message.channel.id].ConsoleMessage(message.content)
@@ -85,15 +89,22 @@ def on_message(message):
         
 
 #Parses each AMP Server Console
-def serverconsole(amp_server,db_server):
-    if amp_server.Running:
+def serverconsole(amp_server,db_server,channel,client,async_loop):
+    global BOTOUTPUT
+    #print(db_server)
+    #print(channel,type(channel))
+    #print(db_server) #server object check from DB
+    while amp_server.Running:
         time.sleep(0.5)
         console = amp_server.ConsoleUpdate()
         consolemsg = []
         #Walks through every entry of a Console Update
         for entry in console['ConsoleEntries']:
+            #print(amp_server.FriendlyName,entry)
             #Checks every entry to update DB values if needed
             status = consolescan.scan(amp_server,colorstrip(entry))
+            chat.MCchattoDiscord(db_server,async_loop,client,entry)
+            #print(status) 
             if status[0] == True:
                 BOTOUTPUT(status[1])
                 continue
@@ -103,7 +114,7 @@ def serverconsole(amp_server,db_server):
                 entry = consolefilters.filters(entry)
             if entry == True:
                 continue
-            elif len(entry['Contents']) > 1500:
+            if len(entry['Contents']) > 1500:
                 msg_len_index = entry['Contents'].rindex(';')
                 while msg_len_index > 1500:
                     msg_len_indexend = msg_len_index
@@ -115,23 +126,23 @@ def serverconsole(amp_server,db_server):
                         msg_len_index = len(entry['Contents'])
                         continue
             else:
-                consolemsg.append(f"{entry['Source']}: {entry['Contents']}")
-        if db_server.DiscordConsoleChannel != None:
-            channel = CLIENT.get_channel(int(db_server.DiscordConsoleChannel))
-            if len(consolemsg) > 0:
-                bulkentry = ''
-                for entry in consolemsg:
-                    if len(bulkentry + entry) < 1500:
-                        bulkentry = bulkentry + entry + '\n' 
-                    else:
-                        serverConsoletoDiscord(channel,entry)
-                        #ret = asyncio.run_coroutine_threadsafe(serverconsolemessage(outputchan, bulkentry[:-1]), async_loop)
-                        #ret.result()
-                        bulkentry = entry + '\n'
-                if len(bulkentry):
-                    serverConsoletoDiscord(channel,entry)
-                    #ret = asyncio.run_coroutine_threadsafe(serverconsolemessage(outputchan, bulkentry[:-1]), async_loop)
-                    #ret.result()
+                consolemsg.append(f"{entry['Source']}: {entry['Contents']}")   
+        if len(consolemsg) > 0:
+            bulkentry = ''
+            for entry in consolemsg:
+                if len(bulkentry + entry) < 1500:
+                    bulkentry = bulkentry + entry + '\n' 
+                else:
+                    #serverConsoletoDiscord(channel,bulkentry[:-1])
+                    ret = asyncio.run_coroutine_threadsafe(serverConsoletoDiscord(channel,bulkentry[:-1]),async_loop)
+                    ret.result()
+                    bulkentry = entry + '\n'
+            if len(bulkentry):
+                #serverConsoletoDiscord(channel,bulkentry[:-1])
+                ret = asyncio.run_coroutine_threadsafe(serverConsoletoDiscord(channel,bulkentry[:-1]),async_loop)
+                ret.result()
+
+ 
 
 #Removed the odd character for color idicators on text
 def colorstrip(entry):

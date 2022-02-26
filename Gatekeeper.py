@@ -49,9 +49,11 @@ import commandlogger
 import chatfilter
 import timehandler
 import UUIDhandler
+import console
+import chat
 
 
-Version = 'alpha-2.2.0' #Major.Minor.Revisions
+Version = 'alpha-2.2.1' #Major.Minor.Revisions
 print('Version:', Version)
 
 async_loop = asyncio.new_event_loop()
@@ -60,9 +62,7 @@ asyncio.set_event_loop(async_loop)
 intents = discord.Intents.default() # Default
 intents.members = True
 client = commands.Bot(command_prefix = '//', intents=intents, loop=async_loop)
-import console
-import chat
-#client.remove_command('help')
+
 
 #AMP API setup
 AMP = AMPAPI()
@@ -689,7 +689,7 @@ async def user(ctx,*parameter):
         except:
             response = userfuncs[parameter[1]](ctx,cur_db_user,parameter)
     else:
-        return await ctx.send('**Format**: //user {curuser.DiscordName} {parameter[1]} (option) (parameter)',reference = ctx.message.to_reference())
+        return await ctx.send(f'**Format**: //user {curuser.DiscordName} {parameter[1]} (option) (parameter)',reference = ctx.message.to_reference())
     return await ctx.send(response,reference= ctx.message.to_reference()) 
 
 #Adds the User to the Server Lists and updates their whitelist flags        
@@ -924,7 +924,7 @@ async def botsetting(ctx,*parameter):
                     if value == True:
                         botoutput('Currently initiating Consoles...')
                         #Starts up the console functions
-                        console.init() 
+                        #!TODO Need to start up the console here...
             except:
                 response = f'**Format:** //botsetting {parameter[0]} (True or False)'
         else:
@@ -1205,12 +1205,13 @@ async def on_message(message):
             db.AddUser(DiscordID = str(message.author.id), DiscordName = message.author.name)
     if console.on_message(message):
         return
-    if chat.on_message(message):
+    if chat.on_message(message,client):
         return
     else:
         chat_filter = chatfilter.spamFilter(message)
         if chat_filter == True:
             print('Kicking the user from the server...')
+            #!TODO client.kick script here
             return 
         if dbconfig.Autoreply:
             if (message.content.lower() == 'help'):
@@ -1332,7 +1333,7 @@ async def discordRoleSet(user):
 #General thread loop for all recurring checks/events...
 def threadloop():
     time.sleep(1)
-    print('Recurring Thread Loop Initiated...\n')
+    print('Recurring Thread Loop Initiated...')
     localdb = database.Database()
     updateinterval = datetime.now()
     while(1):
@@ -1362,13 +1363,15 @@ def threadloop():
 
 #Runs on startup...
 def defaultinit():
-    global AMPservers
+    global AMPservers,async_loop
     loop = threading.Thread(target=threadloop)
     loop.start()
     chatloop = threading.Thread(target = chat.init, args = (client,))
     chatloop.start()
-    consoleloop = threading.Thread(target = console.init, args=(client,rolecheck,botoutput))
+    consoleloop = threading.Thread(target = console.init, args=(client,rolecheck,botoutput,async_loop))
     consoleloop.start()
+    #CommandLogger 
+    commandlogger.init()
     try:
         isconfigured = dbconfig.Isconfigured
         return 
@@ -1378,8 +1381,6 @@ def defaultinit():
     for entry in AMPservers:
         db.AddServer(InstanceID= AMPservers[entry].InstanceID, FriendlyName= AMPservers[entry].FriendlyName)
 
-    #CommandLogger 
-    commandlogger.init()
     print('Setting up database')
     dbconfig.AddSetting('Isconfigured', True)
     dbconfig.AddSetting('Firststartup', True)

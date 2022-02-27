@@ -13,7 +13,7 @@ Some additional functionality was added for replying to players with certain key
 - Please Install [Python](https://www.python.org/); you will also need to install the required packages. 
     - **Run `pip install -r requirements.txt`** in the same directory as Gatekeeper Bot.
 - You also need to be using [Cube Coders AMP](https://cubecoders.com/AMP) with a instance of Minecraft Java (any version later than 1.12) set up and running.
-    - Please set the AMP Role Permissions to [AMP Perms 1](imgs/AMP_perms1.png) and [AMP Perms2](imgs/AMP_perms2.png).
+    - Please set the AMP Role Permissions to [AMP Perms 1](imgs/AMP_Perms1.png) and [AMP Perms2](imgs/AMP_Perms2.png).
 
 ---
 
@@ -27,7 +27,7 @@ Some additional functionality was added for replying to players with certain key
 5. Setting up your AMP **Servers**
     - You must enable `whitelist` on your AMP Instance via `Configuration -> Gameplay and Difficulty`
         - You must set the servers `//server server_name whitelist` to `true` to allow for users to request whitelist.
-6. Once done; familarize yourself with the [**Commands**](COMMANDS.md)
+6. Once done; familarize yourself with the [**Commands**](Commands.md)
 ---
 ## Features
 - Multi-MC Server Support with Database integration for storing Server specific settings and controls!

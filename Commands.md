@@ -115,4 +115,4 @@ These ranks do follow a heirachy starting from `General` to `Operator`; each ran
 
 
 ---
-**Version** alpha-1.0.0
+**Version** alpha-1.0.1

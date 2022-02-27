@@ -43,6 +43,7 @@ SERVERCONSOLE = {}
 SERVERTHREADS = {}
 ROLECHECK = None
 BOTOUTPUT = None
+channelinit = None
 
 def init(client,rolecheck,botoutput,async_loop):
     while(client.is_ready() == False): #Lets wait to start this until the bot has fully setup.
@@ -54,22 +55,37 @@ def init(client,rolecheck,botoutput,async_loop):
         db_server = db.GetServer(server)
         channel = db_server.DiscordConsoleChannel #Needs to be an int() because of discord message.channel.id type is int()
         #print(db_server.FriendlyName,channel)
-        server_thread = threading.Thread(target = serverconsole, args = (AMPservers[server],db_server,disc_channel,client,async_loop))
         if channel != None:
             disc_channel = client.get_channel(int(channel))
+            print(f'Starting Console Thread for {AMPservers[server].FriendlyName}')
+            server_thread = threading.Thread(target = serverconsole, args = (AMPservers[server],db_server,disc_channel,client,async_loop))
             SERVERCONSOLE = {int(channel): {'AMPserver' :AMPservers[server], 'DBserver': db_server, 'thread' : server_thread, 'status' : AMPservers[server].Running}}
-        print('Starting Console Threads...')
-        SERVERTHREADS = {AMPservers[server]: server_thread}
-        time.sleep(0.1)
-        server_thread.start()
+            SERVERTHREADS = {AMPservers[server]: server_thread}
+            time.sleep(0.1)
+            server_thread.start()
 
-def threadinit(db_server,channel):
-    global SERVERCONSOLE
+            
+#This is called when someone changed a servers console channel; so lets spin up its thread to start scanning.
+def threadinit(db_server,channel,client,async_loop): 
+    global SERVERCONSOLE,SERVERTHREADS,channelinit
     if channel not in SERVERCONSOLE:
-        server_thread = SERVERTHREADS[AMPservers[db_server.InstanceID]]
+        print(f'Starting Thread for {db_server.FriendlyName}')
+        disc_channel = client.get_channel(int(channel)) #lets update our global so the thread can have an updated value
+        server_thread = threading.Thread(target = serverconsole, args = (AMPservers[db_server.InstanceID],db_server,disc_channel,client,async_loop))
         SERVERCONSOLE = {int(channel): {'AMPserver' :AMPservers[db_server.InstanceID], 'DBserver': db_server, 'thread' : server_thread, 'status' : AMPservers[db_server.InstanceID].Running}}
+        SERVERTHREADS = {AMPservers[db_server.InstanceID]: server_thread}
+        server_thread.start()
     return
 
+def threadstop(db_server):
+    server = AMPservers[db_server.InstanceID]
+    global SERVERTHREADS
+    if server in SERVERTHREADS:
+        SERVERTHREADS[server].stop() 
+
+def threadstopall():
+    for server in SERVERTHREADS:
+        SERVERTHREADS[server].stop()
 
 #Sends the console to the predefined channel
 async def serverConsoletoDiscord(channel, entry):
@@ -94,7 +110,8 @@ def on_message(message):
 
 #Parses each AMP Server Console
 def serverconsole(amp_server,db_server,channel,client,async_loop):
-    global BOTOUTPUT
+    global BOTOUTPUT,channelinit
+    channel = channelinit
     while amp_server.Running:
         time.sleep(0.5)
         console = amp_server.ConsoleUpdate()

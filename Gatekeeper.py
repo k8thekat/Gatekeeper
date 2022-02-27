@@ -21,7 +21,6 @@
 ## Gatekeeper Bot
 ## k8thekat - 11/5/2021
 ## 
-from tracemalloc
 import discord
 from discord.ext import commands 
 import json
@@ -50,7 +49,7 @@ import console
 import chat
 
 
-Version = 'alpha-2.2.3' #Major.Minor.Revisions
+Version = 'alpha-2.2.4' #Major.Minor.Revisions
 print('Version:', Version)
 
 async_loop = asyncio.new_event_loop()
@@ -150,9 +149,11 @@ def serverdiscordchannel(ctx,curserver,parameter):
         elif parameter[2].lower() == 'console':
             if parameter[3] == 'None':
                 curserver.DiscordConsoleChannel(None)
+                console.threadstop(curserver) #curserver = db object
             else:
                 curserver.DiscordConsoleChannel = str(channel.id)
-                console.threadinit(curserver,channel,'console',client,async_loop)
+                #This starts up the thread now that a discord console channel was set.
+                console.threadinit(curserver,channel,client,async_loop) #curserver= db object, channel = discord object, client = bot object
                 return f'Set Discord Console Channel for {curserver.FriendlyName} to {channel.name}.'
     else:
         return f'**Format**: //server {curserver.FriendlyName} discordchannel (chat or console) discord_channel_name or discord_channel_id'
@@ -917,11 +918,6 @@ async def botsetting(ctx,*parameter):
                 value = strtobool(parameter[1])
                 dbconfig.SetSetting(parameter[0], value)
                 response = f'**{parameter[0].capitalize()}** is now set to {bool(value)}.'
-                if parameter[0].lower() == 'autoconsole':
-                    if value == True:
-                        botoutput('Currently initiating Consoles...')
-                        #Starts up the console functions
-                        #!TODO Need to start up the console here...
             except:
                 response = f'**Format:** //botsetting {parameter[0]} (True or False)'
         else:

@@ -19,7 +19,7 @@
    02110-1301, USA. 
 '''
 #Gatekeeper Bot - Console Scanning
-import old.commandlogger as commandlogger
+import logger
 import config
 import plugin_commands
 from datetime import datetime, timedelta
@@ -37,7 +37,7 @@ def scan(amp_server,entry):
     curserver = db.GetServer(amp_server.InstanceID)
     #Finding in game issued server commands
     if entry['Contents'].find('issued server command:') != -1:
-        commandlogger.logHandler(None,curserver,entry,'console')
+        logger.commandLog(None,curserver,entry,'console')
         entry_split = entry['Contents'].split(' ')
         command_user = entry_split[0]
         command = entry_split[4]
@@ -71,7 +71,7 @@ def scan(amp_server,entry):
     #Player�c Console �6banned�c k8_thekat �6for: �c�cYou have been banned:
     if entry['Contents'].startswith('Player Console banned') and entry['Contents'].endswith('You have been banned:'):
         logging.info('User has been banned via console...')
-        commandlogger.logHandler(None,curserver,entry,'console')
+        logger.commandLog(None,curserver,entry,'console')
         entry_split = entry['Contents'].split(' ')
         try:
             curserver.GetUser(entry_split[3]).SuspensionExpiration = curtime + timedelta(days=9999)
@@ -83,7 +83,7 @@ def scan(amp_server,entry):
     #�6Player�c Console �6unbanned�c k8_thekat
     if entry['Contents'].startswith('Player Console unbanned'):
         logging.info('User has been unbanned via console...')
-        commandlogger.logHandler(None,curserver,entry,'console')
+        logger.commandLog(None,curserver,entry,'console')
         entry_split = entry['Contents'].split(' ')
         try:
             curserver.GetUser(entry_split[3]).SuspensionExpiration = None
@@ -96,7 +96,7 @@ def scan(amp_server,entry):
     #Added k8_thekat to the whitelist
     if entry['Contents'].startswith('Added') and entry['Contents'].endswith('to the whitelist'):
         logging.info('User added to Whitelist via console..')
-        commandlogger.logHandler(None,curserver,entry,'console')
+        logger.commandLog(None,curserver,entry,'console')
         entry_split = entry['Contents'].split(' ')
         try:
             curserver.GetUser(entry_split[1]).Whitelisted = True
@@ -107,7 +107,7 @@ def scan(amp_server,entry):
     #Removed k8_thekat from the whitelist
     if entry['Contents'].startswith('Removed') and entry['Contents'].endswith('from the whitelist'):
         logging.info('User removed from Whitelist via console..')
-        commandlogger.logHandler(None,curserver,entry,'console')
+        logger.commandLog(None,curserver,entry,'console')
         entry_split = entry['Contents'].split(' ')
         try:
             curserver.GetUser(entry_split[1]).Whitelisted = False

@@ -20,9 +20,15 @@
 '''
 #Config file for Gatekeeper Bot
 #Author: k8thekat
-#Are you the gate keeper?! <3
+#Are you the Key Master!!? ?! <3
 import tokens
 import database
+import logging
+
+
+#Logging Level (Debug/Info/Warning/Error)
+logginglevel = logging.INFO
+
 
 #Database
 db = database.Database()

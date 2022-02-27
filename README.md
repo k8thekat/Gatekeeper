@@ -42,6 +42,8 @@ Some additional functionality was added for replying to players with certain key
 - Configurable Logging of all Discord Bot Commands and Server Commands by Users.
 - Tracking of Discord Users Donator Status, Minecraft Playtime, In-Game Name, Last login, Infractions/Punishments, Whitelist status, Banned Status/Expiration Time and much more...
 ---
-![img](img/gategif.gif)
+<p align="center">
+<img src="imgs/gategif.gif" />
+</p>
 ---
-**Version** alpha-1.0.1
+**Version** alpha-1.0.2

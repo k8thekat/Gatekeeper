@@ -19,14 +19,13 @@
    02110-1301, USA. 
 '''
 #Gatekeeper Bot - Console Scanning
-import logger
 import config
 import plugin_commands
 from datetime import datetime, timedelta
 import traceback
 import database
-import datetime
 import logging
+import logger
 
 #Database
 db = database.Database()

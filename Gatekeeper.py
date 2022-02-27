@@ -51,7 +51,7 @@ import console
 import chat
 
 
-data = 'alpha-3.0.7' #Major.Minor.Revisions
+data = 'alpha-3.0.8' #Major.Minor.Revisions
 logging.info(f'Version: {data}')
 
 async_loop = asyncio.new_event_loop()
@@ -61,7 +61,6 @@ intents = discord.Intents.default() # Default
 intents.members = True
 client = commands.Bot(command_prefix = '//', intents=intents, loop=async_loop)
 client.remove_command('help')
-
 
 #AMP API setup
 AMP = AMPAPI()
@@ -1215,7 +1214,7 @@ async def on_message(message):
         chat_filter = chatfilter.spamFilter(message)
         if chat_filter == True:
             logging.info('Kicking the user from the server...')
-            #!TODO client.kick script here
+            await client.kick(message.author, reason = 'Spamming our Discord Server...')
             return 
         if dbconfig.Autoreply:
             if (message.content.lower() == 'help'):

@@ -39,7 +39,6 @@ CURTIME = datetime.now()
 DATE = CURTIME.strftime('%Y-%m-%d-')
 OSPLAT = platform.system()
 BOTDIR = os.getcwd()
-LOGFILE_LIST = os.listdir(BOTDIR + DIR)
 LOG = None
 
 def init():
@@ -59,6 +58,12 @@ def init():
                         TimedRotatingFileHandler(log_file_name,'midnight',backupCount= 4,encoding='utf-8',utc=True)])
     return
 
+def logfilelist():
+    list = os.listdir(BOTDIR + DIR)
+    for file in list:
+        if not file.endswith('.json'):
+            list.remove(file)
+    return list
 
 def varupdate(time):
     global DATE,CURTIME

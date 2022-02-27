@@ -51,7 +51,7 @@ import console
 import chat
 
 
-data = 'alpha-3.0.5' #Major.Minor.Revisions
+data = 'alpha-3.0.6' #Major.Minor.Revisions
 logging.info(f'Version: {data}')
 
 async_loop = asyncio.new_event_loop()
@@ -1044,7 +1044,7 @@ async def role(ctx,*parameter):
 
 
 def loglist(ctx,parameter):
-    list = logger.logfile_list #list of all the log files in botdirectory + \\logs
+    list = logger.logfilelist #list of all the log files in botdirectory + \\logs
     return "**List of Log Files:**\n" + '\n'.join(list)
 
 #/logs read filename count start_index

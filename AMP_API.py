@@ -28,7 +28,7 @@ import config
 import pyotp # 2Factor Authentication Python Module
 import json
 import time
-import pprint
+from pprint import pprint
 import sys
 import os
 import logging
@@ -121,14 +121,16 @@ class AMPAPI:
         return post_req.json()
 
     @Login
-    def getInstances(self,checkup = False):
+    def getInstances(self):
         parameters = {}
         result = self.CallAPI('ADSModule/GetInstances',parameters) 
+        #pprint(result)
         serverlist = {}
         for i in range(0,len(result["result"][0]['AvailableInstances'])): #entry = name['result']['AvailableInstances'][0]['InstanceIDs']
             entry = result["result"][0]['AvailableInstances'][i]
-            server = AMPAPI(entry['InstanceID'],entry,Index = i)
-            serverlist[server.InstanceID] = server 
+            if entry['Module'] == 'Minecraft':
+                server = AMPAPI(entry['InstanceID'],entry,Index = i)
+                serverlist[server.InstanceID] = server 
         return serverlist
 
     @Login  
@@ -142,7 +144,7 @@ class AMPAPI:
     @Login
     def ConsoleMessage(self,msg):
         parameters = {'message': msg}
-        print(parameters)
+        #print(parameters)
         result = self.CallAPI('Core/SendConsoleMessage', parameters)
         time.sleep(0.5)
         update = self.ConsoleUpdate()

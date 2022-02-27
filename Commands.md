@@ -22,6 +22,7 @@ ___
 All commands can be used in any channel the bot can see. They are not case sensitive! <br>
 **Commands are triggered via two forward slashes. `//`**. 
 - You can use `//help` at any time for commands. 
+    - `//user` and `//server` support `example` after the command to show examples of code usage. (`//user example`)
     - Some Commands support `list` and `info` after any Command and or its function, the bot will reply with information.
 - All `time` parameters support values: `Years(y:) Months(mo:) Weeks(w:) Days(d:) Hours(h:) Minutes(m:) Seconds(s:)` 
     - All `time` parameters are optional. *example: `//server server_name userban user_name y:2d:4m:45`*
@@ -111,3 +112,7 @@ These ranks do follow a heirachy starting from `General` to `Operator`; each ran
 - Currently all log files are local and can be accessed in the same directory as the bot `Gatekeeper/logs`<br>
 - **List** | Usage: Lists all files in the `Gatekeeper/logs` folder
 - **Read** | Usage: Read entries from a specific log file.
+
+
+---
+**Version** alpha-1.0.0

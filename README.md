@@ -29,3 +29,17 @@ Some additional functionality was added for replying to players with certain key
         - You must set the servers `//server server_name whitelist` to `true` to allow for users to request whitelist.
 6. Once done; familarize yourself with the [**Commands**](COMMANDS.md)
 ---
+## Features
+- Multi-MC Server Support with Database integration for storing Server specific settings and controls!
+- Expanding Support for plugins on your Minecraft Servers such as /tempban!
+- **Auto-Reply** feature to assist players who are in need of information with customizable replies!
+- **Spam Protection** on your Discord Server against Nitro bots and similar spam!
+- **Auto-Whitelist** of Discord Users to your Minecraft Servers with a simple message.
+- **Live** AMP Console to Discord Channels with ability to send server console commands.
+- **Live** Minecraft Server Chat to Discord Channels with communication both ways.
+- Resetting of the Ender Dragon Fight and World via Discord!
+- Control over AMP Servers via Discord with commands such as Start, Stop, Kill and Restart. 
+- Configurable Logging of all Discord Bot Commands and Server Commands by Users.
+- Tracking of Discord Users Donator Status, Minecraft Playtime, In-Game Name, Last login, Infractions/Punishments, Whitelist status, Banned Status/Expiration Time and much more...
+---
+**Version** alpha-1.0.1

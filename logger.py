@@ -18,45 +18,58 @@
    Software Foundation, 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA. 
 '''
-#Gatekeeper Bot - command logger
+#Gatekeeper Bot - logger
 import config
 import os
 import json
 from datetime import datetime
 import traceback
 import platform
+import logging
+import sys
 
 
-curtime = datetime.now()
-botdir = os.getcwd()
-logfile_list = os.listdir(botdir + '\\logs')
-LOGS = []
-FILENAME = ''
-DIR = ''
+
+COMMANDLOGS = []
+FILES = {'log' : 'log',
+        'commands' : 'commandlog.json'}
+DIR = '\\logs\\'
+CURTIME = datetime.now()
+DATE = CURTIME.strftime('%Y-%m-%d-')
+OSPLAT = platform.system()
+BOTDIR = os.getcwd()
+LOGFILE_LIST = os.listdir(BOTDIR + DIR)
+LOG = None
 
 def init():
-    global FILENAME, DIR
-    osplat = platform.system()
-    if osplat.lower() == 'windows':
-        FILENAME = f'\\logs\\commandlog-{curtime.strftime("%d-%m-%Y")}.json'
-        DIR = '\\logs\\'
-    if osplat.lower() == 'linux': #Flip the slash to accomadate Linux users <3
-        FILENAME = f'//logs//commandlog-{curtime.strftime("%d-%m-%Y")}.json'
-        DIR = '//logs//'
-    try:
-        dircheck = os.path.isdir(botdir + DIR)
-        if dircheck != True:
-            print('Making Log Directory')
-            os.makedirs(botdir + DIR)
-            logfileloader()
-    except Exception as e:
-        print(e)
-        traceback.print_exc()
+    global DIR
+    if OSPLAT.lower() == 'linux': #Flip the slash to accomadate Linux users <3
+        DIR.replace('\\','//')
+    
+    dircheck = os.path.isdir(BOTDIR + DIR)
+    if dircheck != True:
+        print('Making Log Directory...')
+        os.makedirs(BOTDIR + DIR)
+        
+    log_file_name = BOTDIR + DIR + DATE + FILES['log']
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(threadName)s] [%(levelname)s]  %(message)s', 
+                        datefmt='%m/%d/%Y %I:%M:%S %p',
+                        handlers = [logging.StreamHandler(sys.stdout),logging.FileHandler(log_file_name,mode = 'a+',encoding='utf-8')])
+    return
 
-def logHandler(ctx,curserver,parameter,loc):
-    global LOGS
-    LOGS = logfileloader()
+
+def varupdate(time):
+    global DATE,CURTIME
+    if CURTIME.day != time.day:
+        CURTIME = datetime.now()
+        DATE = CURTIME.strftime('%d-%m-%Y-') 
+    return
+
+def commandLog(ctx,curserver,parameter,loc):
+    global COMMANDLOGS
+    COMMANDLOGS,filename = logfilehandler('commands')
     server = curserver
+    save = False
     time = datetime.now().strftime('%c')
     if curserver != None:
         server = curserver.FriendlyName
@@ -65,6 +78,7 @@ def logHandler(ctx,curserver,parameter,loc):
         command_user_id = str(ctx.author.id)
         command = str(ctx.command)
         if type(parameter) == tuple:
+            save = True
             logentry = {
                     'User': command_user,
                     'User_ID': command_user_id,
@@ -75,6 +89,7 @@ def logHandler(ctx,curserver,parameter,loc):
                     'Usage' : " ".join(parameter)
                     }     
         elif parameter != None:
+            save = True
             contents_split = parameter.split(' ')
             logentry = {
                 'User': command_user,
@@ -86,6 +101,7 @@ def logHandler(ctx,curserver,parameter,loc):
                 'Usage' : " ".join(contents_split[1:])
                 }     
         else:
+            save = True
             logentry = {
                 'User': command_user,
                 'User_ID': command_user_id,
@@ -94,10 +110,12 @@ def logHandler(ctx,curserver,parameter,loc):
                 'Server' : server,
                 'Command' : command
                 }     
+
+        if save == True:
+            COMMANDLOGS.append(logentry)
+            logfilesaver(COMMANDLOGS,filename)
+            return logging.info('Logged a Discord Command...')
              
-        LOGS.append(logentry)
-        logfilesaver(LOGS)
-        print('Logged a Bot Command')
 
     if loc == 'console':
         contents_split = parameter['Contents'].split(' ')
@@ -115,61 +133,44 @@ def logHandler(ctx,curserver,parameter,loc):
                     'Command' : command,
                     'Usage' : " ".join(contents_split[5:])
                     }                   
-            LOGS.append(logentry)
-            logfilesaver(LOGS)
-            print('Logged a Console Command')
+            COMMANDLOGS.append(logentry)
+            logfilesaver(COMMANDLOGS,filename)
+            logging.info('Logged a Console Command...')
     return
 
-def logfileloader():
-    global FILENAME,LOGS
-    dircheck = os.path.isfile(botdir +  FILENAME)
-    LOGS = []
-    try:    
-        if dircheck != True:
-            newfile = open(botdir + FILENAME, 'x')
-            newfile.close()
-            return LOGS
-        if dircheck:
-            filesize = os.path.getsize(botdir + FILENAME)
-            if filesize != 0:
-                newfile = open(botdir + FILENAME)
-                LOGS = json.load(newfile)
-                newfile.close()
-                return LOGS
-        else:
-            return LOGS
-    except json.decoder.JSONDecodeError as e:
-        print(e)
-        traceback.print_exc()
-    return LOGS
 
-def logfilesaver(log):
-    global FILENAME
-    newfile = open(botdir + FILENAME, 'w') 
+def logfilehandler(type):
+    logging.info('File Handler Type', type)
+    global COMMANDLOGS,DATE
+    if type == 'command':
+        dircheck = os.path.isfile(BOTDIR + DIR + DATE + FILES['commands'])
+        filename = DATE + FILES['commands']
+        
+    try:    
+        if dircheck:
+            newfile = open(BOTDIR + DIR + DATE + filename, 'a+')
+            COMMANDLOGS = json.load(newfile)
+            newfile.close()
+            return COMMANDLOGS,filename
+        else:
+            return COMMANDLOGS,filename
+    except json.decoder.JSONDecodeError as e:
+        logging.error(e)
+        logging.error(traceback.print_exc())
+    return COMMANDLOGS,filename
+
+def logfilesaver(log,filename):
+    logging.info('Log File Saver', filename)
+    newfile = open(BOTDIR + DIR + DATE + filename, 'a+') 
     json.dump(log,newfile, indent=0)
     newfile.close()
     return
 
-def logfilearchiver():
-    global FILENAME
-    logdate = FILENAME.replace('log.json',f'log-{curtime.strftime("%d-%m-%Y")}.json')
-    print(logdate)
-    try:
-        if os.path.isfile(botdir + FILENAME) != True:
-            return
-        else:
-            print('Attempting to rename file')
-            os.rename(botdir + FILENAME, botdir + logdate)
-    except Exception as e:
-        print(e)
-        traceback.print_exc()
-    return
 
 def logfileparse(filename,count= 5,start_index= 0):
     global DIR
     try:
-        #TODO Fix the directory
-        newfile = open(botdir + DIR + filename)
+        newfile = open(BOTDIR + DIR + filename)
         parse_log = json.load(newfile)
     except:
         return 'The File: {filename} was not correct...'
@@ -191,3 +192,4 @@ def logfileparse(filename,count= 5,start_index= 0):
         for logentry in parse_log[:count]:
             log_return.append(str(logentry)[1:-1])
         return log_return
+

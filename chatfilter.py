@@ -20,6 +20,7 @@
 '''
 #Gatekeeper Bot - Chat filter
 from datetime import datetime
+import logging
 
 def scan(content,client):
     content = unicode(content)
@@ -116,9 +117,9 @@ def spamFilter(message):
             MSGLOG[message.author.name] = {message.content: data}
     return False
 
-#Checks the log file for entries older than 5 mminutes and removed them.
+#Checks the log file for entries older than 5 minutes and removed them.
 def logCleaner():
-    print('Cleaning up the Chat log...')
+    logging.info('Cleaning up the Chat Spam Log...')
     global MSGLOG
     authorkeys = list(MSGLOG.keys())
     for author in authorkeys:

@@ -21,6 +21,7 @@
 '''
 #Gatekeeper Bot - consolefilters
 import config
+import logging
 
 def filters(entry):
     if type(entry) == dict:
@@ -60,7 +61,7 @@ def filters(entry):
 def colorstrip(entry):
     char =  '�'
     if entry['Contents'].find(char) != -1:
-        print('Color strip triggered...')
+        logging.info('Color strip triggered...')
         index = 0
         while 1:
             index = entry['Contents'].find(char,index)

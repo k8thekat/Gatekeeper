@@ -25,6 +25,8 @@ import io
 import base64
 import gzip
 import platform
+import logging
+
 FILENAME = ''
 OSPLAT = ''
 
@@ -43,7 +45,7 @@ def init(AMPservers,curserver):
     return True
 
 def dragonReset(leveldat):
-    print('Attempting to reset the Dragon Fight in level.dat...')
+    logging.info('Attempting to reset the Dragon Fight in level.dat...')
     fakefile = io.BytesIO()
     fakefile.write(leveldat)
     fakefile.seek(0)
@@ -55,7 +57,7 @@ def dragonReset(leveldat):
     for entry in dragon_path:
         del_list.append(entry)
     for entry in del_list:
-        print(entry)
+        logging.warning(f'Removing {entry}')
         del dragon_path[entry]
     fakefile = io.BytesIO()
     nbtdata.write(fakefile)
@@ -64,16 +66,16 @@ def dragonReset(leveldat):
     return newdata
 
 def worldremove(AMPservers,curserver):
-    print('Removing the End World file...')
+    logging.info('Removing the End World file...')
     global OSPLAT
     if config.Multiverse_Core:
         worlddir = AMPservers[curserver].TrashDirectory('world_the_end')
-        print(worlddir)
+        #print(worlddir)
     else:
         if OSPLAT.lower() == 'windows':
             trashdir = f'world\DIM-1'
         if OSPLAT.lower() == 'linux': #Flip the slash to accomadate Linux users <3
             trashdir = f'world/DIM-1'
         worlddir = AMPservers[curserver].TrashDirectory(trashdir)
-        print(worlddir)
+        #print(worlddir)
     return

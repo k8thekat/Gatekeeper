@@ -20,10 +20,11 @@
 '''
 #Gatekeeper Bot - timehandler
 from datetime import datetime,timedelta
+import logging
 #delta = timedelta(days=50, seconds=27, microseconds=10, milliseconds=29000, minutes=5, hours=8, weeks=2)
 
 def parse(parameter,delta = False):
-    print('Converting the time...')
+    logging.info('Converting the time...')
     #print(parameter)
     curtime = datetime.now()
     time_found = False
@@ -55,11 +56,11 @@ def parse(parameter,delta = False):
 
     if reason_id != -1:
         if reason_id < day_find:
-            print('Found reason before datetime objects')
+            logging.warning('Found reason before datetime objects')
             day_find = -1
             return True
         if reason_id < hour_find:
-            print('Found reason before datetime objects')
+            logging.warning('Found reason before datetime objects')
             hour_find = -1
             return True
 
@@ -139,7 +140,7 @@ def parse(parameter,delta = False):
     #            break
     #    seconds = timedelta(seconds= int(secnum))
     if time_found == False:
-        print('Did not find a time value')
+        logging.warning('Did not find a time value')
         return False
     if delta == True:
         return timedelta(days= ((years*365) + (months*30) + (weeks*7) + days), hours=hours, minutes=minutes)
@@ -150,10 +151,10 @@ def parse(parameter,delta = False):
 def conversionv2(parameter,flip = None):
     message = ''
     time_var = ['years','months','days','hours','minutes']
-    print(dir(parameter))
+    #print(dir(parameter))
     for var in time_var:
         attr_check = hasattr(parameter, var)
-        print(attr_check,var)
+        #print(attr_check,var)
         if attr_check:
             attr = getattr(parameter, var)
             if flip:

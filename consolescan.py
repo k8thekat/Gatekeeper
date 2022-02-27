@@ -19,13 +19,14 @@
    02110-1301, USA. 
 '''
 #Gatekeeper Bot - Console Scanning
-import commandlogger
+import old.commandlogger as commandlogger
 import config
 import plugin_commands
 from datetime import datetime, timedelta
 import traceback
 import database
 import datetime
+import logging
 
 #Database
 db = database.Database()
@@ -69,19 +70,19 @@ def scan(amp_server,entry):
                 curserveruser.SuspensionExpiration = curtime + time_out
     #Player�c Console �6banned�c k8_thekat �6for: �c�cYou have been banned:
     if entry['Contents'].startswith('Player Console banned') and entry['Contents'].endswith('You have been banned:'):
-        print('User has been banned via console...')
+        logging.info('User has been banned via console...')
         commandlogger.logHandler(None,curserver,entry,'console')
         entry_split = entry['Contents'].split(' ')
         try:
             curserver.GetUser(entry_split[3]).SuspensionExpiration = curtime + timedelta(days=9999)
             curserver.GetUser(entry_split[3]).Whitelisted = False
         except Exception as e:
-            print(e)
-            traceback.print_exc()
+            logging.exception(e)
+            logging.error(traceback.print_exc())
             return True, f'Unable to update User: {entry_split[3]} banned status in the database!'
     #�6Player�c Console �6unbanned�c k8_thekat
     if entry['Contents'].startswith('Player Console unbanned'):
-        print('User has been unbanned via console...')
+        logging.info('User has been unbanned via console...')
         commandlogger.logHandler(None,curserver,entry,'console')
         entry_split = entry['Contents'].split(' ')
         try:
@@ -89,35 +90,35 @@ def scan(amp_server,entry):
             #curserver.GetUser(entry_split[3]).Whitelisted = True
             #AMPservers[curserver.InstanceID].ConsoleMessage(f'whitelist add {entry_split[3]}')
         except Exception as e:
-            print(e)
-            traceback.print_exc()
+            logging.exception(e)
+            logging.error(traceback.print_exc())
             return True, f'Unable to update User: {entry_split[3]} banned status in the database!'
     #Added k8_thekat to the whitelist
     if entry['Contents'].startswith('Added') and entry['Contents'].endswith('to the whitelist'):
-        print('User added to Whitelist via console..')
+        logging.info('User added to Whitelist via console..')
         commandlogger.logHandler(None,curserver,entry,'console')
         entry_split = entry['Contents'].split(' ')
         try:
             curserver.GetUser(entry_split[1]).Whitelisted = True
         except Exception as e:
-            print(e)
-            traceback.print_exc()
+            logging.exception(e)
+            logging.error(traceback.print_exc())
             return True, f'Unable to update User: {entry_split[1]} whitelisted status in the database!'
     #Removed k8_thekat from the whitelist
     if entry['Contents'].startswith('Removed') and entry['Contents'].endswith('from the whitelist'):
-        print('User removed from Whitelist via console..')
+        logging.info('User removed from Whitelist via console..')
         commandlogger.logHandler(None,curserver,entry,'console')
         entry_split = entry['Contents'].split(' ')
         try:
             curserver.GetUser(entry_split[1]).Whitelisted = False
         except Exception as e:
-            print(e)
-            traceback.print_exc()
+            logging.exception(e)
+            logging.error(traceback.print_exc())
             return True, f'Unable to update User: {entry_split[1]} whitelisted status in the database!'
     #User Lastlogin Stuff
     if entry['Source'].startswith('User Authenticator'):
             #if entry['Source'].startswith('Server thread/INFO') and entry[''].startswith()
-        print('User Last Login Triggered...')
+        logging.info('User Last Login Triggered...')
         curtime = datetime.now()
         psplit = entry['Contents'].split(' ')
         user = db.GetUser(psplit[3])

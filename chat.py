@@ -26,6 +26,7 @@ import database
 import UUIDhandler
 import chatfilter
 import time
+import logging
 
 #database setup
 db = database.Database()

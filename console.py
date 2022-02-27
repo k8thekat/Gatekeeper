@@ -29,6 +29,7 @@ import consolefilters
 import time
 import traceback
 import chat
+import logging
 
 #database setup
 db = database.Database()
@@ -57,7 +58,7 @@ def init(client,rolecheck,botoutput,async_loop):
         #print(db_server.FriendlyName,channel)
         if channel != None:
             disc_channel = client.get_channel(int(channel))
-            print(f'Starting Console Thread for {AMPservers[server].FriendlyName}')
+            logging.info(f'Starting Console Thread for {AMPservers[server].FriendlyName}')
             server_thread = threading.Thread(target = serverconsole, args = (AMPservers[server],db_server,disc_channel,client,async_loop))
             SERVERCONSOLE = {int(channel): {'AMPserver' :AMPservers[server], 'DBserver': db_server, 'thread' : server_thread, 'status' : AMPservers[server].Running}}
             SERVERTHREADS = {AMPservers[server]: server_thread}
@@ -69,7 +70,7 @@ def init(client,rolecheck,botoutput,async_loop):
 def threadinit(db_server,channel,client,async_loop): 
     global SERVERCONSOLE,SERVERTHREADS,channelinit
     if channel not in SERVERCONSOLE:
-        print(f'Starting Thread for {db_server.FriendlyName}')
+        logging.info(f'Starting Thread for {db_server.FriendlyName}')
         disc_channel = client.get_channel(int(channel)) #lets update our global so the thread can have an updated value
         server_thread = threading.Thread(target = serverconsole, args = (AMPservers[db_server.InstanceID],db_server,disc_channel,client,async_loop))
         SERVERCONSOLE = {int(channel): {'AMPserver' :AMPservers[db_server.InstanceID], 'DBserver': db_server, 'thread' : server_thread, 'status' : AMPservers[db_server.InstanceID].Running}}
@@ -93,8 +94,8 @@ async def serverConsoletoDiscord(channel, entry):
     try:
         await channel.send(entry) 
     except Exception as e:
-        print(e)
-        traceback.print_exc()
+        logging.exception(e)
+        logging.error(traceback.print_exc())
         BOTOUTPUT(e)
 
 #@client.event()
@@ -166,7 +167,7 @@ def serverconsole(amp_server,db_server,channel,client,async_loop):
 def colorstrip(entry):
     char =  '�'
     if entry['Contents'].find(char) != -1:
-        print('Color strip triggered...')
+        logging.info('Color strip triggered...')
         index = 0
         while 1:
             index = entry['Contents'].find(char,index)

@@ -31,6 +31,7 @@ import time
 import pprint
 import sys
 import os
+import logging
 
 SessionIDlist = {}
 
@@ -40,10 +41,10 @@ def init():
     if config.AMPurl[-1] == '/' or "\\":
         config.AMPurl = config.AMPurl[0:-1]
     if os.path.isfile('tokenstemplate.py') or not os.path.isfile('tokens.py'):
-        print('**ERROR** Please rename your tokenstemplate.py file to tokens.py before trying again.')
+        logging.error('**ERROR** Please rename your tokenstemplate.py file to tokens.py before trying again.')
         reset = True
     if len(tokens.AMP2Factor) < 7 or tokens.AMP2Factor != '':
-        print("**ERRORR** Please check your 2 Factor Set-up Code in tokens.py, should not contain spaces and enclosed in ' '")
+        logging.error("**ERRORR** Please check your 2 Factor Set-up Code in tokens.py, should not contain spaces and enclosed in ' '")
         reset = True
     if reset:
         input("Press any Key to Exit")
@@ -63,7 +64,7 @@ def Login(func):
                 self.SessionID = SessionIDlist[self.InstanceID]
                 return func(*args, **kargs)
 
-            print(f'Logging in {self.InstanceID}')
+            logging.info(f'Logging in {self.InstanceID}')
             if self.AMP2Factor != None:
                 token = self.AMP2Factor.now()
             else:
@@ -115,8 +116,8 @@ class AMPAPI:
         post_req = requests.post(self.url+APICall, headers=self.AMPheader, data=jsonhandler)
         #pprint(post_req.json())
         if type(post_req.json()) == None:
-            print(f"AMP_API CallAPI ret is 0: status_code {post_req.status_code}")
-            print(post_req.raw)
+            logging.error(f"AMP_API CallAPI ret is 0: status_code {post_req.status_code}")
+            logging.error(post_req.raw)
         return post_req.json()
 
     @Login

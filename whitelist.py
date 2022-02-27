@@ -22,7 +22,7 @@
 from datetime import datetime
 import base64
 import json
-
+import logging
 import parse
 import timehandler
 import UUIDhandler
@@ -42,15 +42,15 @@ def init(origAMP,origAMPservers,origdb,origdbconfig):
 
 #Used to add users to the DB when they request whitelist in the WL channel if Autowhitelist is False.
 def wlmessagehandler(message):
-    print('User to Database...')
-    print(message.author.id,message.author.name)
+    logging.info('User to Database...')
+    logging.info(message.author.id,message.author.name)
     global WhitelistWaitList 
     curtime = datetime.now()
     user = db.GetUser(str(message.author.id)) 
     wl_request = parse.ParseIGNServer(message.content)
     IGN,sel_server = wl_request
     if user == None:
-        print('New User Setup...')
+        logging.info('New User Setup...')
         curuser = db.AddUser(DiscordID = str(message.author.id), DiscordName = message.author.name)
         if wl_request == None:
             return True, f'**Unable to process**: {message.content} Please manually whitelist this user and update their IGN via //user {message.author.id} ign MC_name'
@@ -79,7 +79,7 @@ def wlmessagehandler(message):
         WhitelistWaitList.append({'User': curuser, 'IGN': IGN, 'timestamp' : curtime, 'server' : curserver, 'Context': message})
         return True, f'**Added User**: {user.DiscordName} to the Whitelist list...'
     else: 
-        print('Found Exisitng user...')
+        logging.info('Found Exisitng user...')
         #Checking if the user has an IGN (to prevent whitelisting others)
         if user.IngameName != None:
             curserver = db.GetServer(Name = sel_server.replace(' ', '_'))
@@ -98,7 +98,7 @@ def wlmessagehandler(message):
             WhitelistWaitList.append({'User': user, 'IGN': user.IngameName, 'timestamp' : curtime, 'server' : curserver, 'Context': message})
             return True,f'**Added User**: {user.DiscordName} to the Whitelist list...'
         else: 
-            print('Found Existing User without an IGN...')
+            logging.warning('Found Existing User without an IGN...')
             #If no IGN; check the message for IGN and check its validity.
             ign_check = UUIDhandler.uuidcheck(IGN)
             if ign_check[0] != True:
@@ -127,7 +127,7 @@ def wlmessagehandler(message):
 #Handles checking the whitelist list and adding users
 def whitelistListCheck(client):
     #user = {'User': user , 'IGN': user.IngameName, 'timestamp' : curtime, 'server' : curserver, 'Context': message}
-    print('Whitelist Wait List Check...')
+    logging.info('Whitelist Wait List Check...')
     wl_channel = dbconfig.Whitelistchannel #ERROR DBConfig object has no attribute 
     if wl_channel == None:
         return False
@@ -143,7 +143,7 @@ def whitelistListCheck(client):
                 AMPservers[user['server'].InstanceID].ConsoleMessage(f'whitelist add {user["IGN"]}')
                 user['server'].AddUser(user)
                 discord_user = client.get_user(user['user'].DiscordID)
-                print(discord_user)
+                #print(discord_user)
                 WhitelistWaitList.remove(user)
                 return user
     else:
@@ -154,13 +154,13 @@ def whitelistListCheck(client):
             AMPservers[user['server'].InstanceID].ConsoleMessage(f'whitelist add {user["IGN"]}')
             user['server'].AddUser(user)
             discord_user = client.get_user(user['user'].DiscordID)
-            print(discord_user)
+            #print(discord_user)
             WhitelistWaitList.remove(user)
             return user
 
 #This checks if the user is already whitelisted on the server...
 def whitelistUserCheck(server,user):
-    print('Whitelist User Check...')
+    logging.info('Whitelist User Check...')
     whitelistcheck = AMPservers[server.InstanceID].getDirectoryListing('')
     for entry in whitelistcheck['result']:
         if entry['Filename'] == 'whitelist.json':
@@ -176,7 +176,7 @@ def whitelistUserCheck(server,user):
 #Removes a user from the list if they have left for any reason. 
 #Usually if they leave the Discord Server prior to getting Whitelisted...     
 def whitelistUpdate(user,var = None):
-    print('Whitelist Update...')
+    logging.info('Whitelist Update...')
     global WhitelistWaitList
     if var.lower() == 'leave':
         for entry in WhitelistWaitList:

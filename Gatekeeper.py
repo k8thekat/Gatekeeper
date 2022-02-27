@@ -33,15 +33,17 @@ from datetime import datetime, timedelta
 import base64
 import random
 import traceback
+import logging
 
 # Bot Scripts
 import database
 import tokens
+import logger
+logger.init()
 from AMP_API import AMPAPI
 import config
 import endReset
 import whitelist 
-import commandlogger
 import chatfilter
 import timehandler
 import UUIDhandler
@@ -49,8 +51,8 @@ import console
 import chat
 
 
-Version = 'alpha-2.2.4' #Major.Minor.Revisions
-print('Version:', Version)
+data = 'alpha-3.0.0' #Major.Minor.Revisions
+logging.info(f'Version: {data}')
 
 async_loop = asyncio.new_event_loop()
 asyncio.set_event_loop(async_loop)
@@ -76,7 +78,7 @@ dbconfig = db.GetConfig()
 def serverwhitelistflag(ctx,curserver,parameter):
     if not rolecheck(ctx, 'Maintenance'):
         return 'User does not have permission.'
-    print('Server Whitelist Flag...')       
+    logging.info('Server Whitelist Flag...')       
     if len(parameter) == 3:
         try:
             curserver.Whitelist = strtobool(parameter[2])
@@ -94,7 +96,7 @@ def serverwhitelistflag(ctx,curserver,parameter):
 def serverdonatorflag(ctx,curserver,parameter):
     if not rolecheck(ctx, 'Maintenance'):
         return 'User does not have permission.'
-    print('Server Donator Flag...')
+    logging.info('Server Donator Flag...')
     if len(parameter) == 3:
         try:
             curserver.Donator = strtobool(parameter[2])
@@ -117,7 +119,7 @@ def serverdonatorflag(ctx,curserver,parameter):
 def serverrole(ctx,curserver,parameter):
     if not rolecheck(ctx, 'Maintenance'):
         return 'User does not have permission.'
-    print('Server Role...')
+    logging.info('Server Role...')
     if len(parameter) >= 3:
         role = roleparse(ctx,parameter[2]) #returns a role object or None
         if role != None:
@@ -135,7 +137,7 @@ def serverrole(ctx,curserver,parameter):
 def serverdiscordchannel(ctx,curserver,parameter):
     if not rolecheck(ctx, 'Maintenance'):
         return 'User does not have permission.'
-    print('Server Discord Channel...')
+    logging.info('Server Discord Channel...')
     if len(parameter) == 4:
         channel = channelparse(ctx,parameter[3]) #returns a channel object or None
         if channel == None:
@@ -164,7 +166,7 @@ def serverdiscordchannel(ctx,curserver,parameter):
 def servernickname(ctx,curserver,parameter):
     if not rolecheck(ctx, 'Maintenance'):
         return 'User does not have permission.'
-    print('Server Nickname...')
+    logging.info('Server Nickname...')
     if parameter[2].lower() == 'list':
         nicknames = ', '.join(curserver.Nicknames)
         return f'{curserver.FriendlyName} has the Nicknames: {nicknames}'
@@ -187,7 +189,7 @@ def servernickname(ctx,curserver,parameter):
 def serverstatus(ctx,curserver,parameter):
     if curserver.Running == False:
         return f'The Server: {curserver.FriendlyName} is currently offline... '
-    print('Server Status...')
+    logging.info('Server Status...')
     status = AMPservers[curserver.InstanceID].getStatus()
     stats = f'**Server**: {curserver.FriendlyName}\n{status}'
     return stats
@@ -198,10 +200,10 @@ def serverstatus(ctx,curserver,parameter):
 def serveruserlist(ctx,curserver,parameter):
     if not rolecheck(ctx, 'Staff'):
         return 'User does not have permission.'
-    print(f'Server User list...')
+    logging.info(f'Server User list...')
     userlist = curserver.GetAllUsers()
     userlist_names = []
-    print(len(userlist))
+    #print(len(userlist))
     if len(userlist) == 0:
         return None
     for user in userlist:
@@ -218,7 +220,7 @@ def serveruserlist(ctx,curserver,parameter):
 def serveruserinfraction(ctx,curserver,parameter):
     if not rolecheck(ctx, 'Staff'):
         return 'User does not have permission.'
-    print('Server User Infraction...')
+    logging.info('Server User Infraction...')
     modauthor = db.GetUser(ctx.author.id)
     details = ' '.join(parameter[3:])
     curuser = db.GetUser(parameter[2])
@@ -231,7 +233,7 @@ def serveruserinfraction(ctx,curserver,parameter):
 def serverinfo(ctx,curserver,parameter):
     if not rolecheck(ctx, 'General'):
         return 'User does not have permission.'
-    print('Server Info...')
+    logging.info('Server Info...')
     try:
         role = ctx.guild.get_role(int(curserver.DiscordRole))
     except:
@@ -249,7 +251,7 @@ def serverinfo(ctx,curserver,parameter):
 def serveruserban(ctx,curserver,parameter):
     if curserver.Running == False:
         return f'The Server: {curserver.FriendlyName} is currently offline... '
-    print('Server Ban Initiated...')
+    logging.info('Server Ban Initiated...')
     if not rolecheck(ctx, 'Staff'):
         return 'User does not have permission.'
     curuser = None
@@ -291,14 +293,14 @@ def serveruserban(ctx,curserver,parameter):
 def serverrestart(ctx,curserver,parameter):
     if not rolecheck(ctx, 'Maintenance'):
         return 'User does not have permission.'
-    botoutput(f'**Server**: {curserver.FriendlyName} Restarted by {ctx.author.name}...')
+    botoutput(f'**Server**: {curserver.FriendlyName} Restarted by {ctx.author.name}...',level= 'warning')
     AMPservers[curserver.InstanceID].RestartInstance()
     return f'**Server**: {curserver.FriendlyName} is restarting...'
 
 def serverstart(ctx,curserver,parameter):
     if not rolecheck(ctx, 'Maintenance'):
         return 'User does not have permission.'
-    botoutput(f'**Server**: {curserver.FriendlyName} Started by {ctx.author.name}...')
+    botoutput(f'**Server**: {curserver.FriendlyName} Started by {ctx.author.name}...',level= 'warning')
     AMPservers[curserver.InstanceID].StartInstance()
     return f'**Server**: {curserver.FriendlyName} has been started...'
 
@@ -307,7 +309,7 @@ def serverstop(ctx,curserver,parameter):
         return 'User does not have permission.'
     if curserver.Running == False:
         return f'The Server: {curserver.FriendlyName} is currently offline... '
-    botoutput(f'**Server**: {curserver.FriendlyName} Stopped by {ctx.author.name}...')
+    botoutput(f'**Server**: {curserver.FriendlyName} Stopped by {ctx.author.name}...',level= 'warning')
     AMPservers[curserver.InstanceID].StopInstance()
     curserver.Running = False
     return f'**Server**: {curserver.FriendlyName} has been stopped...'
@@ -317,7 +319,7 @@ def serverkill(ctx,curserver,parameter):
         return 'User does not have permission.'
     if curserver.Running == False:
         return f'The Server: {curserver.FriendlyName} is currently offline... '
-    botoutput(f'**Server**: {curserver.FriendlyName} Killed by {ctx.author.name}...')
+    botoutput(f'**Server**: {curserver.FriendlyName} Killed by {ctx.author.name}...',level= 'warning')
     AMPservers[curserver.InstanceID].KillInstance()
     return f'**Server**: {curserver.FriendlyName} has been killed...'
 
@@ -326,7 +328,7 @@ def servermaintenance(ctx,curserver,parameter):
         return f'The Server: {curserver.FriendlyName} is currently offline... '
     if not rolecheck(ctx, 'Maintenance'):
         return 'User does not have permission.'
-    botoutput(f'**Server**: {curserver.FriendlyName} Maintenance Mode toggled by {ctx.author.name}...')
+    botoutput(f'**Server**: {curserver.FriendlyName} Maintenance Mode toggled by {ctx.author.name}...',level= 'warning')
     dbuser_list = db.GetAllUsers(ServerModerator=True)
     if len(parameter) <= 2:
         return f'**Format**: //server {curserver.FriendlyName} maintenance (on or off)'
@@ -363,7 +365,7 @@ def serverEndReset(ctx,curserver,parameter):
     if results == True:
         return f'**Server**: {curserver.FriendlyName} has had The End fight reset and the World removed...'
     else:
-        botoutput(f'**ERROR**: Resetting the End for {curserver.FriendlyName}, check your config file...')
+        botoutput(f'**ERROR**: Resetting the End for {curserver.FriendlyName}, check your config file...',level= 'error')
  
 serverfuncs = {
             'info' : serverinfo, 
@@ -389,11 +391,6 @@ serverfuncs = {
 #'//server 'parameter[0]' 'parameter[1]' 'parameter[2]' 'parameter[3]'
 #'//server (server) (funcs: whitelist,donator,role,channel,nickname,status) (options: add,remove,set) (parameter)
 async def server(ctx,*parameter):
-    if len(parameter) < 2:
-        return await ctx.send(f'**Format**: //server server_name (function) (option) (parameter)',reference = ctx.message.to_reference())
-    curserver = db.GetServer(Name= parameter[0])
-    if curserver == None:
-        response = f'**Server**: {parameter[0]} does not exists.'
     #checks if curserver is a server in the database.
     if 'example' in parameter:
         await ctx.send('**Examples**:' +
@@ -419,6 +416,11 @@ async def server(ctx,*parameter):
             parameter_help += '/ user_name / time(Optional) / reason:(Optional)'
         await ctx.send(f'**Format**: //server server_name (function) (option) (parameter)',reference = ctx.message.to_reference())
         return await ctx.send(f"**Functions**: " + ', '.join(serverfuncs.keys()) + '\n' + option_help + '\n' + parameter_help)
+    if len(parameter) < 2:
+        return await ctx.send(f'**Format**: //server server_name (function) (option) (parameter)',reference = ctx.message.to_reference())
+    curserver = db.GetServer(Name= parameter[0])
+    if curserver == None:
+        response = f'**Server**: {parameter[0]} does not exists.'
     if curserver != None:
             if parameter[1].lower() in serverfuncs:
                 response = serverfuncs[parameter[1]](ctx,curserver,parameter) 
@@ -439,7 +441,7 @@ def userIGNdiscord(user):
 def userinfo(ctx,curuser,parameter):
     if not rolecheck(ctx, 'Staff'):
         return 'User does not have permission.'
-    print('User Info...')
+    logging.info('User Info...')
     userinfractionslist = curuser.Infractions
     userservers = curuser.GetAllServers() 
     if curuser.GlobalBanExpiration != None:
@@ -476,7 +478,7 @@ def userinfo(ctx,curuser,parameter):
 def useradd(ctx,curuser,parameter = None):
     if not rolecheck(ctx, 'Staff'):
         return 'User does not have permission.'
-    print('User add...')
+    logging.info('User add...')
     db.AddUser(DiscordID = str(curuser.id), DiscordName = curuser.name)
     response = f'Successfuly added {curuser.name} to database. (DiscordID: {curuser.id}).'
     return response
@@ -486,7 +488,7 @@ def useradd(ctx,curuser,parameter = None):
 #/user 'name'  4 'add/del' 'server' 'notes'
 #/user 'name'  4 'del' 'ID'
 def userinfractions(ctx,curuser,parameter):
-    print('User Infractions Triggered...')
+    logging.info('User Infractions Triggered...')
     if not rolecheck(ctx, 'Staff'):
         return 'User does not have permission.'
     mod = db.GetUser(ctx.author.id)
@@ -519,7 +521,7 @@ def userinfractions(ctx,curuser,parameter):
 def userdonator(ctx,curuser,parameter):
     if not rolecheck(ctx, 'Moderator'):
         return 'User does not have permission.'
-    print('User Donator...')
+    logging.info('User Donator...')
     if len(parameter) == 3:
         if parameter[2].lower() == 'true':
             curuser.Donator = True
@@ -535,7 +537,7 @@ def userdonator(ctx,curuser,parameter):
 def usermoderator(ctx,curuser,parameter):
     if not rolecheck(ctx, 'Maintenance'):
         return 'User does not have permission.'
-    print('User Moderator...')
+    logging.info('User Moderator...')
     if len(parameter) == 3:
         if parameter[2].lower() == 'true':
             curuser.ServerModerator = True
@@ -553,7 +555,7 @@ def usermoderator(ctx,curuser,parameter):
 def userign(ctx,curuser,parameter):
     if not rolecheck(ctx, 'Staff'):
         return 'User does not have permission.'
-    print('User IGN...')
+    logging.info('User IGN...')
     if len(parameter) == 3:
         ign_check = UUIDhandler.uuidcheck(parameter[2])
         if ign_check[0] != False:
@@ -571,7 +573,7 @@ def userign(ctx,curuser,parameter):
 async def userban(ctx,curuser,parameter):
     if not rolecheck(ctx, 'Staff'):
         return 'User does not have permission.'
-    print('User Ban...')
+    logging.info('User Ban...')
     discorduser = ctx.guild.get_member(int(curuser.DiscordID))
     if discorduser == None:
         return f'The User: {parameter[0]} is not apart of this guild.'
@@ -656,11 +658,6 @@ def donatorcheck():
 #/user 'parameter[0]' 'parameter[1]' 'parameter[2]' 'parameter[3]'
 #user specific settings
 async def user(ctx,*parameter):
-    if len(parameter) < 2:
-        return await ctx.send('**Format**: //user discord_id (function) (option) (parameter)',reference = ctx.message.to_reference())
-    curuser = userparse(ctx,parameter)
-    if curuser == None:
-        return await ctx.send(f'**The User**: {parameter[0]} does not exists in **{ctx.guild.name}**.', reference = ctx.message.to_reference())
     if 'example' in parameter:
         await ctx.send('**Examples**:' +
         '\n //user Notch infraction add Vanilla_server note: Griefing Spawn with creepers.' + 
@@ -678,6 +675,11 @@ async def user(ctx,*parameter):
             parameter_help = '**Parameters**: user_name / time(Optional) / reason:(Optional)'
         await ctx.send('**Format**: //user discord_id `function` `option` `parameter`',reference = ctx.message.to_reference())
         return await ctx.send('**Functions**: ' + ", ".join(userfuncs.keys()) + '\n' + option_help + '\n' + parameter_help)
+    if len(parameter) < 2:
+        return await ctx.send('**Format**: //user discord_id (function) (option) (parameter)',reference = ctx.message.to_reference())
+    curuser = userparse(ctx,parameter)
+    if curuser == None:
+        return await ctx.send(f'**The User**: {parameter[0]} does not exists in **{ctx.guild.name}**.', reference = ctx.message.to_reference())
     elif parameter[1].lower() in userfuncs:
         cur_db_user = db.GetUser(curuser.id)
         if parameter[1].lower() == 'add':
@@ -692,7 +694,7 @@ async def user(ctx,*parameter):
 
 #Adds the User to the Server Lists and updates their whitelist flags        
 def serverUserWhitelistFlag(curserver,whitelist,localdb):
-    print('Server User whitelist update...')
+    logging.info('Server User whitelist update...')
     non_dbusers = []
     for entry in whitelist:
         curuser = localdb.GetUser(entry['name'])
@@ -709,12 +711,12 @@ def serverUserWhitelistFlag(curserver,whitelist,localdb):
             #Helps prevent bot error spam if users are whitelisted without a discord account
             if entry['name'] not in non_dbusers:
                 non_dbusers.append(entry['name'])
-                botoutput(f'Failed to handle: **Server**: {AMPservers[curserver.InstanceID].FriendlyName} **IGN**: {entry["name"]} in whitelist file, adding user to non DB user list...')
+                botoutput(f'Failed to handle: **Server**: {AMPservers[curserver.InstanceID].FriendlyName} **IGN**: {entry["name"]} in whitelist file, adding user to non DB user list...',level= 'warning')
     return
 
 #Updates users whitelisted flags for each server
 def serverUserInfoUpdate(curserver,whitelist):
-    print('Server User whitelist name update...')
+    logging.info('Server User whitelist name update...')
     serveruserlist = curserver.GetAllUsers()
     for serveruser in serveruserlist:
         curuser = serveruser.GetUser()
@@ -738,14 +740,14 @@ def serverUserInfoUpdate(curserver,whitelist):
     
 #Checks if a users ban is expired and pardons the user.
 async def databasebancheck(localdb):
-    print('Database User Banned Check...')
+    logging.info('Database User Banned Check...')
     user_dblist = localdb.GetAllUsers(GlobalBanExpiration=datetime.now())
     for user in user_dblist:
         banneduser = await client.fetch_user(user)
         curuser = localdb.GetUser(banneduser.id)
         curuser.GlobalBanExpiration = None
         await client.guild.unban(banneduser)
-        botoutput(f'{banneduser.name} has been unbanned from Discord...')
+        botoutput(f'{banneduser.name} has been unbanned from Discord...',level= 'warning')
     for server in AMPservers:
         if AMPservers[server].Running == False:
             continue 
@@ -754,12 +756,12 @@ async def databasebancheck(localdb):
         for serveruser in server_userlist:
             serveruser.SuspensionExpiration = None
             AMPservers[server].ConsoleMessage(f'pardon {serveruser.IngameName}')
-            botoutput(f'Unbanned: {serveruser.FriendlyName} on {server.FriendlyName}')
+            botoutput(f'Unbanned: {serveruser.FriendlyName} on {server.FriendlyName}',level= 'warning')
     return
 
 #handles all ways of identifying a discrd_channel
 def channelparse(ctx,parameter):
-    print('Channel Parse...')
+    logging.info('Channel Parse...')
     channel_list = ctx.guild.channels
     if parameter.isnumeric():
         channel = ctx.guild.get_channel(int(parameter))
@@ -772,12 +774,17 @@ def channelparse(ctx,parameter):
             return None
 
 #Bot communcation channel, outputs any errors with any functions for staff to handle.
-def botoutput(message,ctx = None):
-    asyncio.run_coroutine_threadsafe(botawaitsend(message,ctx), async_loop)
+def botoutput(message,ctx = None, level = 'info'):
+    asyncio.run_coroutine_threadsafe(botawaitsend(message,ctx,level), async_loop)
 
 #Handles the bot messages and tags the user if provided.
-async def botawaitsend(message,ctx = None):
-    print(message)
+async def botawaitsend(message,ctx = None, level = 'info'):
+    if level == 'info':
+        logging.info(message)
+    if level == 'warning':
+        logging.warning(message)
+    if level == 'error':
+        logging.error(message)
     try:
         #If the bot doesn't have an output chanel; it will use general
         if dbconfig.Botcomms == None:
@@ -788,8 +795,8 @@ async def botawaitsend(message,ctx = None):
         else:
             boterror = client.get_channel(dbconfig.Botcomms)
     except Exception as e:
-        print(e)
-        traceback.print_exc()
+        logging.exception(e)
+        logging.error(traceback.print_exc())
     if ctx == None:
         await boterror.send(content = message)
     else:
@@ -800,14 +807,14 @@ async def wlbotreply(channel, context = None):
     #context = {'User': user , 'IGN': user.IngameName, 'timestamp' : curtime, 'server' : curserver, 'Context': message}
     channel = client.get_channel(int(channel))
     if config.Randombotreplies: #Default is True
-        print('Random Reply...')
+        logging.info('Random Reply...')
         replynum = random.randint(0,len(config.Botwhitelistreplies)-1)
         return await channel.send(config.Botwhitelistreplies[replynum], reference = context['Context'].to_reference())
     if not config.Randombotreplies:
         try:
             return await channel.send(config.Botwhitelistreplies[AMPservers[context['server'].InstanceID].Index], reference = context['Context'].to_reference())
         except Exception as e:
-            botoutput(e)
+            botoutput(e,level= 'error')
             return await channel.send(f'{context.author.name} you have been whitelisted on {context["server"].FriendlyName}.', reference = context['Context'].to_reference())
     return
 
@@ -819,7 +826,7 @@ async def on_ready():
 @client.event
 #this is a nickname change; shouldn't need to update the database. Maybe other functionality?
 async def on_user_update(user_before,user_after):
-    print(f'Discord User update...{user_before}')
+    logging.info(f'Discord User update...{user_before}')
     try:
         botoutput(f'{user_before.name} changed their discord info, updating database name to {user_after.name}')
         curuser = db.GetUser(user_before.id)
@@ -830,7 +837,7 @@ async def on_user_update(user_before,user_after):
 @client.event
 #remove user form database and remove whitelist on all servers
 async def on_member_remove(member):
-    botoutput(f'{member.name} with ID: {member.id} has left the guild.')
+    botoutput(f'{member.name} with ID: {member.id} has left the guild.',level= 'warning')
     #Checks if the user is in the Whitelist list, removes them if they are.
     whitelist.whitelistUpdate(member,'leave')
     curuser = db.GetUser(member.id)
@@ -845,7 +852,7 @@ async def on_member_remove(member):
 
 @client.command()
 async def ping(ctx):
-    commandlogger.logHandler(ctx,None,None,'bot')
+    logger.commandLog(ctx,None,None,'bot')
     await ctx.send(f'Pong! {round(client.latency * 1000)}ms')
 
 botflags = ['autowhitelist','autorole','autoreply','autoconsole','convertign']
@@ -861,7 +868,7 @@ bottime = ['infractiontimeout','bantimeout','whitelistwaittime']
 async def botsetting(ctx,*parameter):
     if not rolecheck(ctx, 'Moderator'):
         return 'User does not have permission.'
-    commandlogger.logHandler(ctx,None,parameter,'bot')
+    logger.commandLog(ctx,None,parameter,'bot')
     curtime = datetime.now()
     functions = []
     for entry in botflags: 
@@ -943,10 +950,10 @@ async def botsetting(ctx,*parameter):
 def roleset(ctx,currole,parameter):
     if not rolecheck(ctx, 'Admin'):
         return f'User does not have permission.'
-    print('Role Set...')
+    logging.info('Role Set...')
     #currole is the discord_role object
     for role in roles:
-        print(parameter[2],role['Name'])
+        #print(parameter[2],role['Name'])
         if parameter[2].lower() == role['Name'].lower():
             dbconfig.SetSetting(parameter[2], currole.id)
             return f'**Discord Role**: {currole.name} now has the Role: **{role["Name"]}**.'
@@ -963,7 +970,7 @@ roles = [{'Name': 'Operator', 'Description': 'Full control over the bot, this is
 #role check
 #will check user role and perms
 def rolecheck(ctx,parameter):
-    print('Role Check...')
+    logging.info(f'Role Check...{ctx.author.name}')
     global roles
     if ctx == 'bot':
         return True
@@ -978,12 +985,12 @@ def rolecheck(ctx,parameter):
         if dbrole == None:
             continue
         if dbrole in user_rolelist: #Contains Admins / index = 1
-            print('Role Check Passed',ctx.author.name)
+            logging.info(f'Role Check Passed {ctx.author.name}')
             return True
         if parameter == role['Name']:
             break
 
-    botoutput('ERROR: Rolecheck failed', ctx)
+    botoutput('ERROR: Rolecheck failed', ctx,level= 'warning')
     return False
 
 rolefuncs = { 
@@ -1008,7 +1015,7 @@ def roleparse(ctx,parameter): #returns None on failure
 #/role 'parameter[0] 'parameter[1]' 'parameter[2]'
 #/role 'discordid' 'set' 'Moderator'
 async def role(ctx,*parameter):
-    commandlogger.logHandler(ctx,None,parameter,'bot')
+    logger.commandLog(ctx,None,parameter,'bot')
     if 'help' in parameter[0:2]:
         role_display = []
         for entry in roles:
@@ -1036,7 +1043,7 @@ async def role(ctx,*parameter):
 
 
 def loglist(ctx,parameter):
-    list = commandlogger.logfile_list #list of all the log files in botdirectory + \\logs
+    list = logger.logfile_list #list of all the log files in botdirectory + \\logs
     return "**List of Log Files:**\n" + '\n'.join(list)
 
 #/logs read filename count start_index
@@ -1044,21 +1051,21 @@ def logread(ctx,parameter):
     #print(parameter, len(parameter))
     filename = parameter[1]
     if len(parameter) == 2:
-        logs = '\n'.join(commandlogger.logfileparse(filename))
+        logs = '\n'.join(logger.logfileparse(filename))
         return logs
     elif len(parameter) == 3:
         if parameter[2].isnumeric():
             count = int(parameter[2])
-            logs = '\n'.join(commandlogger.logfileparse(filename, count))
+            logs = '\n'.join(logger.logfileparse(filename, count))
             return logs
     elif len(parameter) == 4:
         if parameter[2].isnumeric() and parameter[3].isnumeric():
             count = int(parameter[2])
             start_index = int(parameter[3])
-            logs = '\n'.join(commandlogger.logfileparse(filename, count, start_index))
+            logs = '\n'.join(logger.logfileparse(filename, count, start_index))
             return logs
     else:
-        botoutput('We encountered an Error reading a log file {parameter}',ctx)
+        botoutput('We encountered an Error reading a log file {parameter}',ctx,level= 'warning')
         return 'Error'
    
 
@@ -1073,7 +1080,7 @@ logfuncs = {
 async def logs(ctx,*parameter):
     if not rolecheck(ctx, 'Staff'):
         return 'User does not have permission.'
-    commandlogger.logHandler(ctx,None,parameter,'bot')
+    logger.commandLog(ctx,None,parameter,'bot')
     if len(parameter) < 1:
         return await ctx.send('**Format**: //logs (function) (parameter)', reference = ctx.message.to_reference())
     if 'help' in parameter:
@@ -1093,9 +1100,9 @@ async def serverlist(ctx):
         return 'User does not have permission.'
     if rolecheck(ctx,'Staff'): #If the user is Staff or Higher append to the list
         staff = True
-    print('Server List...')
+    logging.info('Server List...')
     AMPinstancecheck()
-    commandlogger.logHandler(ctx,None,None,'bot')
+    logger.commandLog(ctx,None,None,'bot')
     status = AMP.getInstanceStatus()
     serverlist = []
     for entry in status['result']:
@@ -1128,8 +1135,8 @@ async def serverlist(ctx):
 async def banhammer(ctx,*parameter):
     if not rolecheck(ctx, 'Staff'):
         return 'User does not have permission.'
-    print('Ban Hammer...')
-    commandlogger.logHandler(ctx,None,parameter,'bot')
+    logging.info('Ban Hammer...')
+    logger.commandLog(ctx,None,parameter,'bot')
     user = db.GetUser(parameter[0])
     curmember = ctx.guild.get_member(int(parameter[0]))
     curtime = datetime.now()
@@ -1156,7 +1163,7 @@ async def pardon(ctx,*parameter):
     if not rolecheck(ctx, 'Staff'):
         return 'User does not have permission.'
     print('Pardon...')
-    commandlogger.logHandler(ctx,None,parameter,'bot')
+    logger.commandLog(ctx,None,parameter,'bot')
     user = db.GetUser(parameter[0])
     banneduser = await client.fetch_user(parameter[0])
     if user != None:
@@ -1185,7 +1192,7 @@ async def on_message(message):
     if message.author.bot:
         return
     if (message.content.startswith('//')):
-        print('Found /command.')
+        logging.info('Found /command.')
         return await client.process_commands(message)
     if message.channel.id == dbconfig.Whitelistchannel:
         if dbconfig.Autowhitelist:
@@ -1203,7 +1210,7 @@ async def on_message(message):
     else:
         chat_filter = chatfilter.spamFilter(message)
         if chat_filter == True:
-            print('Kicking the user from the server...')
+            logging.info('Kicking the user from the server...')
             #!TODO client.kick script here
             return 
         if dbconfig.Autoreply:
@@ -1223,11 +1230,11 @@ async def setup(ctx,*parameter):
     if len(parameter) < 1:
         return await ctx.send('**Format**: //setup discord_role_id or discord_role_name',reference = ctx.message.to_reference())
     if dbconfig.Firststartup == True:
-        print('Initializing...')
+        logging.info('Initializing...')
         role = roleparse(ctx,parameter[0]) #Verify the Discord_role_id exists
         if role == None:
             response = f'The role: {parameter[0]} does not exists.'
-            return botoutput('**ERROR**: Setting Startup Role',ctx)
+            return botoutput('**ERROR**: Setting Startup Role',ctx,level= 'error')
         dbconfig.Operator = role.id
         dbconfig.Firststartup = False
         response = f'First time startup completed. Operator role set to {role.name}'
@@ -1256,7 +1263,7 @@ def blankwhitelistgenerator(server):
 
 #whitelist file check
 def whitelistfilecheck(localdb):
-    print('Whitelist file check in progress...')
+    logging.info('Whitelist file check in progress...')
     for server in AMPservers:
         whitelistcheck = AMPservers[server].getDirectoryListing('')
         if whitelistcheck == False:
@@ -1281,7 +1288,7 @@ def whitelistfilecheck(localdb):
 #Checks AMP for any new Instances...
 def AMPinstancecheck(startup = False):
     global AMPservers, AMPserverConsoles
-    print('Checking for any new Instances..')
+    logging.info('Checking for any new Instances..')
     if startup == True:
         for server in AMPservers:
             cur_server = db.GetServer(server)
@@ -1304,21 +1311,21 @@ def AMPinstancecheck(startup = False):
                 blankwhitelistgenerator(cur_server)
                 botoutput(f'Found a new Instance, adding it to the Database...{AMPservers[server].FriendlyName}')
     #Updating the Instance Names
-    print('Checking if names have been changed...')
+    logging.info('Checking if names have been changed...')
     for server in AMPservers:
         cur_server = db.GetServer(server)
         if AMPservers[server].FriendlyName != cur_server.FriendlyName:
             botoutput(f'{cur_server.FriendlyName} has been updated too {AMPservers[server].FriendlyName}...')
             cur_server.FriendlyName = AMPservers[server].FriendlyName
-    print(response)
+    logging.info(response)
     return 
 
 #This sets the users discord role to that of the servers
 #user = {'User': user , 'IGN': user.IngameName, 'timestamp' : curtime, 'server' : curserver, 'Context': message}
 async def discordRoleSet(user):
-    print(user['server'].DiscordRole)
+    logging.info(user['server'].DiscordRole)
     server_role = client.guild.get_role(int(user['server'].DiscordRole))
-    print(user['context'])
+    logging.info(user['context'])
     #cur_user = user['context'].author
     await user['context'].author.add_roles(server_role)
     return
@@ -1326,12 +1333,12 @@ async def discordRoleSet(user):
 #General thread loop for all recurring checks/events...
 def threadloop():
     time.sleep(1)
-    print('Recurring Thread Loop Initiated...')
+    logging.info('Recurring Thread Loop Initiated...')
     localdb = database.Database()
     updateinterval = datetime.now()
     while(1):
         if (updateinterval+timedelta(seconds=60)) < datetime.now(): #1 minute checkup interval
-            print(f'Updating and Saving...{datetime.now().strftime("%c")}')
+            logging.info(f'Updating and Saving...{datetime.now().strftime("%c")}')
             #Database check on bans
             asyncio.run_coroutine_threadsafe(databasebancheck(localdb), async_loop)
             time.sleep(.5)
@@ -1348,10 +1355,13 @@ def threadloop():
             if config.donations:
                 #Checks all user roles and updates the DB flags
                 donatorcheck()
+            logger.varupdate(updateinterval)
             updateinterval = datetime.now()
         time.sleep(.5)
         if (updateinterval+ timedelta(seconds=3500)) < datetime.now(): #5 minute checkup interval
             chatfilter.logCleaner() #Cleans up the MSGLOG for potential chat spam.
+        
+        
     return
 
 #Runs on startup...
@@ -1363,8 +1373,6 @@ def defaultinit():
     chatloop.start()
     consoleloop = threading.Thread(target = console.init, args=(client,rolecheck,botoutput,async_loop))
     consoleloop.start()
-    #CommandLogger 
-    commandlogger.init()
     try:
         isconfigured = dbconfig.Isconfigured
         return 
@@ -1374,7 +1382,7 @@ def defaultinit():
     for entry in AMPservers:
         db.AddServer(InstanceID= AMPservers[entry].InstanceID, FriendlyName= AMPservers[entry].FriendlyName)
 
-    print('Setting up database')
+    logging.info('Setting up database...')
     dbconfig.AddSetting('Isconfigured', True)
     dbconfig.AddSetting('Firststartup', True)
     dbconfig.AddSetting('Whitelistfilecheck', str(datetime.now()))

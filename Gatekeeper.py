@@ -51,7 +51,7 @@ import console
 import chat
 
 
-data = 'alpha-3.0.4' #Major.Minor.Revisions
+data = 'alpha-3.0.5' #Major.Minor.Revisions
 logging.info(f'Version: {data}')
 
 async_loop = asyncio.new_event_loop()
@@ -1245,6 +1245,7 @@ async def setup(ctx,*parameter):
        
     else:
         return await ctx.send('First time startup has been done already...', reference = ctx.message.to_reference())
+    await ctx.send('You are now the Key Master!...')
     return await ctx.send(response,reference= ctx.message.to_reference())
 
 

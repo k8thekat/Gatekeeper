@@ -26,6 +26,7 @@ from datetime import datetime
 import traceback
 import platform
 import logging
+from logging.handlers import TimedRotatingFileHandler
 import sys
 
 
@@ -51,10 +52,11 @@ def init():
         print('Making Log Directory...')
         os.makedirs(BOTDIR + DIR)
         
-    log_file_name = BOTDIR + DIR + DATE + FILES['log']
+    log_file_name = BOTDIR + DIR + FILES['log']
     logging.basicConfig(level=config.logginglevel, format='%(asctime)s [%(threadName)s] [%(levelname)s]  %(message)s', 
                         datefmt='%m/%d/%Y %I:%M:%S %p',
-                        handlers = [logging.StreamHandler(sys.stdout),logging.FileHandler(log_file_name,mode = 'a+',encoding='utf-8')])
+                        handlers = [logging.StreamHandler(sys.stdout),
+                        TimedRotatingFileHandler(log_file_name,'midnight',backupCount= 4,encoding='utf-8',utc=True)])
     return
 
 

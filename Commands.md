@@ -8,12 +8,12 @@ ___
         - You must set `//botsettings autoconsole true` for the console to go live. <br>
     - Set a Discord Chat channel if you want to be able to talk and see in game chat in Discord. <br>
 2. Setting up **Bot Commands: Whitelist**
-    - Set a Discord channel for the bot to read messages for whitelist requests via `//botsettings whitelist (discord_channel_id` or `discord_channel_name)`
+    - Set a Discord channel for the bot to read messages for whitelist requests via `//botsettings whitelist discord_channel_id` or `discord_channel_name`
     - This allows the bot to store the users `discord_name`, `discord_user_id` and their `minecraft_ign` to a database. 
         - If **Bot Setting: AutoWhitelist** is `TRUE` then the bot will whitelist that user's `minecracft_ign` to the specified `server_name`
-    - Format for whitelist requests is: **`IGN: minecraft_ign SERVER: (server_name` or `server_nickname)`**
+    - Format for whitelist requests is: **`IGN: minecraft_ign SERVER: server_name` or `server_nickname`**
 3. Setting up **Role Commands: Permissions**
-    - Set a Discord Roles permissions via `//role (discord_role_id` or `discord_role_name) set (role) (true` or `false)`
+    - Set a Discord Roles permissions via `//role (discord_role_id` or `discord_role_name) set (role) true` or `false`
     - Almost all commands require a certain permission, a role can have more than one permission set to `true`
 
 ---
@@ -22,7 +22,7 @@ ___
 All commands can be used in any channel the bot can see. They are not case sensitive! <br>
 **Commands are triggered via two forward slashes. `//`**. 
 - You can use `//help` at any time for commands. 
-    - `//user` and `//server` support `example` after the command to show examples of code usage. (`//user example`)
+    - `//user` and `//server` support `example` after the command to show examples of code usage. `//user example`
     - Some Commands support `list` and `info` after any Command and or its function, the bot will reply with information.
 - All `time` parameters support values: `Years(y:) Months(mo:) Weeks(w:) Days(d:) Hours(h:) Minutes(m:) Seconds(s:)` 
     - All `time` parameters are optional. *example: `//server server_name userban user_name y:2d:4m:45`*

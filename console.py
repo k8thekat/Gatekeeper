@@ -44,7 +44,6 @@ SERVERCONSOLE = {}
 SERVERTHREADS = {}
 ROLECHECK = None
 BOTOUTPUT = None
-channelinit = None
 
 def init(client,rolecheck,botoutput,async_loop):
     while(client.is_ready() == False): #Lets wait to start this until the bot has fully setup.
@@ -101,18 +100,17 @@ async def serverConsoletoDiscord(channel, entry):
 #@client.event()
 #This handles passing DISCORD Chat commands to the MC server
 def on_message(message):
-    if message.channel.id in SERVERCONSOLE:
-        if SERVERCONSOLE[message.channel.id]['status']:
-            if ROLECHECK(message, 'Maintenance'):
-                SERVERCONSOLE[message.channel.id].ConsoleMessage(message.content)
-                return True
+    message = message.content.replace('//','/')
+    if SERVERCONSOLE[message.channel.id]['status']:
+        if ROLECHECK(message, 'Maintenance'):
+            SERVERCONSOLE[message.channel.id].ConsoleMessage(message)
+            return True
     return False
         
 
 #Parses each AMP Server Console
 def serverconsole(amp_server,db_server,channel,client,async_loop):
-    global BOTOUTPUT,channelinit
-    channel = channelinit
+    global BOTOUTPUT
     while amp_server.Running:
         time.sleep(0.5)
         console = amp_server.ConsoleUpdate()

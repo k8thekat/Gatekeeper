@@ -51,7 +51,7 @@ import console
 import chat
 
 
-data = 'alpha-3.0.2' #Major.Minor.Revisions
+data = 'alpha-3.0.3' #Major.Minor.Revisions
 logging.info(f'Version: {data}')
 
 async_loop = asyncio.new_event_loop()
@@ -60,6 +60,7 @@ asyncio.set_event_loop(async_loop)
 intents = discord.Intents.default() # Default
 intents.members = True
 client = commands.Bot(command_prefix = '//', intents=intents, loop=async_loop)
+client.remove_command('help')
 
 
 #AMP API setup
@@ -1193,7 +1194,14 @@ async def on_message(message):
         return
     if (message.content.startswith('//')):
         logging.info('Found /command.')
-        return await client.process_commands(message)
+        if message.channel.id in console.SERVERCONSOLE:
+            status = console.on_message(message)
+        if status == False:
+            return await message.send('Server is not currently Online',reference = message.to_reference())
+        else:
+            return await client.process_commands(message)
+    if message.channel.id in chat.SERVERCHAT:
+        chat.on_message(message,client)
     if message.channel.id == dbconfig.Whitelistchannel:
         if dbconfig.Autowhitelist:
             reply = whitelist.wlmessagehandler(message)
@@ -1203,10 +1211,6 @@ async def on_message(message):
                 botoutput(reply[1])
         else:
             db.AddUser(DiscordID = str(message.author.id), DiscordName = message.author.name)
-    if console.on_message(message):
-        return
-    if chat.on_message(message,client):
-        return
     else:
         chat_filter = chatfilter.spamFilter(message)
         if chat_filter == True:

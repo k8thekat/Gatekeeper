@@ -67,7 +67,7 @@ def varupdate(time):
 
 def commandLog(ctx,curserver,parameter,loc):
     global COMMANDLOGS
-    COMMANDLOGS,filename = logfilehandler('commands')
+    COMMANDLOGS,filename = logfilehandler('command')
     server = curserver
     save = False
     time = datetime.now().strftime('%c')
@@ -140,7 +140,7 @@ def commandLog(ctx,curserver,parameter,loc):
 
 
 def logfilehandler(type):
-    logging.info('File Handler Type', type)
+    logging.info(f'File Handler Type {type}')
     global COMMANDLOGS,DATE
     if type == 'command':
         dircheck = os.path.isfile(BOTDIR + DIR + DATE + FILES['commands'])

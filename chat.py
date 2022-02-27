@@ -54,15 +54,14 @@ def init(client):
 #@client.event()
 #This handles scanning discord chat messages to send it to the correct minecraft server
 def on_message(message,client):
-    if message.channel.id in SERVERCHAT:
-        if SERVERCHAT[message.channel.id]['status']:
-            message.content = message.content.replace('\n',' ')
-            message.content = chatfilter.scan(message.content,client) #Removes characters that MC cannot display properly (emojis,ascii,etc)
-            if message.content == True:
-                return True
-            else:
-                SERVERCHAT[message.channel.id]['AMPserver'].ConsoleMessage(f'tellraw @a [{{"text":"(Discord)","color":"blue"}},{{"text":"<{message.author.name}>: {message.content}","color":"white"}}]')
-                return True
+    if SERVERCHAT[message.channel.id]['status']:
+        message.content = message.content.replace('\n',' ')
+        message.content = chatfilter.scan(message.content,client) #Removes characters that MC cannot display properly (emojis,ascii,etc)
+        if message.content == True:
+            return True
+        else:
+            SERVERCHAT[message.channel.id]['AMPserver'].ConsoleMessage(f'tellraw @a [{{"text":"(Discord)","color":"blue"}},{{"text":"<{message.author.name}>: {message.content}","color":"white"}}]')
+            return True
     return False
 
 #This fetches MC avatars heads and uses them for Discord Profile Pics and changes the message name to the IGN from minecraft

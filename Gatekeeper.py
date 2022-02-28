@@ -51,7 +51,7 @@ import console
 import chat
 
 
-data = 'alpha-3.0.8' #Major.Minor.Revisions
+data = 'alpha-3.0.9' #Major.Minor.Revisions
 logging.info(f'Version: {data}')
 
 async_loop = asyncio.new_event_loop()
@@ -1194,9 +1194,7 @@ async def on_message(message):
     if (message.content.startswith('//')):
         logging.info('Found /command.')
         if message.channel.id in console.SERVERCONSOLE:
-            status = console.on_message(message)
-        if status == False:
-            return await message.send('Server is not currently Online',reference = message.to_reference())
+            console.on_message(message)
         else:
             return await client.process_commands(message)
     if message.channel.id in chat.SERVERCHAT:

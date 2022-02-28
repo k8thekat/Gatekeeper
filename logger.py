@@ -167,7 +167,7 @@ def logfilehandler(type):
     return COMMANDLOGS,filename
 
 def logfilesaver(log,filename):
-    logging.info('Log File Saver', filename)
+    logging.info(f'Log File Saver {filename}')
     newfile = open(BOTDIR + DIR + DATE + filename, 'a+') 
     json.dump(log,newfile, indent=0)
     newfile.close()

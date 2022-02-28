@@ -70,9 +70,9 @@ def threadinit(db_server,channel,client,async_loop):
     global SERVERCONSOLE,SERVERTHREADS,channelinit
     if channel not in SERVERCONSOLE:
         logging.info(f'Starting Thread for {db_server.FriendlyName}')
-        disc_channel = client.get_channel(int(channel)) #lets update our global so the thread can have an updated value
-        server_thread = threading.Thread(target = serverconsole, args = (AMPservers[db_server.InstanceID],db_server,disc_channel,client,async_loop))
-        SERVERCONSOLE = {int(channel): {'AMPserver' :AMPservers[db_server.InstanceID], 'DBserver': db_server, 'thread' : server_thread, 'status' : AMPservers[db_server.InstanceID].Running}}
+        #disc_channel = client.get_channel(int(channel)) #lets update our global so the thread can have an updated value
+        server_thread = threading.Thread(target = serverconsole, args = (AMPservers[db_server.InstanceID],db_server,channel,client,async_loop))
+        SERVERCONSOLE = {channel.id: {'AMPserver' :AMPservers[db_server.InstanceID], 'DBserver': db_server, 'thread' : server_thread, 'status' : AMPservers[db_server.InstanceID].Running}}
         SERVERTHREADS = {AMPservers[db_server.InstanceID]: server_thread}
         server_thread.start()
     return

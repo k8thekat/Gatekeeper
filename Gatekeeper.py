@@ -51,7 +51,7 @@ import console
 import chat
 
 
-data = 'alpha-3.0.9' #Major.Minor.Revisions
+data = 'alpha-3.0.10' #Major.Minor.Revisions
 logging.info(f'Version: {data}')
 
 async_loop = asyncio.new_event_loop()
@@ -1300,7 +1300,7 @@ def AMPinstancecheck(startup = False):
                     blankwhitelistgenerator(InstanceID = AMPservers[server].InstanceID)
                     botoutput(f'Found a new Instance, adding it to the Database...{AMPservers[server].FriendlyName}')
         return
-    AMPserverscheck = AMP.getInstances(checkup=True)
+    AMPserverscheck = AMP.getInstances()
     time.sleep(1)
     #AMP.sessionCleanup()
     response = f'Found no new Instances..'

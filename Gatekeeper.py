@@ -1298,8 +1298,9 @@ def AMPinstancecheck(startup = False):
             cur_server = db.GetServer(server)
             if cur_server == None:
                 cur_server = db.AddServer(InstanceID = AMPservers[server].InstanceID, FriendlyName = AMPservers[server].FriendlyName)
-                blankwhitelistgenerator(cur_server)
-                botoutput(f'Found a new Instance, adding it to the Database...{AMPservers[server].FriendlyName}')
+                if AMPservers[server].Module == 'Minecraft':
+                    blankwhitelistgenerator(InstanceID = AMPservers[server].InstanceID)
+                    botoutput(f'Found a new Instance, adding it to the Database...{AMPservers[server].FriendlyName}')
         return
     AMPserverscheck = AMP.getInstances(checkup=True)
     time.sleep(1)
@@ -1312,8 +1313,9 @@ def AMPinstancecheck(startup = False):
             cur_server = db.GetServer(server)
             if cur_server == None:
                 cur_server = db.AddServer(InstanceID = AMPservers[server].InstanceID, FriendlyName = AMPservers[server].FriendlyName)
-                blankwhitelistgenerator(cur_server)
-                botoutput(f'Found a new Instance, adding it to the Database...{AMPservers[server].FriendlyName}')
+                if AMPservers[server].Module == 'Minecraft':
+                    blankwhitelistgenerator(InstanceID = AMPservers[server].InstanceID)
+                    botoutput(f'Found a new Instance, adding it to the Database...{AMPservers[server].FriendlyName}')
     #Updating the Instance Names
     logging.info('Checking if names have been changed...')
     for server in AMPservers:

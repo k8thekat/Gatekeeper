@@ -51,7 +51,7 @@ import console
 import chat
 
 
-data = 'alpha-3.0.15' #Major.Minor.Revisions
+data = 'alpha-3.0.16' #Major.Minor.Revisions
 logging.info(f'Version: {data}')
 
 async_loop = asyncio.new_event_loop()

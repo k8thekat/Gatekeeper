@@ -118,7 +118,7 @@ class AMPAPI:
             try:
                 post_req = requests.post(self.url+APICall, headers=self.AMPheader, data=jsonhandler)
                 break
-            except TimeoutError as e:
+            except:
                 if SuccessfulConnection == False:
                     logging.critical('Unable to connect to URL; please check Tokens.py -> AMPURL')
                     sys.exit(-1)
@@ -126,7 +126,7 @@ class AMPAPI:
                 time.sleep(30)
 
         SuccessfulConnection = True
-        
+
         #Error catcher for API calls
         if type(post_req.json()) == None:
             logging.error(f"AMP_API CallAPI ret is 0: status_code {post_req.status_code}")

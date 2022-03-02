@@ -51,7 +51,7 @@ import console
 import chat
 
 
-data = 'alpha-3.0.12' #Major.Minor.Revisions
+data = 'alpha-3.0.15' #Major.Minor.Revisions
 logging.info(f'Version: {data}')
 
 async_loop = asyncio.new_event_loop()
@@ -126,7 +126,7 @@ def serverrole(ctx,curserver,parameter):
             curserver.DiscordRole = role.id
             response = f'**Server**: {curserver.FriendlyName} now has its role set to {role.name}'
         else:
-            response = f'The Discord Role ID: {parameter[2]}, does not exist in {ctx.guild.name}'
+            response = f'The Discord Role ID: {parameter[2]}, does not exist in **{ctx.guild.name}**.'
     else:
         response = f'**Format**: //server {curserver.FriendlyName} role (Discord Role ID or Discord Role Name).'
     return response
@@ -398,29 +398,40 @@ async def server(ctx,*parameter):
             '\n //server Valhelsia3 role 617967701381611520' +
             '\n //server ProjectOzone3 nickname add po3' +
             '\n //server SkyFactory channel chat SkyFactory-Chat')
+
     if 'help' in parameter:
         option_help = '**Options**: None'
         parameter_help = '**Parameters**: server_name '
+
         if 'channel' in parameter:
             option_help = '**Options**: chat or console'
             parameter_help += '/ channel'
+
         if 'nickname' in parameter:
             option_help = '**Options**: list or add or remove'
-        if 'whitelist' or 'donator' or 'maintenance' in parameter:
+
+        if ('whitelist' in parameter) or ('donator' in parameter) or ('maintenance' in parameter):
             parameter_help += '/ true or false'
+
         if 'infraction' in parameter:
             parameter_help += '/ user_name / note(Optional) '
+
         if 'role' in parameter:
             parameter_help += '/ role'
+
         if 'ban' in parameter:
             parameter_help += '/ user_name / time(Optional) / reason:(Optional)'
+
         await ctx.send(f'**Format**: //server server_name (function) (option) (parameter)',reference = ctx.message.to_reference())
         return await ctx.send(f"**Functions**: " + ', '.join(serverfuncs.keys()) + '\n' + option_help + '\n' + parameter_help)
+
     if len(parameter) < 2:
         return await ctx.send(f'**Format**: //server server_name (function) (option) (parameter)',reference = ctx.message.to_reference())
+
     curserver = db.GetServer(Name= parameter[0])
     if curserver == None:
-        response = f'**Server**: {parameter[0]} does not exists.'
+        response = f'**Server**: {parameter[0]} does not exist.'
+
     if curserver != None:
             if parameter[1].lower() in serverfuncs:
                 response = serverfuncs[parameter[1]](ctx,curserver,parameter) 
@@ -459,16 +470,16 @@ def userinfo(ctx,curuser,parameter):
                 Suspensionformat = entry.SuspensionExpiration.strftime('Date: %Y/%m/%d | Time: %X (UTC)')
             else:
                 Suspensionformat = entry.SuspensionExpiration
-            data = f'\n**Server**: {entry.GetServer().FriendlyName}\n\tWhitelisted: `{bool(entry.Whitelisted)}`\n\tSuspended: {Suspensionformat}\n\tLast Login: {lastloginformat}'
+            data = f'\n**Server**: {entry.GetServer().FriendlyName}\n\t__Whitelisted__: `{bool(entry.Whitelisted)}`\n\t__Suspended__: {Suspensionformat}\n\t__Last Login__: {lastloginformat}'
             response += data
     if len(userinfractionslist) != 0:
         for entry in userinfractionslist:
             dateformat = entry['Date'].strftime('%Y/%m/%d Time: %X (UTC)')
             if entry['Server'] == None:
-                data = (f"\n**Infraction ID**: {entry['ID']}\n\tDate: {dateformat}\n\tWho Reported: {entry['DiscordName']}\n\tNotes: {entry['Note']}")
+                data = (f"\n**Infraction ID**: {entry['ID']}\n\t__Date__: {dateformat}\n\t__Who Reported__: {entry['DiscordName']}\n\t__Notes__: {entry['Note']}")
                 response += data
             else:
-                data = (f"\n**Infraction ID**: {entry['ID']}\n\tDate: {dateformat}\n\tWho Reported: {entry['DiscordName']}\n\tServer: {entry['Server']}\n\tNotes: {entry['Note']}")
+                data = (f"\n**Infraction ID**: {entry['ID']}\n\__Date__: {dateformat}\n\t__Who Reported__: {entry['DiscordName']}\n\t__Server__: {entry['Server']}\n\t__Notes__: {entry['Note']}")
                 response += data
     return response
 
@@ -491,23 +502,45 @@ def userinfractions(ctx,curuser,parameter):
     logging.info('User Infractions Triggered...')
     if not rolecheck(ctx, 'Staff'):
         return 'User does not have permission.'
-    mod = db.GetUser(ctx.author.id)
     if len(parameter) >= 4:
         if parameter[2].lower() == 'add':
-            for entry in parameter:
+            mod = db.GetUser(ctx.author.id)
+            server_id,reason_id = -1, -1
+            found_reason,found_server = False,False
+            db_server, reason = None,None
+            response = f'Added Infraction for {curuser.DiscordName}'
+
+            for index in range(2,len(parameter)):
+                entry = parameter[index]
                 entry = entry.replace('Reason:','reason:')
-                reason_id = entry.find('reason:')
+                entry = entry.replace('Server:','server:')
+                if entry.find('server:') != -1:
+                    server_id = index
+                if entry.find('reason:') != -1:
+                    reason_id = index
+            
             if reason_id != -1:
-                reason_id = parameter.index('reason:')
+                found_reason = True
                 reason = []
-                reason = ' '.join(parameter[reason_id+1:])
-            server = db.GetServer(name = parameter[3])
-            if server != None:
-                curuser.AddInfraction(server = server, mod = mod, note = reason)
-                response = f'Added Infraction on {curuser.DiscordName} for {server.FriendlyName} with the reason of "{reason}"'
-            else:
-                curuser.AddInfraction(server = None, mod = mod, note = reason)
-                response = f'Added Infracton on {curuser.DiscordName} with the reason of "{reason}"'
+                reason = ' '.join(parameter[reason_id:])
+                if len(reason) == 0:
+                    reason = parameter[reason_id+1]
+
+            if server_id != -1:
+                found_server = True
+                server = parameter[server_id].replace('server:','')    
+                if len(server) == 0:
+                    server = parameter[server_id+1]
+
+            if found_server == True:
+                db_server = db.GetServer(Name = server)
+                response += f'on {server.FriendlyName}' 
+            
+            if found_reason == True:
+                response += f'Reason: {reason}'
+
+            curuser.AddInfraction(server = db_server, mod = mod, note = reason)
+            
         elif parameter[2].lower() == 'del':
                 curuser.DelInfraction(ID=parameter[3])
                 response = f'Removed Infraction {parameter[3]} on {curuser.DiscordName}' 
@@ -666,20 +699,25 @@ async def user(ctx,*parameter):
     if 'help' in parameter:
         option_help = '**Options**: None'
         parameter_help = '**Parameters**: user_name '
-        if 'infractions' in parameter:
+
+        if 'infraction' in parameter:
             option_help = '**Options**: Add or Del'
             parameter_help = '**Parameters**: user_name / infractionID("Del" only) / time("Add" only: Optional) / reason:("Add" only: Optional)'
-        if 'moderator' or 'donator' in parameter:
+
+        if ('moderator' in parameter) or ('donator' in parameter):
             parameter_help = '**Parameters**: user_name / True or False'
+
         if 'ban' in parameter:
             parameter_help = '**Parameters**: user_name / time(Optional) / reason:(Optional)'
+
         await ctx.send('**Format**: //user discord_id `function` `option` `parameter`',reference = ctx.message.to_reference())
         return await ctx.send('**Functions**: ' + ", ".join(userfuncs.keys()) + '\n' + option_help + '\n' + parameter_help)
+        
     if len(parameter) < 2:
         return await ctx.send('**Format**: //user discord_id (function) (option) (parameter)',reference = ctx.message.to_reference())
     curuser = userparse(ctx,parameter)
     if curuser == None:
-        return await ctx.send(f'**The User**: {parameter[0]} does not exists in **{ctx.guild.name}**.', reference = ctx.message.to_reference())
+        return await ctx.send(f'**The User**: {parameter[0]} does not exist in **{ctx.guild.name}**.', reference = ctx.message.to_reference())
     elif parameter[1].lower() in userfuncs:
         cur_db_user = db.GetUser(curuser.id)
         if parameter[1].lower() == 'add':
@@ -804,10 +842,10 @@ async def botawaitsend(message,ctx = None, level = 'info'):
     return
 
 async def wlbotreply(channel, context = None):
+    logging.info('Whitelist Bot Reply...')
     #context = {'User': user , 'IGN': user.IngameName, 'timestamp' : curtime, 'server' : curserver, 'Context': message}
     channel = client.get_channel(int(channel))
     if config.Randombotreplies: #Default is True
-        logging.info('Random Reply...')
         replynum = random.randint(0,len(config.Botwhitelistreplies)-1)
         return await channel.send(config.Botwhitelistreplies[replynum], reference = context['Context'].to_reference())
     if not config.Randombotreplies:
@@ -881,8 +919,11 @@ async def botsetting(ctx,*parameter):
     if len(parameter) < 1:
         return await ctx.send(f'**Format**: //botsetting (function) (parameter)',reference=ctx.message.to_reference())
     if 'help' in parameter:
-        await ctx.send(f'**Example**: //botsetting bantimeout y:1 d:3')
-        return await ctx.send(f'**Functions** : {functions}')
+        await ctx.send(f'**Format**: //botsetting `function` `parameter`' + 
+                        '\n**Functions**: {functions}' +
+                        '\n**Parameters**: True or False / channel_name or channel_id / time(See Commands.md)',reference=ctx.message.to_reference())
+    if 'example' in parameter:
+        return await ctx.send(f'**Example**: //botsetting bantimeout y:1 d:3')
     if 'info' in parameter:
         curbotflags = []
         curbotchans = []
@@ -907,17 +948,19 @@ async def botsetting(ctx,*parameter):
                 curbottimes.append(f'{entry.capitalize()}: `{dbconfig.GetSetting(entry)}`')
         response = '\n'.join(curbotflags) + "\n" + '\n'.join(curbotchans) + "\n" + '\n'.join(curbottimes)
         return await ctx.send(response,reference = ctx.message.to_reference())
+
     #/botsettings faq 1234567890
     elif parameter[0].lower() in botchans:
         channel = channelparse(ctx,parameter[1])
         if len(parameter) == 2:
             if channel != None:
                 dbconfig.SetSetting(parameter[0], channel.id)
-                response = f'**{parameter[0].capitalize()}** is now set to channel: {channel.name} ID: {channel.id}'
+                response = f'**{parameter[0].capitalize()}** is now set to channel: #{channel.name} ID: {channel.id}'
             else:
-                response = f'Channel {parameter[0]} is not in this Discord, please try again.'
+                response = f'Channel {parameter[0]} is apart of {ctx.guild.name}, please try again.'
         else:
             response = f'**Format**: //botsetting {parameter[0]} (parameter)'
+
     #/botsettings autowhitelist True
     elif parameter[0].lower() in botflags:
         if len(parameter) == 2:
@@ -970,7 +1013,7 @@ roles = [{'Name': 'Operator', 'Description': 'Full control over the bot, this is
 #role check
 #will check user role and perms
 def rolecheck(ctx,parameter):
-    logging.info(f'Role Check...{ctx.author.name}')
+    logging.info(f'Role Check...{ctx.author.name} for {parameter}')
     global roles
     if ctx == 'bot':
         return True
@@ -1032,13 +1075,13 @@ async def role(ctx,*parameter):
     if parameter[2] != 'None':
         role = roleparse(ctx,parameter[0])
         if role == None:
-            response = f'The Role: {parameter[0]} does not exists in this server.'
+            response = f'The Role: {parameter[0]} does not exist in **{ctx.guild.name}**.'
             return await ctx.send(response,reference = ctx.message.to_reference()) 
     if parameter[1].lower() in rolefuncs:
         response = rolefuncs[parameter[1]](ctx,role,parameter)
         return await ctx.send(response,reference = ctx.message.to_reference())
     else:
-        response = f'The Function: {parameter[1]} does not exists.'
+        response = f'The Function: {parameter[1]} does not exist.'
     return await ctx.send(response,reference= ctx.message.to_reference())
 
 
@@ -1088,7 +1131,7 @@ async def logs(ctx,*parameter):
     if parameter[0].lower() in logfuncs:
         response = logfuncs[parameter[0]](ctx,parameter)
     else:
-        response = f'The Function: {parameter[1]} does not exists.'
+        response = f'The Function: {parameter[1]} does not exist.'
     return await ctx.send(response,reference = ctx.message.to_reference())
 
 
@@ -1234,7 +1277,7 @@ async def setup(ctx,*parameter):
         logging.info('Initializing...')
         role = roleparse(ctx,parameter[0]) #Verify the Discord_role_id exists
         if role == None:
-            response = f'The role: {parameter[0]} does not exists.'
+            response = f'The role: {parameter[0]} does not exist.'
             return botoutput('**ERROR**: Setting Startup Role',ctx,level= 'error')
         dbconfig.Operator = role.id
         dbconfig.Firststartup = False
@@ -1348,8 +1391,10 @@ def threadloop():
             time.sleep(.5)
             AMPinstancecheck() #Check if any new AMP Instances have been created or started...
             time.sleep(.5)
+
             #whitelist file check to update db for non whitelisted users
             whitelistfilecheck(localdb)
+
             #status = asyncio.run_coroutine_threadsafe(whitelist.whitelistListCheck(), async_loop)
             status = whitelist.whitelistListCheck(client)
             #whitelistListCheck returns False if it has no entries.

@@ -74,7 +74,6 @@ def varupdate(time):
 
 def commandLog(ctx,curserver,parameter,loc):
     global COMMANDLOGS
-    COMMANDLOGS,filename = logfilehandler('command')
     server = curserver
     save = False
     time = datetime.now().strftime('%c')
@@ -119,8 +118,7 @@ def commandLog(ctx,curserver,parameter,loc):
                 }     
 
         if save == True:
-            COMMANDLOGS.append(logentry)
-            logfilesaver(COMMANDLOGS,filename)
+            logfilesaver([logentry])
             return logging.info('Logged a Discord Command...')
              
 
@@ -140,8 +138,7 @@ def commandLog(ctx,curserver,parameter,loc):
                     'Command' : command,
                     'Usage' : " ".join(contents_split[5:])
                     }                   
-            COMMANDLOGS.append(logentry)
-            logfilesaver(COMMANDLOGS,filename)
+            logfilesaver([logentry])
             logging.info('Logged a Console Command...')
     return
 
@@ -155,7 +152,7 @@ def logfilehandler(type):
         
     try:    
         if dircheck:
-            newfile = open(BOTDIR + DIR + DATE + filename, 'a+')
+            newfile = open(BOTDIR + DIR + filename, 'a+')
             COMMANDLOGS = json.load(newfile)
             newfile.close()
             return COMMANDLOGS,filename
@@ -166,10 +163,27 @@ def logfilehandler(type):
         logging.error(traceback.print_exc())
     return COMMANDLOGS,filename
 
-def logfilesaver(log,filename):
+def logfilesaver(log):
+    filename = DATE + FILES['commands']
     logging.info(f'Log File Saver {filename}')
-    newfile = open(BOTDIR + DIR + DATE + filename, 'a+') 
-    json.dump(log,newfile, indent=0)
+    try:
+        newfile = open(BOTDIR + DIR + filename, 'r+', newline= '\n')
+    except:
+        newfile = open(BOTDIR + DIR + filename, 'w', newline= '\n')
+
+    endoffile = newfile.seek(0, os.SEEK_END)
+    if endoffile == 0:
+        #new file, just dump 
+        json.dump(log,newfile, indent=0)
+    else:
+        #go back 1 spot to rewrite the close ]
+        newfile.seek(endoffile-2, os.SEEK_SET)
+
+        #get the json data string and write data after the first [
+        jsondata = json.dumps(log,indent=0)[1:]
+        if jsondata[0] == '\n':
+            jsondata = jsondata[1:]
+        newfile.write("," + jsondata)
     newfile.close()
     return
 

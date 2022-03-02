@@ -34,6 +34,7 @@ import os
 import logging
 
 SessionIDlist = {}
+SuccessfulConnection = False
 
 #Checks for Errors in Config
 def init():
@@ -100,7 +101,6 @@ class AMPAPI:
             return
         self.SessionID = 0
         self.Index = Index
-    
         self.serverdata = serverdata
         if instanceID != 0:
             for entry in serverdata:
@@ -110,11 +110,24 @@ class AMPAPI:
            self.Running = True
 
     def CallAPI(self,APICall,parameters):
+        global SuccessfulConnection
         if self.SessionID != 0:
             parameters['SESSIONID'] = self.SessionID
         jsonhandler = json.dumps(parameters)
-        post_req = requests.post(self.url+APICall, headers=self.AMPheader, data=jsonhandler)
-        #pprint(post_req.json())
+        while(True):
+            try:
+                post_req = requests.post(self.url+APICall, headers=self.AMPheader, data=jsonhandler)
+                break
+            except TimeoutError as e:
+                if SuccessfulConnection == False:
+                    logging.critical('Unable to connect to URL; please check Tokens.py -> AMPURL')
+                    sys.exit(-1)
+                logging.error('AMP API was unable to connect; sleeping for 30 seconds...')
+                time.sleep(30)
+
+        SuccessfulConnection = True
+        
+        #Error catcher for API calls
         if type(post_req.json()) == None:
             logging.error(f"AMP_API CallAPI ret is 0: status_code {post_req.status_code}")
             logging.error(post_req.raw)

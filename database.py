@@ -595,7 +595,7 @@ class DBUser:
 		super().__setattr__(name, value)
 		self._db._UpdateUser(self, **{name:value})
 
-	def AddInfraction(self, server, mod, note):
+	def AddInfraction(self, mod, server = None, note = None):
 		if server != None:
 			ServerID = server.ID
 		else:
@@ -817,7 +817,7 @@ class DBServer:
 		return ret
 
 	def AddUserInfraction(self, user:DBUser, mod:DBUser, note:str):
-		user.AddInfraction(self, mod, note)
+		user.AddInfraction(server = self, mod = mod, note = note)
 
 class DBServerUser:
 	def __init__(self, db:Database, Server:DBServer, User:DBUser, ID=None, Whitelisted:bool=False, LastLogin:datetime.datetime=None,TimePlayed:int= 0, SuspensionExpiration:datetime.datetime=None):

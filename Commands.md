@@ -22,7 +22,7 @@ ___
 All commands can be used in any channel the bot can see. They are not case sensitive! <br>
 **Commands are triggered via two forward slashes. `//`**. 
 - You can use `//help` at any time for commands. 
-    - `//user` and `//server` support `example` after the command to show examples of code usage. `//user example`
+    - `//user`, `//server` and `//botsetting` support `example` after the command to show examples of code usage. eg. `//user example`
     - Some Commands support `list` and `info` after any Command and or its function, the bot will reply with information.
 - All `time` parameters support values: `Years(y:) Months(mo:) Weeks(w:) Days(d:) Hours(h:) Minutes(m:) Seconds(s:)` 
     - All `time` parameters are optional. *example: `//server server_name userban user_name y:2d:4m:45`*

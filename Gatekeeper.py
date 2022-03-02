@@ -51,7 +51,7 @@ import console
 import chat
 
 
-data = 'alpha-3.0.16' #Major.Minor.Revisions
+data = 'alpha-3.0.17' #Major.Minor.Revisions
 logging.info(f'Version: {data}')
 
 async_loop = asyncio.new_event_loop()
@@ -422,11 +422,11 @@ async def server(ctx,*parameter):
         if 'ban' in parameter:
             parameter_help += '/ user_name / time(Optional) / reason:(Optional)'
 
-        await ctx.send(f'**Format**: //server server_name (function) (option) (parameter)',reference = ctx.message.to_reference())
+        await ctx.send(f'**Format**: //server server_name `function` `option` `parameter`',reference = ctx.message.to_reference())
         return await ctx.send(f"**Functions**: " + ', '.join(serverfuncs.keys()) + '\n' + option_help + '\n' + parameter_help)
 
     if len(parameter) < 2:
-        return await ctx.send(f'**Format**: //server server_name (function) (option) (parameter)',reference = ctx.message.to_reference())
+        return await ctx.send(f'**Format**: //server server_name `function` `option` `parameter`',reference = ctx.message.to_reference())
 
     curserver = db.GetServer(Name= parameter[0])
     if curserver == None:
@@ -919,8 +919,8 @@ async def botsetting(ctx,*parameter):
     if len(parameter) < 1:
         return await ctx.send(f'**Format**: //botsetting (function) (parameter)',reference=ctx.message.to_reference())
     if 'help' in parameter:
-        await ctx.send(f'**Format**: //botsetting `function` `parameter`' + 
-                        '\n**Functions**: {functions}' +
+        return await ctx.send(f'**Format**: //botsetting `function` `parameter`' + 
+                        f'\n**Functions**: {functions}' +
                         '\n**Parameters**: True or False / channel_name or channel_id / time(See Commands.md)',reference=ctx.message.to_reference())
     if 'example' in parameter:
         return await ctx.send(f'**Example**: //botsetting bantimeout y:1 d:3')

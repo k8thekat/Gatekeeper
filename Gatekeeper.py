@@ -51,7 +51,7 @@ import console
 import chat
 
 
-data = 'alpha-3.0.17' #Major.Minor.Revisions
+data = 'alpha-3.0.18' #Major.Minor.Revisions
 logging.info(f'Version: {data}')
 
 async_loop = asyncio.new_event_loop()
@@ -720,12 +720,16 @@ async def user(ctx,*parameter):
         return await ctx.send(f'**The User**: {parameter[0]} does not exist in **{ctx.guild.name}**.', reference = ctx.message.to_reference())
     elif parameter[1].lower() in userfuncs:
         cur_db_user = db.GetUser(curuser.id)
-        if parameter[1].lower() == 'add':
-            return await ctx.send(userfuncs[parameter[1]](ctx,curuser,parameter),reference = ctx.message.to_reference())
-        try:
-            response = await asyncio.gather(userfuncs[parameter[1]](ctx,cur_db_user,parameter))
-        except:
-            response = userfuncs[parameter[1]](ctx,cur_db_user,parameter)
+        if cur_db_user != None:
+            if parameter[1].lower() == 'add':
+                return await ctx.send(userfuncs[parameter[1]](ctx,curuser,parameter),reference = ctx.message.to_reference())
+            try:
+                response = await asyncio.gather(userfuncs[parameter[1]](ctx,cur_db_user,parameter))
+            except:
+                response = userfuncs[parameter[1]](ctx,cur_db_user,parameter)
+        else:
+            return await ctx.send(f'**The User**: {parameter[0]} does not exist in the Database.', reference = ctx.message.to_reference())
+
     else:
         return await ctx.send(f'**Format**: //user {curuser.DiscordName} {parameter[1]} (option) (parameter)',reference = ctx.message.to_reference())
     return await ctx.send(response,reference= ctx.message.to_reference()) 
@@ -923,7 +927,7 @@ async def botsetting(ctx,*parameter):
                         f'\n**Functions**: {functions}' +
                         '\n**Parameters**: True or False / channel_name or channel_id / time(See Commands.md)',reference=ctx.message.to_reference())
     if 'example' in parameter:
-        return await ctx.send(f'**Example**: //botsetting bantimeout y:1 d:3')
+        return await ctx.send(f'**Example**: //botsetting bantimeout y:1 d:3',reference = ctx.message.to_reference())
     if 'info' in parameter:
         curbotflags = []
         curbotchans = []
@@ -1141,7 +1145,7 @@ async def serverlist(ctx):
     staff = False
     if not rolecheck(ctx, 'General'):
         return 'User does not have permission.'
-    if rolecheck(ctx,'Staff'): #If the user is Staff or Higher append to the list
+    if rolecheck(ctx,'Staff'): 
         staff = True
     logging.info('Server List...')
     AMPinstancecheck()
@@ -1158,14 +1162,15 @@ async def serverlist(ctx):
                 serv_status = '`Offline`'
                 
             serverinfo = f'**Server**: {curserver.FriendlyName} - {serv_status}' 
+            #Staff see ALL servers
             if staff == True:
                 if len(curserver.Nicknames) != 0: #If the server has nicknames
-                    serverlist.append(f'{serverinfo}\n\t**Nicknames**: {curservernick}')
+                    serverlist.append(f'{serverinfo}\n\t**__Nicknames__**: {curservernick}')
                 else:
                     serverlist.append(serverinfo)
             elif serv_status != '`Offline`': #If the server is OFFLINE; do not display it to a general user..
                 if len(curserver.Nicknames) != 0:
-                    serverlist.append(f'{serverinfo}\n\t**Nicknames**: {curservernick}')
+                    serverlist.append(f'{serverinfo}\n\t**__Nicknames__**: {curservernick}')
                 else:
                     serverlist.append(serverinfo)
 

@@ -54,7 +54,6 @@ All commands can be used in any channel the bot can see. They are not case sensi
 - **Status** | *No Options* | parameters: `server_name` | Permission level: `None` | <br>
 - **Stop** | *No Options* | parameters: `server_name` | Permission level: `Maintenance` | <br>
 - **Ban** | *No Options* | parameters: `server_name` / `user_name` / `time(optional)` / `reason:(optional)` | Permission level: `Staff` | <br>
-- **Infraction** | *No Options* | parameters: `server_name` |`user_name` / `reason:(optional)` | Permission level: `Staff` |  <br>
 - **List** | *No Options* | parameters: `server_name` | Permission level: `Staff` | <br>
 - **Whitelist** | *default: False* | parameters: `server_name` |`true` or `false` | Permission level: `Maintenance` |<br>
 
@@ -79,7 +78,7 @@ These ranks do follow a heirachy starting from `General` to `Operator`; each ran
 - **Donator** | *No Options* | parameters: `user_name` / `true` or `false` | Permission level: `Moderator` <br>
 - **IGN** | *No Options* | parameters: `user_name` | Permission level: `Staff` <br>
 - **Info** | *No Options* | parameters: `user_name` | Permission level: `Staff` <br>
-- **Infractions** | options: `add` or `del` | parameters: `user_name` / `infractionID(del:optional)` / `time(add:optional)` / `reason:(add:optional)` | Permission level: `Staff` <br>
+- **Infractions** | options: `add` or `del` | parameters: `user_name` / `server_name` / `infractionID(del:optional)` / `time(add:optional)` / `reason:(add:optional)` | Permission level: `Staff` <br>
 - **Moderator** | *No Options* | parameters: `user_name` / `true` or `false` | Permission level: `Maintenance` <br>
 ---
 ### Bot Commands `//botsettings`

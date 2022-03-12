@@ -26,6 +26,7 @@ import traceback
 import database
 import logging
 import logger
+import whitelist
 
 #Database
 db = database.Database()
@@ -78,7 +79,7 @@ def scan(amp_server,entry):
         except Exception as e:
             logging.exception(e)
             logging.error(traceback.print_exc())
-            return True, f'Unable to update User: {entry_split[3]} banned status in the database!'
+            return True, f'**Unable to update User**: {entry_split[3]} banned status in the database!'
     #�6Player�c Console �6unbanned�c k8_thekat
     if entry['Contents'].startswith('Player Console unbanned'):
         logging.info('User has been unbanned via console...')
@@ -91,18 +92,36 @@ def scan(amp_server,entry):
         except Exception as e:
             logging.exception(e)
             logging.error(traceback.print_exc())
-            return True, f'Unable to update User: {entry_split[3]} banned status in the database!'
+            return True, f'**Unable to update User**: {entry_split[3]} banned status in the database!'
     #Added k8_thekat to the whitelist
     if entry['Contents'].startswith('Added') and entry['Contents'].endswith('to the whitelist'):
         logging.info('User added to Whitelist via console..')
         logger.commandLog(None,curserver,entry,'console')
         entry_split = entry['Contents'].split(' ')
-        try:
-            curserver.GetUser(entry_split[1]).Whitelisted = True
-        except Exception as e:
-            logging.exception(e)
-            logging.error(traceback.print_exc())
-            return True, f'Unable to update User: {entry_split[1]} whitelisted status in the database!'
+        db_user = db.GetUser(entry_split[1])
+        found = False
+        #{'User': user, 'IGN': user.IngameName, 'timestamp' : curtime, 'server' : curserver, 'Context': message})
+        for index in range(0,len(whitelist.WhitelistWaitList)):
+            user = whitelist.WhitelistWaitList[index]
+            #Lets first try to compare via db_user; this can fail if they are not in the database.. somehow..
+            if db_user != None:
+                print('Whitelist db_user lookup',db_user,user)
+                if db_user == user['User']:
+                    found = True
+                    curserver.GetUser(db_user).Whitelisted = True
+                    whitelist.WhitelistWaitList.remove[user]
+                    return True,f'**Removed User*: {db_user.IngameName} from Whitelist wait list and updated their Whitelisted Status to `True` on {curserver.FriendlyName}.'  
+
+            #Lets now try via the whitelisted ign and see if we can find a match.
+            print('Whitelist IGN Lookup',entry_split[1],user['IGN'])
+            if entry_split[1] == user['IGN']:
+                found = True
+                whitelist.WhitelistWaitList.remove[user]
+                return True,f'**Removed User**: {entry_split[1]} from Whitelist wait list, unable to update Whitelisted status in the Database!'  
+
+        if found == False:
+            return True, f'**Unable to update User**: {entry_split[1]} whitelisted status in the database!'
+        
     #Removed k8_thekat from the whitelist
     if entry['Contents'].startswith('Removed') and entry['Contents'].endswith('from the whitelist'):
         logging.info('User removed from Whitelist via console..')
@@ -113,40 +132,47 @@ def scan(amp_server,entry):
         except Exception as e:
             logging.exception(e)
             logging.error(traceback.print_exc())
-            return True, f'Unable to update User: {entry_split[1]} whitelisted status in the database!'
+            return True, f'**Unable to update User**: {entry_split[1]} whitelisted status in the database!'
     #User Lastlogin Stuff
     if entry['Source'].startswith('User Authenticator'):
             #if entry['Source'].startswith('Server thread/INFO') and entry[''].startswith()
-        logging.info('User Last Login Triggered...')
         curtime = datetime.now()
         psplit = entry['Contents'].split(' ')
         user = db.GetUser(psplit[3])
         if user != None:
+            logging.info(f'**Updating {user.IngameName} Last Login to {curtime}...**')
             serveruser = curserver.GetUser(user)
             if serveruser == None:
                 curserver.AddUser(user)
                 serveruser = curserver.GetUser(user)
                 serveruser.LastLogin = curtime
-                return True, f'Adding user to Server: {curserver.FriendlyName} User: {user.DiscordName} IGN: {user.IngameName}'
+                return True, f'**Adding user to Server**: {curserver.FriendlyName} User: {user.DiscordName} IGN: {user.IngameName}'
             else:
                 serveruser = curserver.GetUser(user)
                 serveruser.LastLogin = curtime
-                return True, f'Updating User Last Login on Server: {curserver.FriendlyName} User: {user.DiscordName} IGN: {user.IngameName}'
+                return True, f'**Updating User Last Login on Server**: {curserver.FriendlyName} User: {user.DiscordName} IGN: {user.IngameName}'
         else:
-            return True, f'Failed to set Last Login for Server: {curserver.FriendlyName} User: {psplit[3]}. Please add the user to the database and set the users IGN via //user DiscordID ign {psplit[3]}'
+            return True, f'**Failed to set Last Login for Server**: {curserver.FriendlyName} User: {psplit[3]}. Please add the user to the database and set the users IGN via //user DiscordID ign {psplit[3]}'
     
     #User Played Time
-    if entry['Source'] == 'Server thread/INFO' and entry['Contents'].endswith('has left the game!'):
+    if entry['Source'].lower() == 'server thread/info' and entry['Contents'].find('left the game') !=-1:
         logout_time = datetime.fromtimestamp(float(entry['Timestamp'][6:-2])/1000)
         entry = entry['Contents'].split(' ') #Prep to help me get the user out of the 'Contents'
-        user = entry[0]
-        if user == None:
-            return True, f'Failed to get User: {entry[0]}; please attempt to add them or update their IGN manually.'
+        db_user = db.GetUser(entry[0])
+        if db_user == None:
+            return True, f'**Failed to Update Time Played**: User: {entry[0]}; Please add the user to the database and set the users IGN via //user DiscordID ign {entry[0]}.'
     
-        lastlogin = curserver.GetUser(entry[0]).LastLogin #Gets the datetime object of the ServerUser last login
-        total_timeplayed = curserver.GetUser(entry[0]).TimePlayed #Gets the time played of the ServerUser - Should be in minutes
-        time_played = (lastlogin - logout_time) #The datetime of how long they played.
+        logging.info(f'**Updating {db_user.IngameName} played time on {curserver.FriendlyName}**')
+        lastlogin = curserver.GetUser(db_user).LastLogin #Gets the datetime object of the ServerUser last login
+        print('Last Login',lastlogin)
+        if lastlogin == None:
+            lastlogin = logout_time
+        total_timeplayed = curserver.GetUser(db_user).TimePlayed #Gets the time played of the ServerUser - Should be in minutes
+        print('Total',total_timeplayed)
+        if total_timeplayed == None:
+            total_timeplayed = 0
+        time_played = (logout_time - lastlogin) #The datetime of how long they played.
+        print('Time played',time_played)
         total_timeplayed += (time_played.seconds/60) #Add's the play time to their current accured amount of play time..
-        return True, f'Updated User: {entry[0]} played time increased by {time_played} Minutes. Total: {total_timeplayed} Minutes.'
-
+        return True, f'**Updated User**: {entry[0]} played time increased by {time_played} Minutes. Total: {total_timeplayed} Minutes.'
     return False, entry

@@ -23,7 +23,7 @@ import json
 import requests
 
 #Minecraft username UUID check
-def uuidcheck(name):
+def uuidcheck(name): 
     url = 'https://api.mojang.com/profiles/minecraft'
     header = {'Content-Type': 'application/json'}
     jsonhandler = json.dumps(name)
@@ -35,8 +35,7 @@ def uuidcheck(name):
         return False, None
 
 #Minecrat username history check
-def uuidCurName(mc_user):
-    mc_user_uuid = mc_user[0]['id']
+def uuidCurName(mc_user_uuid):
     url = f'https://api.mojang.com/user/profiles/{mc_user_uuid}/names'
     post_req = requests.get(url)
     return post_req.json()[-1]

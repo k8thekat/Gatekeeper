@@ -44,7 +44,7 @@ info = dbconfig.GetSetting('infochannel')
 
 #whitelist Format ## DO NOT CHANGE ##
 #Users must use this format to request whitelist via auto-whitelist
-WhitelistFormat = 'IGN: username \nSERVER: servername'
+WhitelistFormat = '**IGN**: minecraft_ign \n**SERVER**: servername'
 
 #Donator Feature - 
 #Allows only users with donator flag to request whitelist and join donator only servers. 
@@ -79,10 +79,11 @@ Default = True #Basic console spamming messages (example: Current Memory Usage)
 Debugging = True #Filters out ANY ERRORs that would show in the console
 CommandBlocks = False #Anything related to command blocks will be suppressed.
 WorldEdit = False #Filters out any worldedit commands that start with //
-
+Modpack = True #If the server uses a Modpack
+DiscordBot = True #Filters other discord bot issues..
 #World Reset/Dragon Fight handlers
 #These settings are needed to allow the bot to reset a dragon fight and reset the world.
-DragonReset = False
+DragonReset = True
 Multiverse_Core = False
 
 #Auto-reply messages
@@ -100,6 +101,6 @@ Randombotreplies = True
 # eg. Entry #1 in the list below would be the **FIRST** server in your AMP Instances, Entry #2 is AMP instance #2 etc...
 Botwhitelistreplies = [ 
     f'Welcome, please see <#{info}> for IP and modpack versions~ Also take a look at <#{faq}> if you need help connecting- otherwise try <#{support}> !Happy Mining!',
-    f'Whitelisted! Please see <#{info}> for IP and modpack versions~ Also take a look at our <#{faq}> ',
+    f'Whitelisted! Please see <#{info}> for IP and modpack versions~  ',
     'Hope your ready to earn your engineering degree! Have fun and blow stuff up~'
     ]

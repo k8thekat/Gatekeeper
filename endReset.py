@@ -73,9 +73,9 @@ def worldremove(AMPservers,curserver):
         #print(worlddir)
     else:
         if OSPLAT.lower() == 'windows':
-            trashdir = f'world\DIM-1'
+            trashdir = f'world\DIM1'
         if OSPLAT.lower() == 'linux': #Flip the slash to accomadate Linux users <3
-            trashdir = f'world/DIM-1'
+            trashdir = f'world/DIM1'
         worlddir = AMPservers[curserver].TrashDirectory(trashdir)
         #print(worlddir)
     return

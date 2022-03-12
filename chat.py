@@ -30,7 +30,6 @@ import logging
 
 #database setup
 db = database.Database()
-dbconfig = db.GetConfig()
 
 #AMP API setup
 AMP = AMPAPI()
@@ -78,6 +77,9 @@ async def MCchatsend(channel, user, message):
 #Console messages are checked by 'Source' and by 'Type' to be sent to a designated discord channel.
 def MCchattoDiscord(db_server,async_loop,client,chat):
     channel = db_server.DiscordChatChannel
+    # No point in sending a message if the channel is None.
+    if channel == None:
+        return
     disc_channel = client.get_channel(int(channel))
 
     chatmsg = []

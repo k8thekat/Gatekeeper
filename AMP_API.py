@@ -32,9 +32,11 @@ from pprint import pprint
 import sys
 import os
 import logging
+from datetime import datetime
 
 SessionIDlist = {}
 SuccessfulConnection = False
+curtime = datetime.now()
 
 #Checks for Errors in Config
 def init():
@@ -191,6 +193,7 @@ class AMPAPI:
     def getStatus(self):
         parameters = {}
         result = self.CallAPI('Core/GetStatus', parameters)
+        pprint(result)
         #Uptime = '**Uptime**: ' + str(result['Uptime'])
         tps = '**TPS**: ' + str(result['State'])
         activeusers = '**Players**: ' + str(result['Metrics']['Active Users']['RawValue'])
@@ -330,7 +333,17 @@ class AMPAPI:
         result = self.CallAPI('FileManagerPlugin/EmptyTrash',parameters)
         return result
 
-    #TODO Need to fix list
+    @Login
+    def takeBackup(self,title, description, sticky = False):
+        parameters = {
+            'Title' : title,
+            'Description' : description,
+            'Sticky' : sticky
+        }
+        result = self.CallAPI('LocalFileBackupPlugin/TakeBackup',parameters)
+        return result
+
+    #TODO - Need to fix list
     def sessionCleanup(self):
         global SessionIDlist
         sessions = self.getActiveAMPSessions()

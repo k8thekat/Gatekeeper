@@ -25,7 +25,11 @@ import logging
 
 def parse(parameter,delta = False):
     logging.info('Converting the time...')
-    #print(parameter)
+    print(parameter)
+
+    if parameter == 'None' or parameter == None:
+        return None
+
     curtime = datetime.now()
     time_found = False
     years,months,weeks,days,hours,minutes = 0,0,0,0,0,0
@@ -131,17 +135,10 @@ def parse(parameter,delta = False):
                 break
         minutes = int(minsnum)
     
-    #if sec_find != -1:
-    #    secnum = ''
-    #    for letter in parameter[sec_find+8:]:
-    #        if letter.isnumeric():
-    #            secnum += letter
-    #        else:
-    #            break
-    #    seconds = timedelta(seconds= int(secnum))
     if time_found == False:
         logging.warning('Did not find a time value')
         return False
+    # If we need a timedelta object.
     if delta == True:
         return timedelta(days= ((years*365) + (months*30) + (weeks*7) + days), hours=hours, minutes=minutes)
     bantime = curtime + timedelta(days= ((years*365) + (months*30) + (weeks*7) + days), hours=hours, minutes=minutes)

@@ -31,9 +31,9 @@ def ParseIGNServer(msg):
 		curentry = msg[pos].lower()
 		if curentry.startswith("server") and (fieldflag == 1):
 			ret[fieldflag] += f' {msg[pos]}'
-		elif curentry.startswith("ign") or curentry.startswith("server") or curentry.startswith("in-game-name"):
+		elif curentry.startswith("ign") or curentry.startswith("server") or curentry.startswith("in-game-name") or curentry.startswith('in-gamename') or curentry.startswith('ingamename'):
     			#flag what we are looking at, ign or server
-			if curentry.startswith("ign") or curentry.startswith("in-game-name"):
+			if curentry.startswith("ign") or curentry.startswith("in-game-name") or curentry.startswith('in-gamename') or curentry.startswith('ingamename'):
 				fieldflag = 0
 			else:
 				fieldflag = 1
@@ -101,12 +101,3 @@ def ParseIGNServer(msg):
 		return None
 
 	return (ret[0], ret[1])
-'''
-for entry in test:
-	print(f"Testing:\n{entry}")
-	ret = ParseIGNServer(entry)
-	if ret == None:
-		print("Failed to parse\n")
-	else:
-		print(f"found User: {ret[0]} Server: {ret[1]}\n")
-'''

@@ -55,7 +55,7 @@ def init():
     logging.basicConfig(level=config.logginglevel, format='%(asctime)s [%(threadName)s] [%(levelname)s]  %(message)s', 
                         datefmt='%m/%d/%Y %I:%M:%S %p',
                         handlers = [logging.StreamHandler(sys.stdout),
-                        TimedRotatingFileHandler(log_file_name,'midnight',backupCount= 4,encoding='utf-8',utc=True)])
+                        TimedRotatingFileHandler(log_file_name,'midnight',atTime=datetime.min.time(),backupCount= 4,encoding='utf-8',utc=True)])
     return
 
 def logfilelist():

@@ -27,29 +27,37 @@ def filters(entry):
     if type(entry) == dict:
         if config.CommandBlocks:
             if entry['Contents'].startswith('CommandBlock at'):
-                #print(f'Console Filter triggered... Removed: {entry["Contents"]}')
                 return True
 
         if config.WorldEdit:
             if entry['Contents'].find('issued server command: //') != -1:
                 return True
-
+        if config.Modpack:
+            if entry['Contents'].lower().startswith('OpenComputers-Computer-1'):
+                return True
+            if entry['Source'].lower() != 'server thread/info':
+                return True
         if config.Default:
+            filter_source_table = {'installer','server thread/warn','server thread/error','server thread/fatal','main/error','main/info','main/warn'}
             if entry['Contents'].startswith('Current Memory Usage:') and entry['Contents'].endswith('mb)'):
-                #print(f'Console Filter triggered... Removed: {entry["Contents"]}')
                 return True
-            if entry['Source'].lower() == 'installer':
+            if entry['Source'].lower() in filter_source_table:
                 return True
-            if entry['Source'].lower() == 'server thread/warn':
+            if entry['Type'].lower() == 'action': #Filters enchantment Actions afaik
                 return True
-
+            if entry['Source'].lower().startswith('netty server io'):
+                return True
+        if config.DiscordBot:
+            #This may be specific to a MC chat bot; but it causes errors.
+            if entry['Source'].lower().startswith('ml'):
+                return True
+            if entry['Source'].lower().startswith('d4j'):
+                return True
         if config.Debugging:
             #if entry['Source'].lower() == 'server thread/info':
                # return True
-            if entry['Source'].lower() == 'server thread/error':
-                return True
-            #!! Needs to be Adressed; find out console filter solutions for mod loading.
-            filtertable = ['\\tat net.minecraft','\\tat java.util','java.lang','java.io','com.google']
+            #TODO - Needs to be Adressed; find out console filter solutions for mod loading.
+            filtertable = ['\tat','java.lang','java.io','com.google']
             for filter in filtertable:
                 if entry['Contents'].lower().startswith(filter):
                     return True

@@ -94,7 +94,7 @@ def spamFilter(message):
 
     for flag in flags:
         if flag in message.content:
-            print('Message contains a flagged word...')
+            print(f'Message contains a flagged word...{message.author.name}: {message.content}')
             storeflag = True
 
     if message.mention_everyone: #If someone is repeatidly using @everyone; I want them to be caught and punished

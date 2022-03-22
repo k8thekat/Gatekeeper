@@ -1408,6 +1408,9 @@ async def setup(ctx,*parameter):
 #/whitelist add (ign) (server) (discord id)
 async def universalWhitelist(ctx,*parameter):
     logging.info('Universal Whitelist Triggered...')
+    if not rolecheck(ctx, 'Staff'):
+        return 'User does not have permission.'
+        
     if len(parameter) <= 3:
         return await ctx.send(f'**Format**: //whitelist `option` `ign` `server` `discord_id`')
 

@@ -731,9 +731,12 @@ class DBServer:
 		elif name in ["Whitelist", "Donator"]:
 			#conver to bool
 			value = bool(value)
-		elif name in ["UserLimit", "DiscordConsoleChannel", "DiscordChatChannel"]:
+		elif name in ["UserLimit"]:
 			value = int(value)
-
+		elif name in ["DiscordConsoleChannel", "DiscordChatChannel"]:
+			if value != None:
+				value = int(value)
+    
 		#set value and update the user
 		super().__setattr__(name, value)
 		self._db._UpdateServer(self, **{name:value})

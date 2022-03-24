@@ -27,6 +27,7 @@ import UUIDhandler
 import chatfilter
 import time
 import logging
+import pprint
 
 #database setup
 db = database.Database()
@@ -44,11 +45,11 @@ def init(client):
     global SERVERCHAT, AMPservers
     #Lets generate our list of servers via Chat channels for easier lookup.
     for server in AMPservers:
-        db_server = db.GetServer(server)
-        channel = db_server.DiscordChatChannel #Needs to be an int() because of discord message.channel.id type is int()
+        channel = db.GetServer(server).DiscordChatChannel #Needs to be an int() because of discord message.channel.id type is int()
         if channel != None:
             time.sleep(0.1)
-            SERVERCHAT = {int(channel): {'AMPserver' : AMPservers[server], 'DBserver': db_server, 'status' : AMPservers[server].Running}}
+            SERVERCHAT.update({int(channel): {'AMPserver' : AMPservers[server], 'status' : AMPservers[server].Running}})
+    pprint.pprint(SERVERCHAT)
 
 #@client.event()
 #This handles scanning discord chat messages to send it to the correct minecraft server
@@ -72,11 +73,17 @@ async def MCchatsend(channel, user, message):
     
     webhooks = await channel.webhooks()
     for webhook in webhooks:
+        try:
             await webhook.delete()
+        except Exception as e:
+            logging.error(e)
+            print(e)
 
 #Console messages are checked by 'Source' and by 'Type' to be sent to a designated discord channel.
-def MCchattoDiscord(db_server,async_loop,client,chat):
-    channel = db_server.DiscordChatChannel
+def MCchattoDiscord(amp_server,async_loop,client,chat):
+    user = None
+    channel = db.GetServer(amp_server.InstanceID).DiscordChatChannel
+    #print(channel,type(channel))
     # No point in sending a message if the channel is None.
     if channel == None:
         return
@@ -85,6 +92,18 @@ def MCchattoDiscord(db_server,async_loop,client,chat):
     chatmsg = []
     if chat['Source'].startswith('Async Chat Thread'):
         chatmsg.append(chat['Contents'])
+
+    #This is an attempt to handle OP'd users when the 'Type' Changes from 'Chat' to 'Console'. Not sure why...
+    #This may cause problems in the future if anything uses '<' or '>'
+    #03/22/2022 04:37:26 PM [Thread-15 (serverconsole)] [INFO]  PO3 {'Timestamp': '/Date(1647992246393)/', 'Source': 'Server thread/INFO', 'Type': 'Console', 'Contents': '<[staff]: k8_thekat> Help'}
+    if chat['Type'] == 'Console':
+        indexleft = chat['Contents'].find('<')
+        indexright = chat['Contents'].find('>')
+        if (indexleft != -1)and (indexright != -1):
+            indexcolon = chat['Contents'].index(':')
+            chatmsg.append(chat['Contents'])
+            user = chat['Contents'][indexcolon+1:-1].strip()
+
     elif chat['Type'] == 'Chat':
         user = UUIDhandler.uuidcheck(chat['Source'])
         chatmsg.append(chat['Contents'])
@@ -97,8 +116,9 @@ def MCchattoDiscord(db_server,async_loop,client,chat):
             if len(bulkentry+entry) < 1500:
                 bulkentry = bulkentry + entry + '\n' 
             else:
-                ret = asyncio.run_coroutine_threadsafe(MCchatsend(disc_channel, user, bulkentry[:-1]), async_loop)
-                ret.result()
+                if chat['Type'] == 'Chat':
+                    ret = asyncio.run_coroutine_threadsafe(MCchatsend(disc_channel, user, bulkentry[:-1]), async_loop)
+                    ret.result()
                 bulkentry = entry + '\n'
         if len(bulkentry):
             ret = asyncio.run_coroutine_threadsafe(MCchatsend(disc_channel, user, bulkentry[:-1]), async_loop)

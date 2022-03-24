@@ -59,7 +59,7 @@ import console
 import chat
 
 
-data = '4.0.0-alpha' #Major.Minor.Revisions
+data = '4.0.1-beta' #Major.Minor.Revisions
 logging.info(f'Version: {data}')
 
 async_loop = asyncio.new_event_loop()
@@ -188,8 +188,9 @@ def serverdiscordchannel(ctx,curserver,parameter):
             if channel == None:
                 return f'The Channel ID: {parameter[3]} is not valid.'    
         if parameter[2].lower() == 'chat':
-            if parameter[3] == 'None':
+            if parameter[3].lower() == 'none':
                 curserver.DiscordChatChannel = None
+                return f'Set Discord Chat Channel for {curserver.FriendlyName} to None.'  
             else:
                 curserver.DiscordChatChannel = str(channel.id)
                 return f'Set Discord Chat Channel for {curserver.FriendlyName} to {channel.name}.'  
@@ -197,6 +198,7 @@ def serverdiscordchannel(ctx,curserver,parameter):
             if parameter[3].lower() == 'none':
                 curserver.DiscordConsoleChannel = None
                 console.threadstop(curserver) #curserver = db object
+                return f'Set Discord Console Channel for {curserver.FriendlyName} to None.'  
             else:
                 curserver.DiscordConsoleChannel = str(channel.id)
                 #This appends the thread with the channel to SERVERCONSOLE list now that a discord console channel was set.
@@ -270,7 +272,7 @@ def serverinfo(ctx,curserver,parameter):
     servernicknames = ', '.join(curserver.Nicknames)
     if len(curserver.Nicknames) == 0:
         return f'**Name**: {curserver.FriendlyName}\n**Whitelist**: `{bool(curserver.Whitelist)}`\n**Donator**: `{bool(curserver.Donator)}`\n**Discord Console Channel**: <#{curserver.DiscordConsoleChannel}>\n**Discord Chat Channel**: <#{curserver.DiscordChatChannel}>\n**Discord Role**: {role}'
-    
+    #Need to add a check if a setting is None.
     response = f'**Name**: {curserver.FriendlyName}\n\t*Nicknames*: {servernicknames}\n**Whitelist**: `{bool(curserver.Whitelist)}`\n**Donator**: `{bool(curserver.Donator)}`\n**Discord Console Channel**: <#{curserver.DiscordConsoleChannel}>\n**Discord Chat Channel**: <#{curserver.DiscordChatChannel}>\n**Discord Role**: {role}'
     return response
 
@@ -533,13 +535,24 @@ def userinfo(ctx,curuser,parameter):
     if not rolecheck(ctx, 'Staff'):
         return 'User does not have permission.'
     logging.info('User Info...')
-    userinfractionslist = curuser.Infractions
-    userservers = curuser.GetAllServers() 
+    
+    response = f'**DiscordID**: {curuser.DiscordID}\n**DiscordName**: {curuser.DiscordName}\n**InGameName**: {curuser.IngameName}'
+
+    if curuser.ServerModerator == 1:
+        data = f'\n**Moderator**: `{bool(curuser.ServerModerator)}`'
+        response += data
+
     if curuser.GlobalBanExpiration != None:
         globalbanformat = curuser.GlobalBanExpiration['Date'].strftime('%Y/%m/%d Time: %X (UTC)')
-    else:
-        globalbanformat = curuser.GlobalBanExpiration
-    response = f'**DiscordID**: {curuser.DiscordID}\n**DiscordName**: {curuser.DiscordName}\n**InGameName**: {curuser.IngameName}\n**Donator**: `{bool(curuser.Donator)}`\n**Banned**: {globalbanformat}'
+        data = f'\n**Banned**: {globalbanformat}'
+        response += data
+
+    #0 = False / 1 = True
+    if curuser.Donator == 1:
+        data = f'\n**Donator**: `{bool(curuser.Donator)}`'
+        response += data
+
+    userservers = curuser.GetAllServers() 
     if len(userservers) != 0:
         for entry in userservers:
             if entry.LastLogin != None:
@@ -552,14 +565,16 @@ def userinfo(ctx,curuser,parameter):
                 Suspensionformat = entry.SuspensionExpiration
             data = f'\n**Server**: {entry.GetServer().FriendlyName}\n\t__Whitelisted__: `{bool(entry.Whitelisted)}`\n\t__Suspended__: {Suspensionformat}\n\t__Last Login__: {lastloginformat}'
             response += data
+
+    userinfractionslist = curuser.Infractions
     if len(userinfractionslist) != 0:
         for entry in userinfractionslist:
             dateformat = entry['Date'].strftime('%Y/%m/%d Time: %X (UTC)')
             if entry['Server'] == None:
-                data = (f"\n**Infraction ID**: {entry['ID']}\n\t__Date__: {dateformat}\n\t__Who Reported__: {entry['Mod_DiscordName']}\n\t__Notes__: {entry['Note']}")
+                data = (f"\n**Infraction ID**: {entry['ID']}\n\t__Date__: {dateformat}\n\t__Who Reported__: {entry['Mod_DiscordName']}\n\t__Reason__: {entry['Note']}")
                 response += data
             else:
-                data = (f"\n**Infraction ID**: {entry['ID']}\n\__Date__: {dateformat}\n\t__Who Reported__: {entry['Mod_DiscordName']}\n\t__Server__: {entry['Server']}\n\t__Notes__: {entry['Note']}")
+                data = (f"\n**Infraction ID**: {entry['ID']}\n\__Date__: {dateformat}\n\t__Who Reported__: {entry['Mod_DiscordName']}\n\t__Server__: {entry['Server']}\n\t__Reason__: {entry['Note']}")
                 response += data
     return response
 
@@ -1006,17 +1021,38 @@ async def on_member_remove(member):
             cur_server_user.Whitelisted = False
 
 @client.event
+async def on_message_edit(before,after):
+    print(before.content)
+    print(after.content)
+    if after.channel.id == dbconfig.Whitelistchannel:
+        reply = whitelist.whitelistMSGHandler(after)
+        print(reply)
+        if reply[0] == False:
+            return await after.reply(reply[1])
+        else:
+            botoutput(reply[1])
+
+@client.event
 async def on_message(message):
     if message.author.bot:
         return
+
+    #Testing channel purpose.
+    if message.channel.id == 944318758040768542:
+        print('Testing...')
+
     if (message.content.startswith('//')):
         logging.info('Found /command.')
+        #pprint(message.channel.id,console.SERVERCONSOLE)
         if message.channel.id in console.SERVERCONSOLE:
+            logging.info('Command in Console Channel.')
             console.on_message(message)
         else:
             return await client.process_commands(message)
+
     if message.channel.id in chat.SERVERCHAT:
         chat.on_message(message,client)
+
     if message.channel.id == dbconfig.Whitelistchannel:
         if message.content.lower().startswith('ign') or message.content.lower().startswith('in-gamename') or message.content.lower().startswith('in-game-name') or message.content.lower().startswith('ingamename'):
             logging.info('Whitelist Request...')
@@ -1570,6 +1606,10 @@ def threadloop():
             time.sleep(.5)
             whitelistfilecheck(db)
 
+            #Cleans up the UserAssisted List and Failed Requests Lists.
+            time.sleep(.5)
+            whitelist.whitelistUpdate(var = 'cleanup')
+
             #status = asyncio.run_coroutine_threadsafe(whitelist.whitelistListCheck(), async_loop)
             status = whitelist.whitelistListCheck(client)
             #whitelistListCheck returns False if it has no entries.
@@ -1599,24 +1639,6 @@ async def helplist(ctx):
         helptext += f"**{command.name.capitalize()}**: `{command.description}`\n"
     helptext += 'https://github.com/k8thekat/Gatekeeper/blob/main/Commands.md'
     await ctx.send(helptext,reference = ctx.message.to_reference())
-
-@client.command()
-async def fileclean(ctx):
-    loop = threading.Thread(target=filedel)
-    loop.start()
-
-def filedel():
-    server = 'dd202c69-ada5-4e47-b620-83f0860fb8c7'
-    filelist = AMPservers[server].getDirectoryListing('world')
-    #pprint(filelist)
-    for entry in filelist['result']:
-        if entry['Filename'].endswith('mca'):
-            time.sleep(3)
-            AMPservers[server].trashFile(entry['Filename'])
-            print(f'Trashed {entry["Filename"]}')
-    # for server in AMPservers:
-    #     print(AMPservers[server].FriendlyName,server)
-
 
 #Runs on startup...
 def defaultinit():

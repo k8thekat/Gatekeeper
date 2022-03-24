@@ -20,7 +20,7 @@
 
 '''
 #Gatekeeper Bot - whitelist.py
-from datetime import datetime
+from datetime import datetime,timedelta
 import base64
 import json
 import logging
@@ -32,8 +32,8 @@ import config
 
 #whitelist wait list
 WhitelistWaitList = []
-UserAssisted = [] #{message.author.id : message, 'created_at': message.created_at} If message.edited_at is not None? maybe not Null then Scan it again?
-
+UserAssisted = {}
+FailedRequests = {}
 
 def init(origAMP,origAMPservers,origdb,origdbconfig):
     global AMP,AMPservers,db,dbconfig
@@ -57,12 +57,23 @@ def whitelistMSGHandler(message):
     
     wl_request = parse.ParseIGNServer(message.content.lower())
     if wl_request == None:
+        if message.id not in FailedRequests:
+            logging.info('Adding User to FailedRequests...')
+            data = {message.id : message}
+            FailedRequests.update(data)
+            #print(FailedRequests)
+
+        #This is to help assist players if they do not use the proper format to request a whitelist
         if dbconfig.Whitelistassist:
             if message.author.id in UserAssisted:
                 return True, f'User has been recently assisted; waiting to send a message again...'
-            #TODO Make a more robust message monitoring for help, also track edited messages if at all possible.
-            UserAssisted.append(message.author.id)
-            response = f'**Failed Request**: I was unable to understand your message; please send another message and follow this format: \n{config.WhitelistFormat}'
+
+            logging.info('Adding User to User Assisted...')
+            data = {message.author.id : curtime}
+            UserAssisted.update(data)
+            #print(UserAssisted)
+
+            response = f'**Failed Request**: I was unable to understand your message; please send another message and follow this format: \n{config.WhitelistFormat} or edit your previous message.'
             return False, response
         response = f'**Unable to process**: {message.content} Please manually whitelist this user and update their IGN via //user {message.author.id} ign Minecraft_Name'
         return True, response
@@ -73,7 +84,7 @@ def whitelistMSGHandler(message):
     #IGN check...
     ign_check = UUIDhandler.uuidcheck(IGN)
     if ign_check[0] != True:
-        return False, f'Your IGN: {IGN} is not correct, please double check your IGN...'
+        return False, f'Hey, your IGN of {IGN} does not exist, could you please double check your IGN...'
         
     #Updates the DB users IGN
     if user.IngameName == None:
@@ -83,12 +94,23 @@ def whitelistMSGHandler(message):
     #Converts and checks for the server in the DB
     curserver = db.GetServer(Name = (sel_server.replace(' ', '_')))
     if curserver == None:
+        if message.id not in FailedRequests:
+            logging.info('Adding User to FailedRequests...')
+            data = {message.id : message}
+            FailedRequests.update(data)
+            #print(FailedRequests)
+
+        #This is to assist with users if they provided a server name that does not exist or incorrect.
         if dbconfig.Whitelistassist:
             if message.author.id in UserAssisted:
                 return True, f'User has been recently assisted; waiting to send a message again...'
-            #TODO Make a more robust message monitoring for help, also track edited messages if at all possible.
-            UserAssisted.append(message.author.id)
-            response = f'**Failed Request**: I am unable to find the Server: **{sel_server}**, please type `//serverlist` and find the correct server name or server nickname...'
+            
+            logging.info('Adding User to User Assisted...')
+            data = {message.author.id : curtime}
+            UserAssisted.update(data)
+            #print(UserAssisted)
+
+            response = f'**Failed Request**: I am unable to find the Server: **{sel_server}**, please type `//serverlist` and find the correct server name/server nickname or you can edit your previous message.'
             return False, response
         return True, f'**Unable to process**: {message.content} Please manually whitelist this user, the Server: {sel_server} is invalid...'
 
@@ -99,7 +121,7 @@ def whitelistMSGHandler(message):
     
     #Server whitelist flag check 
     if not curserver.Whitelist:
-        return False, f'**Server**: {curserver.FriendlyName} whitelist is currently closed.'
+        return False, f'**Server**: {curserver.FriendlyName} whitelist is currently offline.'
     
     #Checks the whitelist file if the user already exists..
     status = whitelistUserCheck(curserver,user.IngameName)
@@ -155,7 +177,7 @@ def whitelistUserCheck(server,user_ign):
             whitelist_data = base64.b64decode(whitelist["result"]["Base64Data"])
             whitelist_json = json.loads(whitelist_data.decode("utf-8"))
             for whitelist_user in whitelist_json:
-                print(whitelist_user,user_ign)
+                #print(whitelist_user,user_ign)
                 if whitelist_user['name'].lower() == user_ign.lower():
                     return False
                 else:
@@ -165,11 +187,45 @@ def whitelistUserCheck(server,user_ign):
 
 #Removes a user from the list if they have left for any reason. 
 #Usually if they leave the Discord Server prior to getting Whitelisted...     
-def whitelistUpdate(user,var = None):
+def whitelistUpdate(user = None,var = None):
     logging.info('Whitelist Update...')
-    global WhitelistWaitList
+    global WhitelistWaitList,FailedRequests,UserAssisted
+
     if var.lower() == 'leave':
         for entry in WhitelistWaitList:
             if entry['User'].DiscordName == user.name:
                 logging.info(f'Removed {entry} from the list, they left the Server...')
                 WhitelistWaitList.remove(entry)
+    
+    if var.lower() == 'cleanup':
+        logging.info('Attempting to Cleanup Failed Requests and User Assists')
+        curtime = datetime.now()
+
+        if len(FailedRequests) != 0:
+            #for request in FailedRequests:
+            FRkeys = list(FailedRequests.keys())
+            for request in FRkeys:
+                if FailedRequests[request].created_at + timedelta(minutes = db.GetConfig().Whitelistwaittime) <= curtime:
+                    FailedRequests.pop(request)
+                    logging.info(f'Removed {request}')
+            
+        if len(UserAssisted) != 0:
+            UAkeys = list(UserAssisted.keys())
+            for assist in UAkeys:
+                if UserAssisted[assist] + timedelta(minutes = 5) <= curtime:
+                    UserAssisted.pop(assist)
+                    logging.info(f'Removed {assist}')
+    
+
+
+
+def failedRequestChecker():
+    logging.info('Checking for Failed Whitelist Requests...')
+    if len(FailedRequests) == 0:
+        return
+
+    #data = {'message' : message}
+    for request in FailedRequests:
+        if request['message'].edited_at != None:
+            whitelistMSGHandler(request['message'])
+        

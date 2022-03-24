@@ -93,6 +93,7 @@ def scan(amp_server,entry):
             logging.exception(e)
             logging.error(traceback.print_exc())
             return True, f'**Unable to update User**: {entry_split[3]} banned status in the database!'
+
     #Added k8_thekat to the whitelist
     if entry['Contents'].startswith('Added') and entry['Contents'].endswith('to the whitelist'):
         logging.info('User added to Whitelist via console..')
@@ -101,22 +102,24 @@ def scan(amp_server,entry):
         db_user = db.GetUser(entry_split[1])
         found = False
         #{'User': user, 'IGN': user.IngameName, 'timestamp' : curtime, 'server' : curserver, 'Context': message})
+
         for index in range(0,len(whitelist.WhitelistWaitList)):
             user = whitelist.WhitelistWaitList[index]
+            
             #Lets first try to compare via db_user; this can fail if they are not in the database.. somehow..
             if db_user != None:
                 print('Whitelist db_user lookup',db_user,user)
                 if db_user == user['User']:
                     found = True
                     curserver.GetUser(db_user).Whitelisted = True
-                    whitelist.WhitelistWaitList.remove[user]
+                    whitelist.WhitelistWaitList.remove(user)
                     return True,f'**Removed User*: {db_user.IngameName} from Whitelist wait list and updated their Whitelisted Status to `True` on {curserver.FriendlyName}.'  
 
             #Lets now try via the whitelisted ign and see if we can find a match.
             print('Whitelist IGN Lookup',entry_split[1],user['IGN'])
             if entry_split[1] == user['IGN']:
                 found = True
-                whitelist.WhitelistWaitList.remove[user]
+                whitelist.WhitelistWaitList.remove(user)
                 return True,f'**Removed User**: {entry_split[1]} from Whitelist wait list, unable to update Whitelisted status in the Database!'  
 
         if found == False:
@@ -155,24 +158,24 @@ def scan(amp_server,entry):
             return True, f'**Failed to set Last Login for Server**: {curserver.FriendlyName} User: {psplit[3]}. Please add the user to the database and set the users IGN via //user DiscordID ign {psplit[3]}'
     
     #User Played Time
-    if entry['Source'].lower() == 'server thread/info' and entry['Contents'].find('left the game') !=-1:
-        logout_time = datetime.fromtimestamp(float(entry['Timestamp'][6:-2])/1000)
-        entry = entry['Contents'].split(' ') #Prep to help me get the user out of the 'Contents'
-        db_user = db.GetUser(entry[0])
-        if db_user == None:
-            return True, f'**Failed to Update Time Played**: User: {entry[0]}; Please add the user to the database and set the users IGN via //user DiscordID ign {entry[0]}.'
+    # if entry['Source'].lower() == 'server thread/info' and entry['Contents'].find('left the game') !=-1:
+    #     logout_time = datetime.fromtimestamp(float(entry['Timestamp'][6:-2])/1000)
+    #     entry = entry['Contents'].split(' ') #Prep to help me get the user out of the 'Contents'
+    #     db_user = db.GetUser(entry[0])
+    #     if db_user == None:
+    #         return True, f'**Failed to Update Time Played**: User: {entry[0]}; Please add the user to the database and set the users IGN via //user DiscordID ign {entry[0]}.'
     
-        logging.info(f'**Updating {db_user.IngameName} played time on {curserver.FriendlyName}**')
-        lastlogin = curserver.GetUser(db_user).LastLogin #Gets the datetime object of the ServerUser last login
-        print('Last Login',lastlogin)
-        if lastlogin == None:
-            lastlogin = logout_time
-        total_timeplayed = curserver.GetUser(db_user).TimePlayed #Gets the time played of the ServerUser - Should be in minutes
-        print('Total',total_timeplayed)
-        if total_timeplayed == None:
-            total_timeplayed = 0
-        time_played = (logout_time - lastlogin) #The datetime of how long they played.
-        print('Time played',time_played)
-        total_timeplayed += (time_played.seconds/60) #Add's the play time to their current accured amount of play time..
-        return True, f'**Updated User**: {entry[0]} played time increased by {time_played} Minutes. Total: {total_timeplayed} Minutes.'
+    #     logging.info(f'**Updating {db_user.IngameName} played time on {curserver.FriendlyName}**')
+    #     lastlogin = curserver.GetUser(db_user).LastLogin #Gets the datetime object of the ServerUser last login
+    #     print('Last Login',lastlogin)
+    #     if lastlogin == None:
+    #         lastlogin = logout_time
+    #     total_timeplayed = curserver.GetUser(db_user).TimePlayed #Gets the time played of the ServerUser - Should be in minutes
+    #     print('Total',total_timeplayed)
+    #     if total_timeplayed == None:
+    #         total_timeplayed = 0
+    #     time_played = (logout_time - lastlogin) #The datetime of how long they played.
+    #     print('Time played',time_played)
+    #     total_timeplayed += (time_played.seconds/60) #Add's the play time to their current accured amount of play time..
+    #     return True, f'**Updated User**: {entry[0]} played time increased by {time_played} Minutes. Total: {total_timeplayed} Minutes.'
     return False, entry

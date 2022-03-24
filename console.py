@@ -30,6 +30,7 @@ import time
 import traceback
 import chat
 import logging
+import pprint
 
 #database setup
 db = database.Database()
@@ -51,20 +52,22 @@ def init(client,rolecheck,botoutput,async_loop):
     ROLECHECK = rolecheck
     BOTOUTPUT = botoutput
     for server in AMPservers:
-        db_server = db.GetServer(server)
-        channel = db_server.DiscordConsoleChannel #Needs to be an int() because of discord message.channel.id type is int()
+        channel = db.GetServer(server).DiscordConsoleChannel
+        #channel = db_server.DiscordConsoleChannel #Needs to be an int() because of discord message.channel.id type is int()
         #print(db_server.FriendlyName,channel)
         logging.info(f'Starting Console Thread for {AMPservers[server].FriendlyName}')
-        server_thread = threading.Thread(target = serverconsole, args = (AMPservers[server],db_server,channel,client,async_loop))
-        SERVERTHREADS = {AMPservers[server]: server_thread}
+        server_thread = threading.Thread(target = serverconsole, args = (AMPservers[server],channel,client,async_loop))
+        SERVERTHREADS.update({AMPservers[server] : server_thread})
+    
         server_thread.start()
         time.sleep(0.1)
         
         if channel != None:
             #disc_channel = client.get_channel(int(channel))
-            SERVERCONSOLE = {int(channel): {'AMPserver' :AMPservers[server], 'DBserver': db_server, 'thread' : server_thread, 'status' : AMPservers[server].Running}}
-        
-
+            #print('Adding', AMPservers[server].FriendlyName, channel,'to SERVERCONSOLE')
+            SERVERCONSOLE[int(channel)] = {'AMPserver' :AMPservers[server], 'thread' : server_thread, 'status' : AMPservers[server].Running}
+    #pprint.pprint(SERVERCONSOLE)
+    #pprint.pprint(SERVERTHREADS)
             
 #This is called when someone changed a servers console channel; so lets spin up its thread to start scanning.
 def threadinit(db_server,channel,client,async_loop): 
@@ -72,7 +75,7 @@ def threadinit(db_server,channel,client,async_loop):
     if channel not in SERVERCONSOLE:
         logging.info(f'Adding {db_server.FriendlyName} Server Thread to Server Console list.')
         print(SERVERTHREADS[AMPservers[db_server.InstanceID]])
-        SERVERCONSOLE = {channel.id: {'AMPserver' :AMPservers[db_server.InstanceID], 'DBserver': db_server, 'thread' : SERVERTHREADS[AMPservers[db_server.InstanceID]], 'status' : AMPservers[db_server.InstanceID].Running}}
+        SERVERCONSOLE[channel.id] = {'AMPserver' :AMPservers[db_server.InstanceID], 'thread' : SERVERTHREADS[AMPservers[db_server.InstanceID]], 'status' : AMPservers[db_server.InstanceID].Running}
         #disc_channel = client.get_channel(int(channel)) #lets update our global so the thread can have an updated value
         #server_thread = threading.Thread(target = serverconsole, args = (AMPservers[db_server.InstanceID],db_server,channel,client,async_loop))
         #SERVERTHREADS = {AMPservers[db_server.InstanceID]: server_thread}
@@ -111,7 +114,7 @@ def on_message(message):
         
 
 #Parses each AMP Server Console
-def serverconsole(amp_server,db_server,channel,client,async_loop):
+def serverconsole(amp_server,channel,client,async_loop):
     global BOTOUTPUT
     while amp_server.Running:
         time.sleep(0.5)
@@ -126,7 +129,7 @@ def serverconsole(amp_server,db_server,channel,client,async_loop):
             logging.info(f'{amp_server.FriendlyName} {entry}')
             #Checks every entry to update DB values if needed
             status = consolescan.scan(amp_server,colorstrip(entry))
-            chat.MCchattoDiscord(db_server,async_loop,client,entry)
+            chat.MCchattoDiscord(amp_server,async_loop,client,entry)
 
             if not db.GetConfig().Autoconsole: #If we don't have auto console; just end our console handling and start over.
                 continue

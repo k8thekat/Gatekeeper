@@ -57,6 +57,7 @@ import timehandler
 import UUIDhandler
 import console
 import chat
+import rank
 
 
 data = '4.0.1-beta' #Major.Minor.Revisions
@@ -373,7 +374,7 @@ def servermaintenance(ctx,curserver,parameter):
                 AMPservers[curserver.InstanceID].ConsoleMessage(f'op {user.IngameName}')
         for filename in serverfile_list['result']:
             if filename['Filename'] == 'whitelist.json':
-                blankwhitelistgenerator(curserver.InstanceID)
+                blankwhitelistgenerator(curserver)
                 AMPservers[curserver.InstanceID].renameFile('whitelist.json', 'whitelist_public.json')
                 time.sleep(.5)
                 AMPservers[curserver.InstanceID].renameFile('whitelist_blank.json', 'whitelist.json')
@@ -1470,6 +1471,7 @@ async def universalWhitelist(ctx,*parameter):
         db_user = db.GetUser(str(discord_user.id))
         if db_user == None:
             db_user = db.AddUser(DiscordID = str(discord_user.id), DiscordName = discord_user.name, IngameName = IGN[1][0]['name'], UUID = IGN[1][0]['id'])
+            print(f'Successfully Added the User to the DB {db_user}')
         print(f'Adding {IGN[1][0]["name"]} to Whitelist on {db_server.FriendlyName} - Discord name: {discord_user.name}')
         print(db_user)
         db_serveruser = db_server.AddUser(db_user)
@@ -1545,7 +1547,7 @@ def AMPinstancecheck(startup = False):
             if cur_server == None:
                 cur_server = db.AddServer(InstanceID = AMPservers[server].InstanceID, FriendlyName = AMPservers[server].FriendlyName)
                 if AMPservers[server].Module == 'Minecraft':
-                    blankwhitelistgenerator(AMPservers[server].InstanceID)
+                    blankwhitelistgenerator(AMPservers[server])
                     botoutput(f'Found a new Instance, adding it to the Database...{AMPservers[server].FriendlyName}')
         return
     AMPserverscheck = AMP.getInstances()
@@ -1560,7 +1562,7 @@ def AMPinstancecheck(startup = False):
             if cur_server == None:
                 cur_server = db.AddServer(InstanceID = AMPservers[server].InstanceID, FriendlyName = AMPservers[server].FriendlyName)
                 if AMPservers[server].Module == 'Minecraft':
-                    blankwhitelistgenerator(AMPservers[server].InstanceID)
+                    blankwhitelistgenerator(AMPservers[server])
                     botoutput(f'Found a new Instance, adding it to the Database...{AMPservers[server].FriendlyName}')
     #Updating the Instance Names
     logging.info('Checking if names have been changed...')
@@ -1611,6 +1613,7 @@ def threadloop():
             whitelist.whitelistUpdate(var = 'cleanup')
 
             #status = asyncio.run_coroutine_threadsafe(whitelist.whitelistListCheck(), async_loop)
+            time.sleep(.5)
             status = whitelist.whitelistListCheck(client)
             #whitelistListCheck returns False if it has no entries.
             if status:
@@ -1639,6 +1642,14 @@ async def helplist(ctx):
         helptext += f"**{command.name.capitalize()}**: `{command.description}`\n"
     helptext += 'https://github.com/k8thekat/Gatekeeper/blob/main/Commands.md'
     await ctx.send(helptext,reference = ctx.message.to_reference())
+
+@client.command(name='restart', description ='Restarts the bot')
+async def restart(ctx):
+        import os
+        await ctx.send(f'**Currently Restarting the Bot.**')
+        sys.stdout.flush()
+        os.execv(sys.executable, ['python3'] + sys.argv)
+        
 
 #Runs on startup...
 def defaultinit():
@@ -1680,5 +1691,6 @@ def defaultinit():
 defaultinit()
 AMPinstancecheck(startup = True)
 whitelist.init(AMP,AMPservers,db,dbconfig)
+rank.init(AMP,AMPservers)
 whitelistfilecheck(db)
 client.run(tokens.token)

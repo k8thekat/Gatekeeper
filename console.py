@@ -121,12 +121,13 @@ def serverconsole(amp_server,channel,client,async_loop):
         console = amp_server.ConsoleUpdate()
         if 'ConsoleEntries' not in console:
             logging.error(f'Failed ConsoleUpdate {console}')
+            #TODO Restart when we no longer have permission.
             continue
         
         consolemsg = []
         #Walks through every entry of a Console Update
         for entry in console['ConsoleEntries']:
-            logging.info(f'{amp_server.FriendlyName} {entry}')
+            #logging.info(f'{amp_server.FriendlyName} {entry}')
             #Checks every entry to update DB values if needed
             status = consolescan.scan(amp_server,colorstrip(entry))
             chat.MCchattoDiscord(amp_server,async_loop,client,entry)

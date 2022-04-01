@@ -99,10 +99,14 @@ def MCchattoDiscord(amp_server,async_loop,client,chat):
     if chat['Type'] == 'Console':
         indexleft = chat['Contents'].find('<')
         indexright = chat['Contents'].find('>')
-        if (indexleft != -1)and (indexright != -1):
-            indexcolon = chat['Contents'].index(':')
-            chatmsg.append(chat['Contents'])
-            user = chat['Contents'][indexcolon+1:-1].strip()
+        if (indexleft != -1) and (indexright != -1):
+            indexcolon = chat['Contents'].find(':')
+            if indexcolon != -1:
+                chatmsg.append(chat['Contents'])
+                user = UUIDhandler.uuidcheck(chat['Contents'][indexcolon+1:-1].strip())
+
+            else:
+                print('This console entry or message triggered OP user messages',chat['Contents'])
 
     elif chat['Type'] == 'Chat':
         user = UUIDhandler.uuidcheck(chat['Source'])

@@ -73,7 +73,7 @@ def whitelistMSGHandler(message):
             UserAssisted.update(data)
             #print(UserAssisted)
 
-            response = f'**Failed Request**: I was unable to understand your message; please send another message and follow this format: \n{config.WhitelistFormat} or edit your previous message.'
+            response = f'**Failed Request**: I was unable to understand your message; please send another message or edit your previous message with this following format: \n{config.WhitelistFormat} '
             return False, response
         response = f'**Unable to process**: {message.content} Please manually whitelist this user and update their IGN via //user {message.author.id} ign Minecraft_Name'
         return True, response
@@ -110,7 +110,7 @@ def whitelistMSGHandler(message):
             UserAssisted.update(data)
             #print(UserAssisted)
 
-            response = f'**Failed Request**: I am unable to find the Server: **{sel_server}**, please type `//serverlist` and find the correct server name/server nickname or you can edit your previous message.'
+            response = f'**Failed Request**: I am unable to find the Server: **{sel_server}**, please type `//serverlist` and find the correct server name/server nickname then edit/resubmit your request.'
             return False, response
         return True, f'**Unable to process**: {message.content} Please manually whitelist this user, the Server: {sel_server} is invalid...'
 
@@ -205,6 +205,8 @@ def whitelistUpdate(user = None,var = None):
             #for request in FailedRequests:
             FRkeys = list(FailedRequests.keys())
             for request in FRkeys:
+                print(db.GetConfig().Whitelistwaittime)
+                print(FailedRequests[request],FailedRequests[request].create_at)
                 if FailedRequests[request].created_at + timedelta(minutes = db.GetConfig().Whitelistwaittime) <= curtime:
                     FailedRequests.pop(request)
                     logging.info(f'Removed {request}')
@@ -212,20 +214,8 @@ def whitelistUpdate(user = None,var = None):
         if len(UserAssisted) != 0:
             UAkeys = list(UserAssisted.keys())
             for assist in UAkeys:
+                print(UserAssisted[assist])
                 if UserAssisted[assist] + timedelta(minutes = 5) <= curtime:
                     UserAssisted.pop(assist)
                     logging.info(f'Removed {assist}')
     
-
-
-
-def failedRequestChecker():
-    logging.info('Checking for Failed Whitelist Requests...')
-    if len(FailedRequests) == 0:
-        return
-
-    #data = {'message' : message}
-    for request in FailedRequests:
-        if request['message'].edited_at != None:
-            whitelistMSGHandler(request['message'])
-        

@@ -97,6 +97,7 @@ class Database:
 						GlobalBanExpiration timestamp,
 						Donator integer not null,
 						ServerModerator integer not null
+						TimePlayed integer,
 						)""")
 
 		cur.execute("""create table ServerUsers (
@@ -105,7 +106,6 @@ class Database:
 						UserID integer not null,
 						Whitelisted integer not null,
 						LastLogin timestamp,
-						TimePlayed integer,
 						SuspensionExpiration timestamp,
 						foreign key(UserID) references Users(ID),
 						foreign key(ServerID) references Servers(ID),
@@ -518,7 +518,7 @@ class Database:
 		return ret
 
 class DBUser:
-	def __init__(self, db:Database, ID:int=None, DiscordID:str=None, DiscordName:str=None, IngameName:str=None, UUID:str=None, GlobalBanExpiration:datetime.datetime=None, Donator:bool=False, ServerModerator:bool=False):
+	def __init__(self, db:Database, ID:int=None, DiscordID:str=None, DiscordName:str=None, IngameName:str=None, UUID:str=None, GlobalBanExpiration:datetime.datetime=None, Donator:bool=False, ServerModerator:bool=False,TimePlayed:int=0):
 		#set defaults
 		Params = locals()
 		Params.pop("self")
@@ -590,6 +590,9 @@ class DBUser:
 		elif name == "DiscordID":
 			#conver to int
 			value =int(value)
+		elif name == "TimePlayed":
+			#conver to integer
+			value = int(value)
 
 		#set value and update the user
 		super().__setattr__(name, value)
@@ -823,7 +826,7 @@ class DBServer:
 		user.AddInfraction(server = self, mod = mod, note = note)
 
 class DBServerUser:
-	def __init__(self, db:Database, Server:DBServer, User:DBUser, ID=None, Whitelisted:bool=False, LastLogin:datetime.datetime=None,TimePlayed:int= 0, SuspensionExpiration:datetime.datetime=None):
+	def __init__(self, db:Database, Server:DBServer, User:DBUser, ID=None, Whitelisted:bool=False, LastLogin:datetime.datetime=None, SuspensionExpiration:datetime.datetime=None):
 		#set defaults
 		Params = locals()
 		Params.pop("self")
@@ -891,9 +894,7 @@ class DBServerUser:
 		elif name == "Whitelisted":
 			#conver to bool
 			value = bool(value)
-		elif name == "TimePlayed":
-			#conver to integer
-			value = int(value)
+		
 
 		#set value and update the user
 		super().__setattr__(name, value)

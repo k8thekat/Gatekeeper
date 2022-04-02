@@ -233,7 +233,7 @@ def servernickname(ctx,curserver,parameter):
         else:
             return f'The nickname {parameter[3]} does not exist for {curserver.FriendlyName}.'
     else:
-        return f'**Format**: //server {curserver} nickname (add or remove or list) name'
+        return f'**Format**: //server {curserver.FriendlyName} nickname (add or remove or list) name'
 
 #get a specific servers status
 def serverstatus(ctx,curserver,parameter):
@@ -1662,6 +1662,8 @@ def githubUpdate():
     update = commits[0].hexsha #This accesses the most recent commit HEXSHA value of the specified branch
     current_branch = repo.head.reference #This accesses the current files brand head which gives me access to the HEXSHA
     current = current_branch.commit.hexsha
+    if update == current:
+        logging.info('The Keymaster says you are Update to date.')
     if update != current and config.git_autoupdate:
         logging.info('Current Version',current,'Version on Github',update)
         logging.info('Lets download our update...')

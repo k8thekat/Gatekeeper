@@ -26,9 +26,12 @@ import database
 import logging
 
 
+#github Branch check (#main or #dev)
+gitrepo_branch = 'dev'
+git_autoupdate = True
+
 #Logging Level (Debug/Info/Warning/Error)
 logginglevel = logging.INFO
-
 
 #Database
 db = database.Database()

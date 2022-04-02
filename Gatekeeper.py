@@ -44,6 +44,8 @@ from datetime import datetime, timedelta
 import base64
 import random
 import traceback
+import git
+import os
 
 # Bot Scripts
 import database
@@ -60,7 +62,7 @@ import chat
 import rank
 
 
-data = '4.0.1-beta' #Major.Minor.Revisions
+data = '4.1.0-beta' #Major.Minor.Revisions
 logging.info(f'Version: {data}')
 
 async_loop = asyncio.new_event_loop()
@@ -1653,8 +1655,37 @@ async def restart(ctx):
     os.execv(sys.executable, ['python3'] + sys.argv)
         
 
+def githubUpdate():
+    logging.info(f'You are currently set to {config.gitrepo_branch}, checking for updates on GitHub...')
+    repo = git.Repo(os.getcwd())
+    commits = list(repo.iter_commits(config.gitrepo_branch,max_count = 5))
+    update = commits[0].hexsha #This accesses the most recent commit HEXSHA value of the specified branch
+    current_branch = repo.head.reference #This accesses the current files brand head which gives me access to the HEXSHA
+    current = current_branch.commit.hexsha
+    if update != current and config.git_autoupdate:
+        logging.info('Current Version',current,'Version on Github',update)
+        logging.info('Lets download our update...')
+        to_update = repo.remotes.origin
+        to_update.pull(config.gitrepo_branch) #Can pass in the branch name.
+        logging.info('Restarting the bot, please wait...')
+        sys.stdout.flush()
+        os.execv(sys.executable, ['python3'] + sys.argv)
+    if update != current and not config.git_autoupdate:
+        botoutput('Gatekeeper has an update on Github!')
+        for index in range(0,len(commits)):
+            if commits[index].hexsha == current:
+                if index == 1:
+                    botoutput(f'Gatekeeper is currently {index} commit behind, please consider updating!')
+                else:
+                    botoutput(f'Gatekeeper is currently {index} commits behind, please consider updating!')
+            else:
+                botoutput('Gatekeeper is more than 5 commits behind! Please consider updating!!!')
+    return
+
+
 #Runs on startup...
 def defaultinit():
+    githubUpdate()
     global AMPservers,async_loop
     loop = threading.Thread(target=threadloop)
     loop.start()

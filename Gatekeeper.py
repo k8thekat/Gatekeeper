@@ -1656,32 +1656,32 @@ async def restart(ctx):
         
 
 def githubUpdate():
-    botoutput(f'You are currently set to {config.gitrepo_branch}, checking for updates on GitHub...')
+    logging.info(f'You are currently set to {config.gitrepo_branch}, checking for updates on GitHub...')
     repo = git.Repo(os.getcwd())
     commits = list(repo.iter_commits(config.gitrepo_branch,max_count = 5))
     update = commits[0].hexsha #This accesses the most recent commit HEXSHA value of the specified branch
     current_branch = repo.head.reference #This accesses the current files brand head which gives me access to the HEXSHA
     current = current_branch.commit.hexsha
     if update == current:
-        botoutput(f'The Keymaster says you are up to date Ver: {data} Hexsha: {current}.')
+        logging.info(f'The Keymaster says you are up to date Ver: {data} Hexsha: {current}.')
     if update != current and config.git_autoupdate:
-        botoutput('Current Version',current,'Version on Github',update)
-        botoutput('Lets download our update...')
+        logging.info('Current Version',current,'Version on Github',update)
+        logging.info('Lets download our update...')
         to_update = repo.remotes.origin
         to_update.pull(config.gitrepo_branch) #Can pass in the branch name.
-        botoutput('Restarting the bot, please wait...')
+        logging.info('Restarting the bot, please wait...')
         sys.stdout.flush()
         os.execv(sys.executable, ['python3'] + sys.argv)
     if update != current and not config.git_autoupdate:
-        botoutput('Gatekeeper has an update on Github!')
+        logging.info('Gatekeeper has an update on Github!')
         for index in range(0,len(commits)):
             if commits[index].hexsha == current:
                 if index == 1:
-                    botoutput(f'Gatekeeper is currently {index} commit behind, please consider updating!',level= 'warning')
+                    logging.warning(f'Gatekeeper is currently {index} commit behind, please consider updating!')
                 else:
-                    botoutput(f'Gatekeeper is currently {index} commits behind, please consider updating!',level= 'warning')
+                    logging.warning(f'Gatekeeper is currently {index} commits behind, please consider updating!')
             else:
-                botoutput('Gatekeeper is more than 5 commits behind! Please consider updating!!!',level = 'error')
+                logging.warning('Gatekeeper is more than 5 commits behind! Please consider updating!!!')
     return
 
 

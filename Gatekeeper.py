@@ -62,7 +62,7 @@ import chat
 import rank
 
 
-data = '4.1.2-beta' #Major.Minor.Revisions
+data = '4.1.3-beta' #Major.Minor.Revisions
 logging.info(f'Version: {data}')
 
 async_loop = asyncio.new_event_loop()

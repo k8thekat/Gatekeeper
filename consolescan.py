@@ -27,7 +27,7 @@ import database
 import logging
 import logger
 import whitelist
-#import rank
+import rank
 
 #Database
 db = database.Database()
@@ -37,7 +37,7 @@ def scan(amp_server,entry):
     curtime = datetime.now()
     curserver = db.GetServer(amp_server.InstanceID)
     #
-    #rank.timeUpdate(entry)
+    rank.timeUpdate(entry)
     #Finding in game issued server commands
     if entry['Contents'].find('issued server command:') != -1:
         logger.commandLog(None,curserver,entry,'console')

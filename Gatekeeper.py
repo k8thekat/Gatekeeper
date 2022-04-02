@@ -62,7 +62,7 @@ import chat
 import rank
 
 
-data = '4.1.1-beta' #Major.Minor.Revisions
+data = '4.1.2-beta' #Major.Minor.Revisions
 logging.info(f'Version: {data}')
 
 async_loop = asyncio.new_event_loop()
@@ -1028,12 +1028,14 @@ async def on_message_edit(before,after):
     #print(before.content)
     #print(after.content)
     if after.channel.id == dbconfig.Whitelistchannel:
-        reply = whitelist.whitelistMSGHandler(after)
-        print(reply)
-        if reply[0] == False:
-            return await after.reply(reply[1])
-        else:
-            botoutput(reply[1])
+        logging.info('User Edited their whitelist request, re-evaluating the Whitelist Request.')
+        if after.content.lower().startswith('ign:') or after.content.lower().startswith('in-gamename:') or after.content.lower().startswith('in-game-name:') or after.content.lower().startswith('ingamename:'):
+            reply = whitelist.whitelistMSGHandler(after)
+            print(reply)
+            if reply[0] == False:
+                return await after.reply(reply[1])
+            else:
+                botoutput(reply[1])
 
 @client.event
 async def on_message(message):
@@ -1656,7 +1658,7 @@ async def restart(ctx):
         
 
 def githubUpdate():
-    logging.info(f'You are currently set to {config.gitrepo_branch}, checking for updates on GitHub...')
+    logging.info(f'You are currently set to branch: {config.gitrepo_branch}, checking for updates on GitHub...')
     repo = git.Repo(os.getcwd())
     commits = list(repo.iter_commits(config.gitrepo_branch,max_count = 5))
     update = commits[0].hexsha #This accesses the most recent commit HEXSHA value of the specified branch

@@ -76,8 +76,8 @@ def threadinit(db_server,channel,client,async_loop):
         logging.info(f'Adding {db_server.FriendlyName} Server Thread to Server Console list.')
         print(SERVERTHREADS[AMPservers[db_server.InstanceID]])
         SERVERCONSOLE[channel.id] = {'AMPserver' :AMPservers[db_server.InstanceID], 'thread' : SERVERTHREADS[AMPservers[db_server.InstanceID]], 'status' : AMPservers[db_server.InstanceID].Running}
-        disc_channel = client.get_channel(int(channel)) #lets update our global so the thread can have an updated value
-        server_thread = threading.Thread(target = serverconsole, args = (AMPservers[db_server.InstanceID],channel,client,async_loop))
+        #disc_channel = client.get_channel(int(channel)) #lets update our global so the thread can have an updated value
+        server_thread = threading.Thread(target = serverconsole, args = (AMPservers[db_server.InstanceID],channel.id,client,async_loop))
         SERVERTHREADS.update({AMPservers[db_server.InstanceID]: server_thread})
         server_thread.start()
     return
@@ -121,7 +121,7 @@ def serverconsole(amp_server,channel,client,async_loop):
         console = amp_server.ConsoleUpdate()
         if 'ConsoleEntries' not in console:
             logging.error(f'Failed ConsoleUpdate {console}, forcing AMP API relog.')
-            amp_server.SessiodID = 0
+            amp_server.SessionID = 0
             console = amp_server.ConsoleUpdate()
             continue
         

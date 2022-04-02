@@ -119,7 +119,10 @@ class AMPAPI:
         while(True):
             try:
                 post_req = requests.post(self.url+APICall, headers=self.AMPheader, data=jsonhandler)
-                break
+                if len(post_req.content) > 0:
+                    break
+                logging.error('AMP API recieved no Data; sleeping for 5 seconds...')
+                time.sleep(5)
             except:
                 if SuccessfulConnection == False:
                     logging.critical('Unable to connect to URL; please check Tokens.py -> AMPURL')

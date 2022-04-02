@@ -1023,8 +1023,8 @@ async def on_member_remove(member):
 
 @client.event
 async def on_message_edit(before,after):
-    print(before.content)
-    print(after.content)
+    #print(before.content)
+    #print(after.content)
     if after.channel.id == dbconfig.Whitelistchannel:
         reply = whitelist.whitelistMSGHandler(after)
         print(reply)
@@ -1039,8 +1039,8 @@ async def on_message(message):
         return
 
     #Testing channel purpose.
-    if message.channel.id == 944318758040768542:
-        print('Testing...')
+    #if message.channel.id == 944318758040768542:
+        #print('Testing...')
 
     if (message.content.startswith('//')):
         logging.info('Found /command.')
@@ -1055,7 +1055,7 @@ async def on_message(message):
         chat.on_message(message,client)
 
     if message.channel.id == dbconfig.Whitelistchannel:
-        if message.content.lower().startswith('ign') or message.content.lower().startswith('in-gamename') or message.content.lower().startswith('in-game-name') or message.content.lower().startswith('ingamename'):
+        if message.content.lower().startswith('ign:') or message.content.lower().startswith('in-gamename:') or message.content.lower().startswith('in-game-name:') or message.content.lower().startswith('ingamename:'):
             logging.info('Whitelist Request...')
             reply = whitelist.whitelistMSGHandler(message)
             if reply[0] == False:
@@ -1645,10 +1645,12 @@ async def helplist(ctx):
 
 @client.command(name='restart', description ='Restarts the bot')
 async def restart(ctx):
-        import os
-        await ctx.send(f'**Currently Restarting the Bot.**')
-        sys.stdout.flush()
-        os.execv(sys.executable, ['python3'] + sys.argv)
+    if not rolecheck(ctx, 'Staff'):
+        return 'User does not have permission.'
+    import os
+    await ctx.send(f'**Currently Restarting the Bot.**')
+    sys.stdout.flush()
+    os.execv(sys.executable, ['python3'] + sys.argv)
         
 
 #Runs on startup...

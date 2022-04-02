@@ -120,8 +120,9 @@ def serverconsole(amp_server,channel,client,async_loop):
         time.sleep(0.5)
         console = amp_server.ConsoleUpdate()
         if 'ConsoleEntries' not in console:
-            logging.error(f'Failed ConsoleUpdate {console}')
-            #TODO Restart when we no longer have permission.
+            logging.error(f'Failed ConsoleUpdate {console}, forcing AMP API relog.')
+            amp_server.SessiodID = 0
+            console = amp_server.ConsoleUpdate()
             continue
         
         consolemsg = []

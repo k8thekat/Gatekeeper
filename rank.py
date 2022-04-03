@@ -90,9 +90,9 @@ def timeUpdate(console_entry):
     global timecheck
    # 'Source': 'Server thread/INFO', 'Type': 'Console', 'Contents': 'There are 10 of a max of 20 players online: Kaymorin, Oxyorum, MoonRacco0n, Alain, Ayvalen, umbrellawarrior, Mouseas, DocScott18 - odog221, Scavable, Spontaneo'
     user_list = console_entry['Contents'].find('players online:')
-    print(timecheck + datetime.timedelta(minutes = 5),datetime.datetime.now(),user_list)
-    if timecheck + datetime.timedelta(minutes = 5) <= datetime.datetime.now():
-        if user_list != -1:
+    if user_list != -1:
+        print(timecheck + datetime.timedelta(minutes = 5),datetime.datetime.now(),user_list)
+        if timecheck + datetime.timedelta(minutes = 5) <= datetime.datetime.now():
             user_list = console_entry['Contents'][user_list+16:].split(', ')
             for user in user_list:
                 if user.find(' - ') != -1:

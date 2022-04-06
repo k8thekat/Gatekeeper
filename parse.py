@@ -19,6 +19,10 @@
    02110-1301, USA. 
 '''
 def ParseIGNServer(msg):
+	message_commafilter = msg.find(',')
+	if message_commafilter != -1:
+		msg.replace(',',' ')
+
 	ret = ['', '']
 
 	#split on tab, newline, and space

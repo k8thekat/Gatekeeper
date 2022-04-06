@@ -67,6 +67,7 @@ def on_message(message,client):
 #This fetches MC avatars heads and uses them for Discord Profile Pics and changes the message name to the IGN from minecraft
 async def MCchatsend(channel, user, message):
     if user != None:
+        print(user[1])
         MChead = 'https://mc-heads.net/head/' + str(user[1][0]['id'])
         webhook = await channel.create_webhook(name= user[1][0]['name'])
         await webhook.send(message, username= user[1][0]['name'], avatar_url= MChead)

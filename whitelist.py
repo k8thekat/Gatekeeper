@@ -207,7 +207,7 @@ def whitelistUpdate(user = None,var = None):
             for request in FRkeys:
                 print(db.GetConfig().Whitelistwaittime)
                 print(FailedRequests[request],FailedRequests[request].created_at)
-                if FailedRequests[request].created_at + timedelta(minutes = db.GetConfig().Whitelistwaittime) <= curtime:
+                if FailedRequests[request].created_at + timedelta(minutes = int(db.GetConfig().Whitelistwaittime)) <= curtime:
                     FailedRequests.pop(request)
                     logging.info(f'Removed {request}')
             

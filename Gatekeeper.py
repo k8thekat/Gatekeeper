@@ -345,7 +345,7 @@ def serverstop(ctx,curserver,parameter):
         return f'The Server: {curserver.FriendlyName} is currently offline... '
     botoutput(f'**Server**: {curserver.FriendlyName} Stopped by {ctx.author.name}...',level= 'warning')
     AMPservers[curserver.InstanceID].StopInstance()
-    curserver.Running = False
+    #AMPservers[curserver.InstanceID] = False
     return f'**Server**: {curserver.FriendlyName} has been stopped...'
 
 def serverkill(ctx,curserver,parameter):
@@ -972,22 +972,32 @@ async def botawaitsend(message,ctx = None, level = 'info'):
         await boterror.send(content = f'{ctx.author.name} ' + message)
     return
 
-async def whitelistbotreply(channel, context = None):
+async def whitelistbotreply(context = None):
     logging.info('Whitelist Bot Reply...')
+    logging.info(f'Seting Users Discord Role too {context["server"].DiscordRole}')
+    #print(context)
+    #print(dir(context['Context']),context['Context'],context['server'].DiscordRole,context['User'].DiscordID)
+    print(type(context['Context'].channel),context['Context'].channel.id)
     #context = {'User':<DBuser> , 'IGN': str(user.IngameName), 'timestamp' : <curtime>, 'server' : <db_server>, 'Context': <message>}
-    channel = client.get_channel(int(channel))
+    channel = client.guild.get_channel(context['Context'].channel)
+    #print(channel)
+    server_role = client.guild.get_role(int(context['server'].DiscordRole))
+    discord_user = client.guild.get_member(int(context['User'].DiscordID))
+    print(discord_user,server_role)
+    await discord_user.add_roles(server_role)
+
     if config.Randombotreplies: #Default is True
         replynum = random.randint(0,len(config.Botwhitelistreplies)-1)
-        await channel.send(content = f"{config.Botwhitelistreplies[replynum]}", reference = context['Context'].to_reference())
+        await context['Context'].channel.send(content = f"{config.Botwhitelistreplies[replynum]}", reference = context['Context'].to_reference())
         return
     
     if not config.Randombotreplies:
         try:
-            await channel.send(config.Botwhitelistreplies[AMPservers[context['server'].InstanceID].Index], reference = context['Context'].to_reference())
+            await context['Context'].channel.send(config.Botwhitelistreplies[AMPservers[context['server'].InstanceID].Index], reference = context['Context'].to_reference())
             return
         except Exception as e:
             botoutput(e,level= 'error')
-            await channel.send(f'{context.author.name} you have been whitelisted on {context["server"].FriendlyName}.', reference = context['Context'].to_reference())
+            await context['Context'].channel.send(f'{context.author.name} you have been whitelisted on {context["server"].FriendlyName}.', reference = context['Context'].to_reference())
             return
     return
 
@@ -1579,14 +1589,10 @@ def AMPinstancecheck(startup = False):
     return 
 
 #This sets the users discord role to that of the servers
-#user = {'User': user , 'IGN': user.IngameName, 'timestamp' : curtime, 'server' : curserver, 'Context': message}
 async def discordRoleSet(user):
+    #user = {'User':<DBuser> , 'IGN': str(user.IngameName), 'timestamp' : <curtime>, 'server' : <db_server>, 'Context': <message>}
     #print(client.manage_roles)
-    logging.info(f'Seting Users Discord Role too {user["server"].DiscordRole}')
-    server_role = client.guild.get_role(int(user['server'].DiscordRole))
-    logging.info(user['Context'])
-    print(user['Context'].author)
-    await user['Context'].author.add_roles([server_role])
+    
     return
 
 
@@ -1621,10 +1627,8 @@ def threadloop():
             status = whitelist.whitelistListCheck(client)
             #whitelistListCheck returns False if it has no entries.
             if status:
-                asyncio.run_coroutine_threadsafe(whitelistbotreply(dbconfig.Whitelistchannel,status), async_loop)
+                asyncio.run_coroutine_threadsafe(whitelistbotreply(status), async_loop)
                 time.sleep(.5)
-                #TODO - Find out why discordRoleSet isnt working; maybe put it with wlbotreply?
-                asyncio.run_coroutine_threadsafe(discordRoleSet(status),async_loop)
 
             if config.donations:
                 #Checks all user roles and updates the DB flags
@@ -1697,6 +1701,7 @@ def defaultinit():
     chatloop.start()
     consoleloop = threading.Thread(target = console.init, args=(client,rolecheck,botoutput,async_loop))
     consoleloop.start()
+
     try:
         isconfigured = dbconfig.Isconfigured
         return 

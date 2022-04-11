@@ -121,7 +121,9 @@ def serverconsole(amp_server,channel,client,async_loop):
         console = amp_server.ConsoleUpdate()
         if 'ConsoleEntries' not in console:
             logging.error(f'Failed ConsoleUpdate {console}, forcing AMP API relog.')
+            print(amp_server.SessionID)
             amp_server.SessionID = 0
+            print(amp_server.SessionID)
             console = amp_server.ConsoleUpdate()
             continue
         

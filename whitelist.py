@@ -20,6 +20,8 @@
 
 '''
 #Gatekeeper Bot - whitelist.py
+import discord
+from discord.ext import commands
 from datetime import datetime,timedelta
 import base64
 import json
@@ -149,7 +151,10 @@ def whitelistListCheck(client):
     curtime = datetime.now()
     for index in range(0,len(WhitelistWaitList)):
         user = WhitelistWaitList[index]
-        waittime = timehandler.parse(dbconfig.Whitelistwaittime,True)
+        waittime = timedelta(minutes= 0)
+        
+        if dbconfig.Whitelistwaittime != None:
+            waittime = timehandler.parse(dbconfig.Whitelistwaittime,True)
 
         if user['timestamp'] + waittime <= curtime :
             discord_user = client.get_user(int(user['User'].DiscordID))
@@ -161,9 +166,9 @@ def whitelistListCheck(client):
                 WhitelistWaitList.remove(user)
                 return None
 
+            WhitelistWaitList.remove(user)
             AMPservers[user['server'].InstanceID].ConsoleMessage(f'whitelist add {user["IGN"]}')
             user['server'].AddUser(user['User'])
-            WhitelistWaitList.remove(user)
             return user
     
 

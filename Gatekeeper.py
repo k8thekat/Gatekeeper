@@ -71,7 +71,8 @@ asyncio.set_event_loop(async_loop)
 intents = discord.Intents.default() # Default
 intents.members = True
 #intents.messages_content = True
-client = commands.Bot(command_prefix = '//', intents=intents, loop=async_loop)
+prefix = '$'
+client = commands.Bot(command_prefix = prefix, intents=intents, loop=async_loop)
 client.remove_command('help')
 
 #AMP API setup
@@ -1049,6 +1050,7 @@ async def on_message_edit(before,after):
 
 @client.event
 async def on_message(message):
+    global prefix
     if message.author.bot:
         return
 
@@ -1056,7 +1058,7 @@ async def on_message(message):
     #if message.channel.id == 944318758040768542:
         #print('Testing...')
 
-    if (message.content.startswith('//')):
+    if (message.content.startswith(prefix)):
         logging.info('Found /command.')
         #pprint(message.channel.id,console.SERVERCONSOLE)
         if message.channel.id in console.SERVERCONSOLE:

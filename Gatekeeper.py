@@ -1073,7 +1073,7 @@ async def on_message(message):
     if message.channel.id == dbconfig.Whitelistchannel:
         if message.content.lower().startswith('ign:') or message.content.lower().startswith('in-gamename:') or message.content.lower().startswith('in-game-name:') or message.content.lower().startswith('ingamename:'):
             logging.info('Whitelist Request...')
-            reply = await whitelist.whitelistMSGHandler(message)
+            reply = asyncio.run_coroutine_threadsafe(whitelist.whitelistMSGHandler(message),async_loop)
             if reply[0] == False:
                 return await message.reply(reply[1])
             else:
@@ -1489,7 +1489,7 @@ async def universalWhitelist(ctx,*parameter):
             db_user = db.AddUser(DiscordID = str(discord_user.id), DiscordName = discord_user.name, IngameName = IGN[1][0]['name'], UUID = IGN[1][0]['id'])
             print(f'Successfully Added the User to the DB {db_user}')
 
-        status = await whitelist.whitelistUserCheck(db_server,db_user.IngameName)
+        status = whitelist.whitelistUserCheck(db_server,db_user.IngameName)
         if status == False:
             return await ctx.send(f'User is already Whitelisted on {db_server.FriendlyName} - IGN : {db_user.IngameName}')
 

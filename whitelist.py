@@ -30,6 +30,7 @@ import parse
 import timehandler
 import UUIDhandler
 import config
+import asyncio
 
 
 #whitelist wait list
@@ -47,7 +48,7 @@ def init(origAMP,origAMPservers,origdb,origdbconfig):
 
 
 #Used to add users to the DB when they request whitelist in the WL channel if Autowhitelist is False.
-async def whitelistMSGHandler(message):
+async def whitelistMSGHandler(message,async_loop):
     logging.info('Whitelist Channel Message Handler...')
     global WhitelistWaitList,db,dbconfig
     curtime = datetime.now()
@@ -126,7 +127,7 @@ async def whitelistMSGHandler(message):
         return False, f'**Server**: {curserver.FriendlyName} whitelist is currently offline.'
     
     #Checks the whitelist file if the user already exists..
-    status = await whitelistUserCheck(curserver,user.IngameName)
+    status = asyncio.run_coroutine_threadsafe(whitelistUserCheck(curserver,user.IngameName),async_loop)
     if status == False:
         return False, f'You are already whitelisted on {curserver.FriendlyName}.'
     if db.GetConfig().Autowhitelist:

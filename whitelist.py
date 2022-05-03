@@ -47,7 +47,7 @@ def init(origAMP,origAMPservers,origdb,origdbconfig):
 
 
 #Used to add users to the DB when they request whitelist in the WL channel if Autowhitelist is False.
-def whitelistMSGHandler(message):
+async def whitelistMSGHandler(message):
     logging.info('Whitelist Channel Message Handler...')
     global WhitelistWaitList,db,dbconfig
     curtime = datetime.now()
@@ -126,7 +126,7 @@ def whitelistMSGHandler(message):
         return False, f'**Server**: {curserver.FriendlyName} whitelist is currently offline.'
     
     #Checks the whitelist file if the user already exists..
-    status = whitelistUserCheck(curserver,user.IngameName)
+    status = await whitelistUserCheck(curserver,user.IngameName)
     if status == False:
         return False, f'You are already whitelisted on {curserver.FriendlyName}.'
     if db.GetConfig().Autowhitelist:
@@ -136,7 +136,7 @@ def whitelistMSGHandler(message):
 
 #Handles checking the whitelist list and adding users
 #user = {'User': user , 'IGN': user.IngameName, 'timestamp' : curtime, 'server' : curserver, 'Context': message}
-def whitelistListCheck(client):
+async def whitelistListCheck(client):
     logging.info('Whitelist Wait List Check...')
     global WhitelistWaitList
 
@@ -168,6 +168,7 @@ def whitelistListCheck(client):
 
             WhitelistWaitList.remove(user)
             AMPservers[user['server'].InstanceID].ConsoleMessage(f'whitelist add {user["IGN"]}')
+            await discord_user.add_roles(int(user['server'].DiscordRole),reason='Auto Whitelist')
             user['server'].AddUser(user['User'])
             return user
     

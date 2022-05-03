@@ -62,7 +62,7 @@ import chat
 import rank
 
 
-data = '4.1.3-beta' #Major.Minor.Revisions
+data = '4.1.4-beta' #Major.Minor.Revisions
 logging.info(f'Version: {data}')
 
 async_loop = asyncio.new_event_loop()
@@ -1073,7 +1073,7 @@ async def on_message(message):
     if message.channel.id == dbconfig.Whitelistchannel:
         if message.content.lower().startswith('ign:') or message.content.lower().startswith('in-gamename:') or message.content.lower().startswith('in-game-name:') or message.content.lower().startswith('ingamename:'):
             logging.info('Whitelist Request...')
-            reply = whitelist.whitelistMSGHandler(message)
+            reply = await whitelist.whitelistMSGHandler(message)
             if reply[0] == False:
                 return await message.reply(reply[1])
             else:
@@ -1488,6 +1488,11 @@ async def universalWhitelist(ctx,*parameter):
         if db_user == None:
             db_user = db.AddUser(DiscordID = str(discord_user.id), DiscordName = discord_user.name, IngameName = IGN[1][0]['name'], UUID = IGN[1][0]['id'])
             print(f'Successfully Added the User to the DB {db_user}')
+
+        status = whitelist.whitelistUserCheck(db_server,db_user.IngameName)
+        if status == False:
+            return await ctx.send(f'User is already Whitelisted on {db_server.FriendlyName} - IGN : {db_user.IngameName}')
+
         print(f'Adding {IGN[1][0]["name"]} to Whitelist on {db_server.FriendlyName} - Discord name: {discord_user.name}')
         print(db_user)
         db_serveruser = db_server.AddUser(db_user)
@@ -1497,9 +1502,12 @@ async def universalWhitelist(ctx,*parameter):
         if db_user in whitelist.WhitelistWaitList:
             logging.info('Found {db_user.DiscordName} in Whitelist Wait List, removing them...')
             whitelist.WhitelistWaitList.remove(db_user)
+
         response = (f'Adding {IGN[1][0]["name"]} to Whitelist on {db_server.FriendlyName} - Discord name: {discord_user.name}')
         logging.info(response)
+        await discord_user.add_roles(int(db_server.DiscordRole),reason='Whitelist Request')
         return await ctx.send(response,reference = ctx.message.to_reference())
+
     if parameter[0].lower() == 'remove':
         print(f'Removing {IGN[1][0]["name"]} from Whitelist on {db_server.FriendlyName} - Discord name: {discord_user.name}')
         db_user = db.GetUser(parameter[1]) #Should be able to find the user via their In game name
@@ -1508,6 +1516,8 @@ async def universalWhitelist(ctx,*parameter):
         AMPservers[db_server.InstanceID].ConsoleMessage(f'whitelist remove {db_user.IngameName}')
         response = (f'Removing {IGN[1][0]["name"]} from Whitelist on {db_server.FriendlyName} - Discord name: {discord_user.name}')
         logging.info(response)
+
+        await discord_user.remove_roles(int(db_server.DiscordRole),reason='Whitelist Removal')
         return await ctx.send(response,reference = ctx.message.to_reference())
 
 

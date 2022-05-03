@@ -176,6 +176,7 @@ async def whitelistListCheck(client):
 #This checks if the user is already whitelisted on the server...
 def whitelistUserCheck(server,user_ign):
     logging.info('Whitelist User Check...')
+    print(server,server.InstanceID)
     whitelistcheck = AMPservers[server.InstanceID].getDirectoryListing('')
     for entry in whitelistcheck['result']:
         if entry['Filename'] == 'whitelist.json':

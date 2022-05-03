@@ -62,7 +62,7 @@ import chat
 import rank
 
 
-data = '4.1.4-beta' #Major.Minor.Revisions
+data = '4.1.5-beta' #Major.Minor.Revisions
 logging.info(f'Version: {data}')
 
 async_loop = asyncio.new_event_loop()
@@ -1023,7 +1023,7 @@ async def on_user_update(user_before,user_after):
 async def on_member_remove(member):
     botoutput(f'{member.name} with ID: {member.id} has left the guild. Removing from all Server Whitelists',level= 'warning')
     #Checks if the user is in the Whitelist list, removes them if they are.
-    whitelist.whitelistUpdate(member,'leave')
+    await whitelist.whitelistUpdate(member,'leave')
     curuser = db.GetUser(member.id)
     if curuser != None and curuser.IngameName != None:
         for server in AMPservers:
@@ -1041,7 +1041,7 @@ async def on_message_edit(before,after):
     if after.channel.id == dbconfig.Whitelistchannel:
         logging.info('User Edited their whitelist request, re-evaluating the Whitelist Request.')
         if after.content.lower().startswith('ign:') or after.content.lower().startswith('in-gamename:') or after.content.lower().startswith('in-game-name:') or after.content.lower().startswith('ingamename:'):
-            reply = whitelist.whitelistMSGHandler(after)
+            reply = await whitelist.whitelistMSGHandler(after)
             print(reply)
             if reply[0] == False:
                 return await after.reply(reply[1])
@@ -1489,7 +1489,7 @@ async def universalWhitelist(ctx,*parameter):
             db_user = db.AddUser(DiscordID = str(discord_user.id), DiscordName = discord_user.name, IngameName = IGN[1][0]['name'], UUID = IGN[1][0]['id'])
             print(f'Successfully Added the User to the DB {db_user}')
 
-        status = whitelist.whitelistUserCheck(db_server,db_user.IngameName)
+        status = await whitelist.whitelistUserCheck(db_server,db_user.IngameName)
         if status == False:
             return await ctx.send(f'User is already Whitelisted on {db_server.FriendlyName} - IGN : {db_user.IngameName}')
 
@@ -1636,7 +1636,7 @@ def threadloop():
 
             #status = asyncio.run_coroutine_threadsafe(whitelist.whitelistListCheck(), async_loop)
             time.sleep(.5)
-            status = whitelist.whitelistListCheck(client)
+            status = asyncio.run_coroutine_threadsafe(whitelist.whitelistListCheck(client),async_loop)
             #whitelistListCheck returns False if it has no entries.
             if status:
                 asyncio.run_coroutine_threadsafe(whitelistbotreply(status), async_loop)

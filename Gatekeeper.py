@@ -53,12 +53,12 @@ import tokens
 from AMP_API import AMPAPI
 import config
 import endReset
-import whitelist 
+from whitelist import Whitelist_module as whitelist #Not sure if I can still import this after or before a load extension via a Cog
 import chatfilter
 import timehandler
 import UUIDhandler
-import console
-import chat
+#import console
+#import chat
 import rank
 
 
@@ -201,12 +201,12 @@ def serverdiscordchannel(ctx,curserver,parameter):
         elif parameter[2].lower() == 'console':
             if parameter[3].lower() == 'none':
                 curserver.DiscordConsoleChannel = None
-                console.threadstop(curserver) #curserver = db object
+                # console.threadstop(curserver) #curserver = db object
                 return f'Set Discord Console Channel for {curserver.FriendlyName} to None.'  
             else:
                 curserver.DiscordConsoleChannel = str(channel.id)
                 #This appends the thread with the channel to SERVERCONSOLE list now that a discord console channel was set.
-                console.threadinit(curserver,channel,client,async_loop) #curserver= db object, channel = discord object, client = bot object
+                # console.threadinit(curserver,channel,client,async_loop) #curserver= db object, channel = discord object, client = bot object
                 return f'Set Discord Console Channel for {curserver.FriendlyName} to {channel.name}.'
     else:
         return f'**Format**: //server {curserver.FriendlyName} discordchannel (chat or console) discord_channel_name or discord_channel_id'
@@ -1040,13 +1040,14 @@ async def on_message_edit(before,after):
     #print(after.content)
     if after.channel.id == dbconfig.Whitelistchannel:
         logging.info('User Edited their whitelist request, re-evaluating the Whitelist Request.')
-        if after.content.lower().startswith('ign:') or after.content.lower().startswith('in-gamename:') or after.content.lower().startswith('in-game-name:') or after.content.lower().startswith('ingamename:'):
-            reply = await whitelist.whitelistMSGHandler(after)
-            print(reply)
-            if reply[0] == False:
-                return await after.reply(reply[1])
-            else:
-                botoutput(reply[1])
+        reply = await whitelist.whitelistMSGHandler(after)
+        if reply[0] == True:
+            botoutput(reply[1])
+        # if after.content.lower().startswith('ign:') or after.content.lower().startswith('in-gamename:') or after.content.lower().startswith('in-game-name:') or after.content.lower().startswith('ingamename:'):
+            # print(reply)
+            # if reply[0] == False:
+            #     return await after.reply(reply[1])
+            # else:
 
 @client.event
 async def on_message(message):
@@ -1058,17 +1059,17 @@ async def on_message(message):
     #if message.channel.id == 944318758040768542:
         #print('Testing...')
 
-    if (message.content.startswith(prefix)):
-        logging.info('Found /command.')
+    # if (message.content.startswith(prefix)):
+        # logging.info('Found /command.')
         #pprint(message.channel.id,console.SERVERCONSOLE)
-        if message.channel.id in console.SERVERCONSOLE:
-            logging.info('Command in Console Channel.')
-            console.on_message(message)
-        else:
-            return await client.process_commands(message)
+        # if message.channel.id in console.SERVERCONSOLE:
+        #     logging.info('Command in Console Channel.')
+        #     console.on_message(message)
+        # else:
+        #     return await client.process_commands(message)
 
-    if message.channel.id in chat.SERVERCHAT:
-        chat.on_message(message,client)
+    # if message.channel.id in chat.SERVERCHAT:
+        # chat.on_message(message,client)
 
     if message.channel.id == dbconfig.Whitelistchannel:
         if message.content.lower().startswith('ign:') or message.content.lower().startswith('in-gamename:') or message.content.lower().startswith('in-game-name:') or message.content.lower().startswith('ingamename:'):
@@ -1176,8 +1177,8 @@ async def botsetting(ctx,*parameter):
     #/botsettings autowhitelist True
     elif parameter[0].lower() in botflags:
         if len(parameter) == 2:
-            if parameter[0] == 'autoconsole' and parameter[1] == 'True':
-                console.init(client,rolecheck,botoutput,async_loop)
+            # if parameter[0] == 'autoconsole' and parameter[1] == 'True':
+                #console.init(client,rolecheck,botoutput,async_loop)
             try:
                 value = strtobool(parameter[1])
                 dbconfig.SetSetting(parameter[0], value)
@@ -1609,7 +1610,7 @@ async def discordRoleSet(user):
 
 
 #General thread loop for all recurring checks/events...
-def threadloop():
+async def threadloop():
     thread_loop = asyncio.new_event_loop()
     asyncio.set_event_loop(thread_loop)
     time.sleep(5)
@@ -1620,7 +1621,8 @@ def threadloop():
         if (updateinterval+timedelta(seconds=60)) < datetime.now(): #1 minute checkup interval
             logging.info(f'Updating and Saving...{datetime.now().strftime("%c")}')
             #Database check on bans
-            asyncio.run_coroutine_threadsafe(databasebancheck(localdb), async_loop)
+            #asyncio.run_coroutine_threadsafe(databasebancheck(localdb), async_loop)
+            databasebancheck(localdb)
 
             #Check if any new AMP Instances have been created or started...
             time.sleep(.5)
@@ -1636,12 +1638,8 @@ def threadloop():
 
             #status = asyncio.run_coroutine_threadsafe(whitelist.whitelistListCheck(), async_loop)
             time.sleep(.5)
-            status = asyncio.run_coroutine_threadsafe(whitelist.whitelistListCheck(client),async_loop)
-            #whitelistListCheck returns False if it has no entries.
-            if status:
-                asyncio.run_coroutine_threadsafe(whitelistbotreply(status), async_loop)
-                time.sleep(.5)
-
+            whitelist.whitelistListCheck(client)
+    
             if config.donations:
                 #Checks all user roles and updates the DB flags
                 donatorcheck()
@@ -1702,17 +1700,23 @@ def githubUpdate():
                 logging.warning('Gatekeeper is more than 5 commits behind! Please consider updating!!!')
     return
 
+async def setup_hook():
+    """This runs at the startup of the bot"""
+    await client.load_extension('whitelist')
+
 
 #Runs on startup...
 def defaultinit():
     githubUpdate()
     global AMPservers,async_loop
+
     loop = threading.Thread(target=threadloop)
     loop.start()
-    chatloop = threading.Thread(target = chat.init, args = (client,))
-    chatloop.start()
-    consoleloop = threading.Thread(target = console.init, args=(client,rolecheck,botoutput,async_loop))
-    consoleloop.start()
+
+    # chatloop = threading.Thread(target = chat.init, args = (client,))
+    # chatloop.start()
+    # consoleloop = threading.Thread(target = console.init, args=(client,rolecheck,botoutput,async_loop))
+    # consoleloop.start()
 
     try:
         isconfigured = dbconfig.Isconfigured
